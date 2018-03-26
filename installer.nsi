@@ -12,7 +12,7 @@ InstallDir "$PROGRAMFILES\miRack"
 ;Get installation folder from registry if available
 InstallDirRegKey HKCU "Software\miRack" ""
 
-;Request application privileges for Windows Vista
+;Request admin permissions so we can install to Program Files and add a registry entry
 RequestExecutionLevel admin
 
 
@@ -28,16 +28,20 @@ RequestExecutionLevel admin
 
 ; Pages
 
-; !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 
-;second directory selection
-; Var DbInstDir
-; !define MUI_PAGE_HEADER_SUBTEXT "Choose the folder in which to install the database."
-; !define MUI_DIRECTORYPAGE_TEXT_TOP "The installer will install the database(s) in the following folder. To install in a differenct folder, click Browse and select another folder. Click Next to continue."
-; !define MUI_DIRECTORYPAGE_VARIABLE $DbInstDir ; <= the other directory will be stored into that variable
-; !insertmacro MUI_PAGE_DIRECTORY
+Var VST_64_DIR
+!define MUI_DIRECTORYPAGE_VARIABLE $VST_64_DIR
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Bridge VST 64-bit plugin install directory"
+!define MUI_PAGE_CUSTOMFUNCTION_PRE VST_64_DIR_PRE
+!insertmacro MUI_PAGE_DIRECTORY
+
+Var VST_32_DIR
+!define MUI_DIRECTORYPAGE_VARIABLE $VST_32_DIR
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Bridge VST 32-bit plugin install directory"
+!define MUI_PAGE_CUSTOMFUNCTION_PRE VST_32_DIR_PRE
+!insertmacro MUI_PAGE_DIRECTORY
 
 !insertmacro MUI_PAGE_INSTFILES
 
@@ -47,11 +51,14 @@ RequestExecutionLevel admin
 !insertmacro MUI_LANGUAGE "English"
 
 
+; Sections
 
-Section "!miRack" MIRACK
+Section "miRack" MIRACK
+	SectionIn RO
 	SetOutPath "$INSTDIR"
 
-	File /r "dist\Rack"
+	CreateDirectory $OUTDIR
+	File /r /x "Bridge" "dist\Rack"
 
 	;Store installation folder
 	WriteRegStr HKCU "Software\miRack" "" $INSTDIR
@@ -72,8 +79,18 @@ Section "!miRack" MIRACK
 SectionEnd
 
 
-; Section "VST Plugin" VST
-; SectionEnd
+Section "Bridge VST 64-bit plugin" VST_64
+	StrCpy $OUTDIR $VST_64_DIR
+	CreateDirectory $OUTDIR
+	File "dist\Rack\Bridge\VCV-Bridge-64.dll"
+SectionEnd
+
+
+Section "Bridge VST 32-bit plugin" VST_32
+	StrCpy $OUTDIR $VST_32_DIR
+	CreateDirectory $OUTDIR
+	File "dist\Rack\Bridge\VCV-Bridge-32.dll"
+SectionEnd
 
 
 Section "Uninstall"
@@ -86,3 +103,23 @@ Section "Uninstall"
 	DeleteRegKey /ifempty HKCU "Software\miRack"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack"
 SectionEnd
+
+
+; Functions
+
+Function VST_64_DIR_PRE
+	${Unless} ${SectionIsSelected} ${VST_64}
+		Abort
+	${EndUnless}
+FunctionEnd
+
+Function VST_32_DIR_PRE
+	${Unless} ${SectionIsSelected} ${VST_32}
+		Abort
+	${EndUnless}
+FunctionEnd
+
+Function .onInit
+	StrCpy $VST_64_DIR "$PROGRAMFILES\Steinberg\VSTPlugins"
+	StrCpy $VST_32_DIR "$PROGRAMFILES (x86)\Steinberg\VSTPlugins"
+FunctionEnd

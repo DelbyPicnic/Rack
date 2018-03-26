@@ -153,6 +153,9 @@ endif
 
 # This target is not intended for public use
 dist: all
+ifndef RELEASE
+	exit 1 # Must enable RELEASE for dist target
+endif
 	rm -rf dist
 	# Rack distribution
 	$(MAKE) -C plugins/Fundamental dist
@@ -194,8 +197,8 @@ ifeq ($(ARCH), mac)
 	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
 
 	cp plugins/Fundamental/dist/Fundamental-*.zip $(BUNDLE)/Contents/Resources/Fundamental.zip
-	cp -R Bridge/au/dist/VCV-Bridge.component dist/
-	cp -R Bridge/vst/dist/VCV-Bridge.vst dist/
+	#cp -R Bridge/au/dist/VCV-Bridge.component dist/
+	#cp -R Bridge/vst/dist/VCV-Bridge.vst dist/
 	# Make DMG image
 	cd dist && ln -s /Applications Applications
 	cd dist && ln -s /Library/Audio/Plug-Ins/Components Components
@@ -204,6 +207,9 @@ ifeq ($(ARCH), mac)
 endif
 ifeq ($(ARCH), win)
 	mkdir -p dist/Rack
+	mkdir -p dist/Rack/Bridge
+	#cp Bridge/vst/dist/VCV-Bridge-64.dll dist/Rack/Bridge/
+	#cp Bridge/vst/dist/VCV-Bridge-32.dll dist/Rack/Bridge/
 	cp -R LICENSE* res dist/Rack/
 	cp $(TARGET) dist/Rack/
 	$(STRIP) -s dist/Rack/$(TARGET)
