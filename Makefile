@@ -149,6 +149,7 @@ ifeq ($(ARCH), win)
 endif
 
 
+# This target is not intended for public use
 dist: all
 	rm -rf dist
 	# Rack distribution
@@ -163,7 +164,7 @@ ifeq ($(ARCH), mac)
 
 	mkdir -p $(BUNDLE)/Contents/MacOS
 	cp $(TARGET) $(BUNDLE)/Contents/MacOS/
-	strip $(BUNDLE)/Contents/MacOS/$(TARGET)
+	strip -S $(BUNDLE)/Contents/MacOS/$(TARGET)
 	cp icon.icns $(BUNDLE)/Contents/Resources/
 
 	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
@@ -176,6 +177,7 @@ ifeq ($(ARCH), mac)
 	cp dep/lib/librtaudio.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/librtmidi.4.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/libcrypto.1.1.dylib $(BUNDLE)/Contents/MacOS/
+	cp dep/lib/libssl.1.1.dylib $(BUNDLE)/Contents/MacOS/
 
 	install_name_tool -change lib/libglfw.3.dylib @executable_path/libglfw.3.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change $(PWD)/dep/lib/libjansson.4.dylib @executable_path/libjansson.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
@@ -185,12 +187,17 @@ ifeq ($(ARCH), mac)
 	install_name_tool -change librtaudio.dylib @executable_path/librtaudio.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change $(PWD)/dep/lib/librtmidi.4.dylib @executable_path/librtmidi.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change $(PWD)/dep/lib/libcrypto.1.1.dylib @executable_path/libcrypto.1.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
+	install_name_tool -change $(PWD)/dep/lib/libssl.1.1.dylib @executable_path/libssl.1.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 
 	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
 
 	cp plugins/Fundamental/dist/Fundamental-*.zip $(BUNDLE)/Contents/Resources/Fundamental.zip
+	cp -R Bridge/au/dist/VCV-Bridge.component dist/
+	cp -R Bridge/vst/dist/VCV-Bridge.vst dist/
 	# Make DMG image
 	cd dist && ln -s /Applications Applications
+	cd dist && ln -s /Library/Audio/Plug-Ins/Components Components
+	cd dist && ln -s /Library/Audio/Plug-Ins/VST VST
 	cd dist && hdiutil create -srcfolder . -volname Rack -ov -format UDZO Rack-$(VERSION)-$(ARCH).dmg
 endif
 ifeq ($(ARCH), win)
