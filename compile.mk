@@ -50,12 +50,12 @@ CXXFLAGS += $(FLAGS)
 
 
 # Derive object files from sources and place them before user-defined objects
-SOURCE_OBJECTS := $(patsubst %, build/%.o, $(SOURCES))
+OBJECTS := $(patsubst %, build/%.o, $(SOURCES)) $(OBJECTS)
 DEPENDENCIES := $(patsubst %, build/%.d, $(SOURCES))
 
 # Final targets
 
-$(TARGET): $(SOURCE_OBJECTS) $(OBJECTS)
+$(TARGET): $(OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 -include $(DEPENDENCIES)
