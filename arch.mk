@@ -1,5 +1,5 @@
-MACHINE = $(shell gcc -dumpmachine)
-ifneq (,$(findstring linux,$(MACHINE)))
+MACHINE = $(shell $(CC) -dumpmachine)
+ifneq (, $(findstring linux, $(MACHINE)))
 	# Linux
 	ARCH = lin
 	CPU = $(shell uname -m)

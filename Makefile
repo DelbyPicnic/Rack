@@ -10,11 +10,13 @@ ifdef RELEASE
 	FLAGS += -DRELEASE
 endif
 
+include arch.mk
+
+STRIP ?= strip
+
 # Sources and build flags
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp
-
-include arch.mk
 
 ifneq (,$(findstring arm,$(CPU)))
 	SOURCES += $(wildcard dep/math-neon/*.c)
@@ -164,7 +166,7 @@ ifeq ($(ARCH), mac)
 
 	mkdir -p $(BUNDLE)/Contents/MacOS
 	cp $(TARGET) $(BUNDLE)/Contents/MacOS/
-	strip -S $(BUNDLE)/Contents/MacOS/$(TARGET)
+	$(STRIP) -S $(BUNDLE)/Contents/MacOS/$(TARGET)
 	cp icon.icns $(BUNDLE)/Contents/Resources/
 
 	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
@@ -204,7 +206,7 @@ ifeq ($(ARCH), win)
 	mkdir -p dist/Rack
 	cp -R LICENSE* res dist/Rack/
 	cp $(TARGET) dist/Rack/
-	strip dist/Rack/$(TARGET)
+	$(STRIP) -s dist/Rack/$(TARGET)
 	cp /mingw64/bin/libwinpthread-1.dll dist/Rack/
 	cp /mingw64/bin/zlib1.dll dist/Rack/
 	cp /mingw64/bin/libstdc++-6.dll dist/Rack/
@@ -230,7 +232,7 @@ ifeq ($(ARCH), lin)
 	mkdir -p dist/Rack
 	cp -R LICENSE* res dist/Rack/
 	cp $(TARGET) Rack.sh dist/Rack/
-	strip dist/Rack/$(TARGET)
+	$(STRIP) -s dist/Rack/$(TARGET)
 	cp dep/lib/libspeexdsp.so dist/Rack/
 	cp dep/lib/libjansson.so.4 dist/Rack/
 	cp dep/lib/libglfw.so.3 dist/Rack/
