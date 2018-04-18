@@ -1,6 +1,6 @@
 [submodule "ext/nanovg"]
 	path = dep/nanovg
-url=https://gitlab.com/mi-rack/app/nanovg.git
+url=https://github.com/mi-rack/nanovg
 [submodule "ext/nanosvg"]
 	path = dep/nanosvg
 	url = https://github.com/memononen/nanosvg.git
@@ -9,7 +9,7 @@ url=https://gitlab.com/mi-rack/app/nanovg.git
 	url = https://github.com/AndrewBelt/osdialog.git
 [submodule "ext/oui-blendish"]
 	path = dep/oui-blendish
-url=https://gitlab.com/mi-rack/app/oui-blendish.git
+url=https://github.com/mi-rack/oui-blendish
 [submodule "dep/glfw"]
 	path = dep/glfw
 	url = https://github.com/glfw/glfw.git
