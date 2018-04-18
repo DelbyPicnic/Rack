@@ -13,8 +13,16 @@ FLAGS += -DVERSION=$(VERSION)
 FLAGS += -MMD -MP
 FLAGS += -g
 # Optimization
-FLAGS += -O3 -march=nocona -ffast-math -fno-finite-math-only
+FLAGS += -O3
 FLAGS += -Wall -Wextra -Wno-unused-parameter
+
+ifneq (,$(findstring arm,$(CPU)))
+#	FLAGS += -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
+	FLAGS += -march=armv7 -mtune=cortex-a17 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
+	FLAGS += -I$(RACK_DIR)/dep/optimized-routines/build/include -I$(RACK_DIR)/dep/math-neon/src
+else
+	FLAGS += -march=nocona -ffast-math -fno-finite-math-only
+endif
 
 ifneq ($(ARCH), mac)
 	CXXFLAGS += -Wsuggest-override

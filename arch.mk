@@ -6,6 +6,7 @@ MACHINE = $(shell gcc -dumpmachine)
 ifneq (,$(findstring linux,$(MACHINE)))
 	# Linux
 	ARCH = lin
+	CPU = $(shell uname -m)
 else ifneq (,$(findstring apple,$(MACHINE)))
 	# Mac
 	ARCH = mac

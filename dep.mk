@@ -1,7 +1,15 @@
 include $(RACK_DIR)/arch.mk
 
 DEP_LOCAL ?= .
-DEP_FLAGS += -g -O3 -march=nocona
+DEP_FLAGS += -g -O3
+
+ifneq (,$(findstring arm,$(CPU)))
+#	DEP_FLAGS += -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
+	DEP_FLAGS += -march=armv7 -mtune=cortex-a17 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
+	DEP_FLAGS += -I$(RACK_DIR)/dep/optimized-routines/build/include -I$(RACK_DIR)/dep/math-neon
+else
+	DEP_FLAGS += -march=nocona
+endif
 
 ifeq ($(ARCH), mac)
 	DEP_FLAGS += -mmacosx-version-min=10.7 -stdlib=libc++

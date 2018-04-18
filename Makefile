@@ -3,7 +3,7 @@ VERSION = master
 
 FLAGS += \
 	-Iinclude \
-	-Idep/include -Idep/lib/libzip/include
+	-Idep/include -Idep/lib/libzip/include -Idep/tinythread
 
 ifdef RELEASE
 	FLAGS += -DRELEASE=$(RELEASE)
@@ -11,7 +11,11 @@ endif
 
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c
+SOURCES += dep/tinythread/tinythread.cpp
 
+ifneq (,$(findstring arm,$(CPU)))
+	SOURCES += $(wildcard dep/math-neon/*.c)
+endif
 
 include arch.mk
 
@@ -19,9 +23,16 @@ ifeq ($(ARCH), lin)
 	SOURCES += dep/osdialog/osdialog_gtk2.c
 	CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
 	LDFLAGS += -rdynamic \
-		-lpthread -lGL -ldl \
+		-lpthread -ldl \
 		$(shell pkg-config --libs gtk+-2.0) \
-		-Ldep/lib -lGLEW -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
+		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
+
+ifneq (,$(findstring arm,$(CPU)))
+	LDFLAGS += -lGLESv2 dep/optimized-routines/build/lib/libmathlib_static.a
+else
+	LDFLAGS += -lGL
+endif		
+
 	TARGET := Rack
 endif
 
@@ -30,7 +41,7 @@ ifeq ($(ARCH), mac)
 	CXXFLAGS += -DAPPLE -stdlib=libc++
 	LDFLAGS += -stdlib=libc++ -lpthread -ldl \
 		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo \
-		-Ldep/lib -lGLEW -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
+		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
 	TARGET := Rack
 	BUNDLE := dist/$(TARGET).app
 endif
@@ -110,7 +121,6 @@ ifeq ($(ARCH), mac)
 
 	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
 
-	cp dep/lib/libGLEW.2.1.0.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/libglfw.3.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/libjansson.4.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/libspeexdsp.1.dylib $(BUNDLE)/Contents/MacOS/
@@ -120,7 +130,6 @@ ifeq ($(ARCH), mac)
 	cp dep/lib/librtmidi.4.dylib $(BUNDLE)/Contents/MacOS/
 	cp dep/lib/libcrypto.1.1.dylib $(BUNDLE)/Contents/MacOS/
 
-	install_name_tool -change /usr/local/lib/libGLEW.2.1.0.dylib @executable_path/libGLEW.2.1.0.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change lib/libglfw.3.dylib @executable_path/libglfw.3.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change $(PWD)/dep/lib/libjansson.4.dylib @executable_path/libjansson.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
 	install_name_tool -change $(PWD)/dep/lib/libspeexdsp.1.dylib @executable_path/libspeexdsp.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
@@ -169,7 +178,6 @@ ifeq ($(ARCH), lin)
 	cp Rack Rack.sh dist/Rack/
 	cp dep/lib/libspeexdsp.so dist/Rack/
 	cp dep/lib/libjansson.so.4 dist/Rack/
-	cp dep/lib/libGLEW.so.2.1 dist/Rack/
 	cp dep/lib/libglfw.so.3 dist/Rack/
 	cp dep/lib/libcurl.so.4 dist/Rack/
 	cp dep/lib/libzip.so.5 dist/Rack/

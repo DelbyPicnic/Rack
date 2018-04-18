@@ -7,7 +7,6 @@ RACK_DIR ?= ..
 include $(RACK_DIR)/arch.mk
 
 ifeq ($(ARCH), lin)
-	glew = lib/libGLEW.so
 	glfw = lib/libglfw.so
 	jansson = lib/libjansson.so
 	libspeexdsp = lib/libspeexdsp.so
@@ -19,7 +18,6 @@ ifeq ($(ARCH), lin)
 endif
 
 ifeq ($(ARCH), mac)
-	glew = lib/libGLEW.dylib
 	glfw = lib/libglfw.dylib
 	jansson = lib/libjansson.dylib
 	libspeexdsp = lib/libspeexdsp.dylib
@@ -63,7 +61,7 @@ $(glew):
 $(glfw):
 	cd glfw && $(CMAKE) . \
 		-DBUILD_SHARED_LIBS=ON \
-		-DGLFW_COCOA_CHDIR_RESOURCES=OFF -DGLFW_COCOA_MENUBAR=ON -DGLFW_COCOA_RETINA_FRAMEBUFFER=ON
+		-DGLFW_COCOA_CHDIR_RESOURCES=OFF -DGLFW_COCOA_MENUBAR=ON -DGLFW_COCOA_RETINA_FRAMEBUFFER=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF
 	$(MAKE) -C glfw
 	$(MAKE) -C glfw install
 
@@ -75,11 +73,11 @@ $(jansson):
 	$(MAKE) -C jansson-2.10 install
 
 $(libspeexdsp):
-	$(WGET) https://vcvrack.com/downloads/dep/speexdsp-SpeexDSP-1.2rc3.tgz
-	$(UNTAR) speexdsp-SpeexDSP-1.2rc3.tgz
-	cd speexdsp-SpeexDSP-1.2rc3 && $(CONFIGURE)
-	$(MAKE) -C speexdsp-SpeexDSP-1.2rc3
-	$(MAKE) -C speexdsp-SpeexDSP-1.2rc3 install
+	# $(WGET) https://vcvrack.com/downloads/dep/speexdsp-SpeexDSP-1.2rc3.tgz
+	# $(UNTAR) speexdsp-SpeexDSP-1.2rc3.tgz
+	cd speexdsp && ./autogen.sh && $(CONFIGURE)
+	$(MAKE) -C speexdsp
+	$(MAKE) -C speexdsp install
 
 $(openssl):
 	$(WGET) https://www.openssl.org/source/openssl-1.1.0g.tar.gz
