@@ -29,6 +29,8 @@ struct Input {
 	float value = 0.0;
 	/** Whether a wire is plugged in */
 	bool active = false;
+	float queue[8192];
+	int pos;
 	Light plugLights[2];
 	/** Returns the value if a wire is plugged in, otherwise returns the given default value */
 	float normalize(float normalValue) {
@@ -36,12 +38,16 @@ struct Input {
 	}
 };
 
+struct Wire;
+
 struct Output {
 	/** Voltage of the port. Write-only by Module */
 	float value = 0.0;
+	float queue[8192];
 	/** Whether a wire is plugged in */
 	bool active = false;
 	Light plugLights[2];
+	std::vector<Wire*> wires;
 };
 
 
@@ -52,6 +58,8 @@ struct Module {
 	std::vector<Light> lights;
 	/** For CPU usage meter */
 	float cpuTime = 0.0;
+	bool act;
+	int curstep;
 
 	/** Constructs a Module with no params, inputs, outputs, and lights */
 	Module() {}
@@ -100,6 +108,7 @@ struct Wire {
 	Module *inputModule = NULL;
 	int inputId;
 	void step();
+	void stepMultiple(int steps);
 };
 
 void engineInit();
@@ -119,6 +128,9 @@ void engineSetSampleRate(float sampleRate);
 float engineGetSampleRate();
 /** Returns the inverse of the current sample rate */
 float engineGetSampleTime();
+
+void engineStep();
+void engineStepMT(int steps);
 
 extern bool gPaused;
 /** If plugins begin using this in harmful ways, I will remove it and break your API.

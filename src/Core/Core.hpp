@@ -5,14 +5,13 @@ using namespace rack;
 
 
 extern Model *modelAudioInterface;
+extern Model *modelAudioInterface2;
 extern Model *modelMIDIToCVInterface;
 extern Model *modelQuadMIDIToCVInterface;
 extern Model *modelMIDICCToCVInterface;
 extern Model *modelMIDITriggerToCVInterface;
 extern Model *modelBlank;
 extern Model *modelNotes;
-
-
 
 struct GridChoice : LedDisplayChoice {
 	virtual void setId(int id) {}

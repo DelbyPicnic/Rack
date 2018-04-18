@@ -66,10 +66,23 @@ struct AudioInterfaceIO : AudioIO {
 			auto timeout = std::chrono::milliseconds(100);
 			if (audioCv.wait_for(lock, timeout, cond)) {
 				// Consume audio block
-				for (int i = 0; i < frames; i++) {
-					Frame<AUDIO_OUTPUTS> f = outputBuffer.shift();
-					for (int j = 0; j < numOutputs; j++) {
-						output[numOutputs*i + j] = clamp(f.samples[j], -1.f, 1.f);
+				if (numOutputs == 2)
+				{
+					float *o = output;
+					const Frame<AUDIO_OUTPUTS> *f = outputBuffer.startData();
+					for (int i = 0; i < frames; i++) {
+						*(o++) = clamp(f[i].samples[0], -1.f, 1.f);
+						*(o++) = clamp(f[i].samples[1], -1.f, 1.f);
+					}
+					outputBuffer.startIncr(frames);
+				}
+				else
+				{
+					for (int i = 0; i < frames; i++) {
+						Frame<AUDIO_OUTPUTS> f = outputBuffer.shift();
+						for (int j = 0; j < numOutputs; j++) {
+							output[numOutputs*i + j] = clamp(f.samples[j], -1.f, 1.f);
+						}
 					}
 				}
 			}
@@ -286,4 +299,4 @@ struct AudioInterfaceWidget : ModuleWidget {
 };
 
 
-Model *modelAudioInterface = Model::create<AudioInterface, AudioInterfaceWidget>("Core", "AudioInterface", "Audio", EXTERNAL_TAG);
+Model *modelAudioInterface = Model::create<AudioInterface, AudioInterfaceWidget>("Core", "AudioInterface Full", "Audio", EXTERNAL_TAG);

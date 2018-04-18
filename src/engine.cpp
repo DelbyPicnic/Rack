@@ -6,11 +6,9 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
-#include <xmmintrin.h>
-#include <pmmintrin.h>
+#include "concurrentqueue.h"
 
 #include "engine.hpp"
-
 
 namespace rack {
 
@@ -31,15 +29,31 @@ static Module *smoothModule = NULL;
 static int smoothParamId;
 static float smoothValue;
 
+struct UOW {
+	Module *module;
+	int step, step2;
+};
+moodycamel::ConcurrentQueue<UOW> q;
+moodycamel::ProducerToken *ptoks[10];
+volatile int runningt;
+
+std::mutex m;
+std::condition_variable cond;
+std::condition_variable cond2;
+int numWorkers;
 
 float Light::getBrightness() {
 	// LEDs are diodes, so don't allow reverse current.
 	// For some reason, instead of the RMS, the sqrt of RMS looks better
-	return powf(fmaxf(0.f, value), 0.25f);
+	//return powf(fmaxf(0.f, value), 0.25f);
+	return value;
 }
 
 void Light::setBrightnessSmooth(float brightness, float frames) {
-	float v = (brightness > 0.f) ? brightness * brightness : 0.f;
+	setBrightness(brightness);
+
+	/*float v = (brightness > 0.f) ? brightness * brightness : 0.f;
+
 	if (v < value) {
 		// Fade out light with lambda = framerate
 		value += (v - value) * sampleTime * frames * 60.f;
@@ -47,7 +61,7 @@ void Light::setBrightnessSmooth(float brightness, float frames) {
 	else {
 		// Immediately illuminate light
 		value = v;
-	}
+	}*/
 }
 
 
@@ -56,9 +70,88 @@ void Wire::step() {
 	inputModule->inputs[inputId].value = value;
 }
 
+void Wire::stepMultiple(int steps) {
+	for (int i = 0; i < steps;i++)
+	{
+		float value = outputModule->outputs[outputId].queue[i];
+		inputModule->inputs[inputId].queue[i] = value;
+	}
+}
+
+void do_work(int qq)
+{
+	// int qq=0;
+	// printf("MM? %d\n",qq);
+	std::unique_lock<std::mutex> lock(m);
+	//m.lock();
+	while(1)
+	{
+		// printf("READY %d\n",qq);
+		cond.wait(lock);
+		lock.unlock();
+		// printf("WAKE %d\n",qq);
+		UOW item;
+		while(q.try_dequeue(item))
+		{
+			// printf("%d deq %p %d %d\n", qq, item.module, item.step, item.step2);
+			Module *module = item.module;
+			for (int step = item.step; step < item.step2; step++)
+			{
+				int id=0;
+				for (auto &in : module->inputs)
+				{
+					if (in.pos < step)
+					{
+						item.step = step;
+						q.enqueue(*ptoks[qq], item);
+						// printf("%d enq %p %d %d\n", qq, item.module, item.step, item.step2);
+						goto nope;
+					}
+					in.value = *(volatile float*)(in.queue + step);
+					// if (in.active)
+					// 	printf("%d :: read %p %d @ %d = %f\n", qq, module, id, step, in.value);
+					id++;
+				}
+				
+			// printf("work %p %d\n", item.module, step);
+				module->step();
+
+				for (auto &out : module->outputs)
+				{
+					//out.queue[i] = out.value;
+					for (Wire *w : out.wires)
+					{
+						// if (w->inputModule == outm)
+						// 	printf("wrote OUT %d\n",step+1);
+						*(volatile float*)(w->inputModule->inputs[w->inputId].queue + step + 1) = out.value;
+						__sync_synchronize();
+						w->inputModule->inputs[w->inputId].pos = step+1;
+						// printf("%d :: wrote %p to %p %d @ %d = %f\n", qq, module, w->inputModule, w->inputId, w->inputModule->inputs[w->inputId].pos, out.value);
+					}
+				}					
+			}
+
+			nope:;
+		}
+
+		lock.lock();
+		runningt--;
+		// printf("FINISHED %d\n",qq);
+		cond2.notify_all();
+	}
+	// printf("EXITED %d\n",qq);
+}
 
 void engineInit() {
-	engineSetSampleRate(44100.0);
+	engineSetSampleRate(48000.0);
+
+	numWorkers = 3;
+	for (int i = 0; i < numWorkers; i++)
+	{
+		ptoks[i] = new moodycamel::ProducerToken(q);
+		(new std::thread((void(*)(void*))do_work, (void*)i))->detach();
+	}
+	printf("Started %d DSP threads\n", numWorkers);
 }
 
 void engineDestroy() {
@@ -67,7 +160,7 @@ void engineDestroy() {
 	assert(gModules.empty());
 }
 
-static void engineStep() {
+void engineStep() {
 	// Param interpolation
 	if (smoothModule) {
 		float value = smoothModule->params[smoothParamId].value;
@@ -90,20 +183,24 @@ static void engineStep() {
 
 		// TODO skip this step when plug lights are disabled
 		// Step ports
-		for (Input &input : module->inputs) {
+		/*for (Input &input : module->inputs) {
 			if (input.active) {
 				float value = input.value / 5.f;
-				input.plugLights[0].setBrightnessSmooth(value);
-				input.plugLights[1].setBrightnessSmooth(-value);
+				// input.plugLights[0].setBrightnessSmooth(value);
+				// input.plugLights[1].setBrightnessSmooth(-value);
+				input.plugLights[0].setBrightnessSmooth(value > 0);
+				input.plugLights[1].setBrightnessSmooth(value < 0);
 			}
 		}
 		for (Output &output : module->outputs) {
 			if (output.active) {
 				float value = output.value / 5.f;
-				output.plugLights[0].setBrightnessSmooth(value);
-				output.plugLights[1].setBrightnessSmooth(-value);
+				// output.plugLights[0].setBrightnessSmooth(value);
+				// output.plugLights[1].setBrightnessSmooth(-value);
+				output.plugLights[0].setBrightnessSmooth(value > 0);
+				output.plugLights[1].setBrightnessSmooth(value < 0);				
 			}
-		}
+		}*/
 	}
 
 	// Step cables by moving their output values to inputs
@@ -112,11 +209,77 @@ static void engineStep() {
 	}
 }
 
+void engineStepMT(int steps) {
+	if (smoothModule) {
+		float value = smoothModule->params[smoothParamId].value;
+		const float lambda = 60.0; // decay rate is 1 graphics frame
+		float delta = smoothValue - value;
+		float newValue = value + delta * lambda * sampleTime*steps;
+		if (value == newValue) {
+			// Snap to actual smooth value if the value doesn't change enough (due to the granularity of floats)
+			smoothModule->params[smoothParamId].value = smoothValue;
+			smoothModule = NULL;
+		}
+		else {
+			smoothModule->params[smoothParamId].value = newValue;
+		}
+	}
+
+	// Step modules
+	// printf("---\n");
+	Module *outm = NULL;
+	for (Module *module : gModules) {
+		if(0&&module->outputs.size() == 0 && !outm)
+		{
+			for (Input &in : module->inputs)
+				in.queue[0] = in.queue[steps];
+			outm = module;
+			continue;
+		}
+		bool good = true;
+		for (Input &in : module->inputs)
+		{
+			in.pos = in.active ? 0 : steps-1;
+			in.queue[0] = in.queue[steps];
+			// if (in.active)
+			// 	good = false;
+		}
+		module->curstep = 0;
+		UOW uow = { module, 0, good ? steps : 1 };
+		q.enqueue(*ptoks[0], uow);
+	}
+
+	runningt = numWorkers;
+	cond.notify_all();
+
+	// printf("WAITING\n");
+	{
+		std::unique_lock<std::mutex> lock(m);
+		while(runningt)
+			cond2.wait(lock);
+	}
+
+	// printf("DONE\n");
+	if (outm)
+	{
+		// printf("OUT\n");
+		for (int step = 0; step < steps; step++)
+		{
+			for (auto &in : outm->inputs)
+				in.value = in.queue[step];
+			outm->step();
+		}
+	}
+}
+
+
 static void engineRun() {
+#if !(defined(__arm__) || defined(__aarch64__))
 	// Set CPU to flush-to-zero (FTZ) and denormals-are-zero (DAZ) mode
 	// https://software.intel.com/en-us/node/682949
 	_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
 	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+#endif
 
 	// Every time the engine waits and locks a mutex, it steps this many frames
 	const int mutexSteps = 64;
@@ -129,9 +292,10 @@ static void engineRun() {
 
 		if (!gPaused) {
 			std::lock_guard<std::mutex> lock(mutex);
-			for (int i = 0; i < mutexSteps; i++) {
-				engineStep();
-			}
+			// for (int i = 0; i < mutexSteps; i++) {
+			// 	engineStep();
+			// }
+			engineStepMT(mutexSteps);
 		}
 
 		double stepTime = mutexSteps * sampleTime;
@@ -222,6 +386,7 @@ void engineAddWire(Wire *wire) {
 	}
 	// Add the wire
 	gWires.push_back(wire);
+	wire->outputModule->outputs[wire->outputId].wires.push_back(wire);
 	updateActive();
 }
 
@@ -231,11 +396,13 @@ void engineRemoveWire(Wire *wire) {
 	std::lock_guard<std::mutex> lock(mutex);
 	// Check that the wire is already added
 	auto it = std::find(gWires.begin(), gWires.end(), wire);
+	auto it2 = std::find(wire->outputModule->outputs[wire->outputId].wires.begin(), wire->outputModule->outputs[wire->outputId].wires.end(), wire);
 	assert(it != gWires.end());
 	// Set input to 0V
 	wire->inputModule->inputs[wire->inputId].value = 0.0;
 	// Remove the wire
 	gWires.erase(it);
+	wire->outputModule->outputs[wire->outputId].wires.erase(it2);
 	updateActive();
 }
 

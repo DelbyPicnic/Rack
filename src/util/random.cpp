@@ -50,7 +50,7 @@ uint64_t randomu64() {
 
 float randomUniform() {
 	// 24 bits of granularity is the best that can be done with floats while ensuring that the return value lies in [0.0, 1.0).
-	return (xoroshiro128plus_next() >> (64 - 24)) / powf(2, 24);
+	return (xoroshiro128plus_next() >> (64 - 24)) / 16777216.0f;
 }
 
 float randomNormal() {

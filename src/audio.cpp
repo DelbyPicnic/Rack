@@ -181,7 +181,7 @@ void AudioIO::setSampleRate(int sampleRate) {
 
 std::vector<int> AudioIO::getBlockSizes() {
 	if (rtAudio) {
-		return {64, 128, 256, 512, 1024, 2048, 4096};
+		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
 	}
 	return {};
 }
