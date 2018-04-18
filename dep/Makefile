@@ -15,6 +15,7 @@ ifeq ($(ARCH), lin)
 	rtmidi = lib/librtmidi.so
 	rtaudio = lib/librtaudio.so
 	openssl = lib/libssl.so
+	mathlib = optimized-routines/lib/libmathlib_static.a
 endif
 
 ifeq ($(ARCH), mac)
@@ -45,7 +46,7 @@ nanosvg = include/nanosvg.h
 oui-blendish = include/blendish.h
 osdialog = include/osdialog.h
 
-DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(nanovg) $(nanosvg) $(oui-blendish) $(osdialog)
+DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(nanovg) $(nanosvg) $(oui-blendish) $(osdialog) $(mathlib)
 include $(RACK_DIR)/dep.mk
 
 
@@ -109,6 +110,10 @@ $(rtmidi):
 	cd rtmidi && $(CONFIGURE)
 	$(MAKE) -C rtmidi
 	$(MAKE) -C rtmidi install
+
+$(mathlib):
+	cd optimized-routines && $(CMAKE) .
+	$(MAKE) -C optimized-routines
 
 ifeq ($(ARCH),mac)
 RTAUDIO_FLAGS += -DAUDIO_OSX_CORE=ON

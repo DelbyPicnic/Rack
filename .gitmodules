@@ -16,3 +16,13 @@
 [submodule "dep/rtaudio"]
 	path = dep/rtaudio
 	url = https://github.com/thestk/rtaudio.git
+[submodule "dep/optimized-routines"]
+	path = dep/optimized-routines
+	url = https://github.com/ARM-software/optimized-routines
+[submodule "dep/math-neon"]
+	path = dep/math-neon
+	url = https://github.com/andrepuschmann/math-neon
+[submodule "dep/speexdsp"]
+	path = dep/speexdsp
+	url = https://github.com/xiph/speexdsp
+	branch = resample-aarch64

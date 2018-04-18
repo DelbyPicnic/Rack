@@ -3,7 +3,7 @@ VERSION = master
 
 FLAGS += \
 	-Iinclude \
-	-Idep/include -Idep/lib/libzip/include -Idep/tinythread
+	-Idep/include -Idep/lib/libzip/include
 
 ifdef RELEASE
 	FLAGS += -DRELEASE=$(RELEASE)
@@ -11,7 +11,6 @@ endif
 
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c
-SOURCES += dep/tinythread/tinythread.cpp
 
 ifneq (,$(findstring arm,$(CPU)))
 	SOURCES += $(wildcard dep/math-neon/*.c)
@@ -28,7 +27,7 @@ ifeq ($(ARCH), lin)
 		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
 
 ifneq (,$(findstring arm,$(CPU)))
-	LDFLAGS += -lGLESv2 dep/optimized-routines/build/lib/libmathlib_static.a
+	LDFLAGS += -lGLESv2 dep/optimized-routines/lib/libmathlib_static.a
 else
 	LDFLAGS += -lGL
 endif		
