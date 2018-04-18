@@ -6,6 +6,10 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
+#if !(defined(__arm__) || defined(__aarch64__))
+#include <xmmintrin.h>
+#endif
+#include "tinythread.h"
 #include "concurrentqueue.h"
 
 #include "engine.hpp"
@@ -37,9 +41,9 @@ moodycamel::ConcurrentQueue<UOW> q;
 moodycamel::ProducerToken *ptoks[10];
 volatile int runningt;
 
-std::mutex m;
-std::condition_variable cond;
-std::condition_variable cond2;
+tthread::mutex m;
+tthread::condition_variable cond;
+tthread::condition_variable cond2;
 int numWorkers;
 
 float Light::getBrightness() {
@@ -82,13 +86,12 @@ void do_work(int qq)
 {
 	// int qq=0;
 	// printf("MM? %d\n",qq);
-	std::unique_lock<std::mutex> lock(m);
-	//m.lock();
+	m.lock();
 	while(1)
 	{
 		// printf("READY %d\n",qq);
-		cond.wait(lock);
-		lock.unlock();
+		cond.wait(m);
+		m.unlock();
 		// printf("WAKE %d\n",qq);
 		UOW item;
 		while(q.try_dequeue(item))
@@ -134,7 +137,7 @@ void do_work(int qq)
 			nope:;
 		}
 
-		lock.lock();
+		m.lock();
 		runningt--;
 		// printf("FINISHED %d\n",qq);
 		cond2.notify_all();
@@ -149,7 +152,7 @@ void engineInit() {
 	for (int i = 0; i < numWorkers; i++)
 	{
 		ptoks[i] = new moodycamel::ProducerToken(q);
-		(new std::thread((void(*)(void*))do_work, (void*)i))->detach();
+		(new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
 	}
 	printf("Started %d DSP threads\n", numWorkers);
 }
@@ -253,11 +256,10 @@ void engineStepMT(int steps) {
 	cond.notify_all();
 
 	// printf("WAITING\n");
-	{
-		std::unique_lock<std::mutex> lock(m);
-		while(runningt)
-			cond2.wait(lock);
-	}
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+	m.unlock();
 
 	// printf("DONE\n");
 	if (outm)

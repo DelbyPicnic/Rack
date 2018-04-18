@@ -8,7 +8,12 @@
 
 #include "osdialog.h"
 
+#if (defined(__arm__) || defined(__aarch64__))
 #define NANOVG_GLES2_IMPLEMENTATION 1
+#else
+#define NANOVG_GL2_IMPLEMENTATION 1
+#endif
+
 #include "nanovg_gl.h"
 // Hack to get framebuffer objects working on OpenGL 2 (we blindly assume the extension is supported)
 #define NANOVG_FBO_VALID 1
@@ -37,7 +42,6 @@ float gWindowRatio = 1.0;
 bool gAllowCursorLock = true;
 int gGuiFrame;
 Vec gMousePos;
-int needRender=2;
 
 std::string lastWindowTitle;
 
@@ -56,7 +60,6 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 #endif
 
 	if (action == GLFW_PRESS) {
-		needRender+=2;
 		gTempWidget = NULL;
 		// onMouseDown
 		{
@@ -196,7 +199,6 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 				gDragHoveredWidget->onDragEnter(e);
 			}
 		}
-		needRender = 2;
 	}
 	else {
 		if (gTempWidget != gHoveredWidget) {
@@ -220,7 +222,6 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 		e.pos = mousePos;
 		e.scrollRel = mouseRel;
 		gScene->onScroll(e);
-		needRender = 2;
 	}
 }
 
@@ -289,30 +290,6 @@ void errorCallback(int error, const char *description) {
 	warn("GLFW error %d: %s", error, description);
 }
 
-void markDirtyWidgets(Widget *parent)
-{
-	for (Widget *w : parent->children)
-	{
-		markDirtyWidgets(w);
-		if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(w))
-		{
-			if (v->dirty/* || v->alwaysRender*/)
-			{
-				v->needsRender = 2;//true;
-			}
-		}
-	}	
-}
-
-void markDirtyWidgetsAll(Widget *parent)
-{
-	for (Widget *w : parent->children)
-	{
-		markDirtyWidgetsAll(w);
-		w->needsRender = 2;//true;
-	}	
-}
-
 void renderGui() {
 	int width, height;
 	glfwGetFramebufferSize(gWindow, &width, &height);
@@ -322,18 +299,6 @@ void renderGui() {
 	nvgReset(gVg);
 	nvgScale(gVg, gPixelRatio, gPixelRatio);
 
-/*	if (1||needRender)
-	{
-		markDirtyWidgetsAll(gScene);
-		//gScene->draw(gVg);
-		needRender=0;
-	}
-	else
-	{
-		markDirtyWidgets(gScene);
-		gScene->draw(gVg);
-	}*/
-
 	gScene->draw(gVg);
 
 	glViewport(0, 0, width, height);
@@ -341,7 +306,6 @@ void renderGui() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	nvgEndFrame(gVg);
 	glfwSwapBuffers(gWindow);
-	// glFlush();
 }
 
 void windowInit() {
@@ -349,13 +313,12 @@ void windowInit() {
 
 	// Set up GLFW
 	glfwSetErrorCallback(errorCallback);
-	printf("#1\n");
+
 	err = glfwInit();
 	if (err != GLFW_TRUE) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Could not initialize GLFW.");
 		exit(1);
 	}
-	printf("#2\n");
 
 #if defined NANOVG_GL2
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -386,7 +349,12 @@ void windowInit() {
 	glfwMakeContextCurrent(gWindow);
     printf("GL_VERSION  : %s\n", glGetString(GL_VERSION) );
     printf("GL_RENDERER : %s\n", glGetString(GL_RENDERER) );
+
+#if (defined(__arm__) || defined(__aarch64__))
 	glfwSwapInterval(0);
+#else
+	glfwSwapInterval(1);
+#endif
 
 	glfwSetWindowSizeCallback(gWindow, windowSizeCallback);
 	glfwSetMouseButtonCallback(gWindow, mouseButtonStickyCallback);
@@ -409,8 +377,8 @@ void windowInit() {
 	// GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll consume it here.
 	glGetError();*/
 
-//	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
-printf("!!\n");
+	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
 	// Set up NanoVG
 #if defined NANOVG_GL2
 	gVg = nvgCreateGL2(NVG_ANTIALIAS);
@@ -516,10 +484,9 @@ void windowRun() {
 		gScene->step();
 
 		// Render
-		// bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
-		// if (visible) {
+		bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
+		if (visible)
 			renderGui();
-		// }
 
 		static int frame = 0;
 		static double t1, t2;
@@ -531,7 +498,7 @@ void windowRun() {
 			t1 = t2;
 		}
 
-		wait = std::max(0.,1./30. - (glfwGetTime()-startTime));
+		wait = std::max(0., 1./30. - (glfwGetTime()-startTime));
 	}
 }
 

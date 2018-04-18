@@ -26,3 +26,6 @@ url=https://gitlab.com/mi-rack/app/oui-blendish.git
 	path = dep/speexdsp
 	url = https://github.com/xiph/speexdsp
 	branch = resample-aarch64
+[submodule "dep/tinythread"]
+	path = dep/tinythread
+	url = https://github.com/aseprite/tinythreadpp

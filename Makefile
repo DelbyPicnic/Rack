@@ -3,14 +3,14 @@ VERSION = master
 
 FLAGS += \
 	-Iinclude \
-	-Idep/include -Idep/lib/libzip/include
+	-Idep/include -Idep/lib/libzip/include -Idep/tinythread/source
 
 ifdef RELEASE
 	FLAGS += -DRELEASE=$(RELEASE)
 endif
 
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
-SOURCES += dep/nanovg/src/nanovg.c
+SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp
 
 ifneq (,$(findstring arm,$(CPU)))
 	SOURCES += $(wildcard dep/math-neon/*.c)
