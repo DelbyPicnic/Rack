@@ -10,6 +10,7 @@ CircularShadow::CircularShadow() {
 }
 
 void CircularShadow::draw(NVGcontext *vg) {
+	return;
 	if (opacity < 0.0)
 		return;
 

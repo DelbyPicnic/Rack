@@ -1,6 +1,6 @@
 #include "widgets.hpp"
 #include "window.hpp"
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 
@@ -10,6 +10,7 @@ namespace rack {
 
 struct FramebufferWidget::Internal {
 	NVGLUframebuffer *fb = NULL;
+	Vec fbSize;
 	Rect box;
 
 	~Internal() {
@@ -24,6 +25,7 @@ struct FramebufferWidget::Internal {
 
 
 FramebufferWidget::FramebufferWidget() {
+	canCache = true;
 	oversample = 1.0;
 	internal = new Internal();
 }
@@ -34,8 +36,14 @@ FramebufferWidget::~FramebufferWidget() {
 
 void FramebufferWidget::draw(NVGcontext *vg) {
 	// Bypass framebuffer rendering entirely
-	// Widget::draw(vg);
-	// return;
+	Widget::draw(vg);
+	return;
+
+	if (!needsRender)
+	{
+		//Widget::draw(gFramebufferVg);
+		return;
+	}
 
 	// Get world transform
 	float xform[6];
@@ -63,16 +71,20 @@ void FramebufferWidget::draw(NVGcontext *vg) {
 		if (fbSize.isZero())
 			return;
 
-		// info("rendering framebuffer %f %f", fbSize.x, fbSize.y);
-		// Delete old one first to free up GPU memory
-		internal->setFramebuffer(NULL);
-		// Create a framebuffer from the main nanovg context. We will draw to this in the secondary nanovg context.
-		NVGLUframebuffer *fb = nvgluCreateFramebuffer(gVg, fbSize.x, fbSize.y, 0);
-		if (!fb)
-			return;
-		internal->setFramebuffer(fb);
+		if (!fbSize.isEqual(internal->fbSize))
+		{
+			internal->fbSize = fbSize;
+			// info("rendering framebuffer %f %f", fbSize.x, fbSize.y);
+			// Delete old one first to free up GPU memory
+			internal->setFramebuffer(NULL);
+			// Create a framebuffer from the main nanovg context. We will draw to this in the secondary nanovg context.
+			NVGLUframebuffer *fb = nvgluCreateFramebuffer(gVg, fbSize.x, fbSize.y, 0);
+			if (!fb)
+				return;
+			internal->setFramebuffer(fb);
+		}
 
-		nvgluBindFramebuffer(fb);
+		nvgluBindFramebuffer(internal->fb);
 		glViewport(0.0, 0.0, fbSize.x, fbSize.y);
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -120,7 +132,7 @@ int FramebufferWidget::getImageHandle() {
 }
 
 void FramebufferWidget::onZoom(EventZoom &e) {
-	dirty = true;
+	dirty += 2;
 	Widget::onZoom(e);
 }
 

@@ -5,6 +5,8 @@ namespace rack {
 
 
 SVGKnob::SVGKnob() {
+	canSquash = true;
+
 	shadow = new CircularShadow();
 	addChild(shadow);
 	shadow->box.size = Vec();
@@ -27,7 +29,9 @@ void SVGKnob::setSVG(std::shared_ptr<SVG> svg) {
 
 void SVGKnob::step() {
 	// Re-transform TransformWidget if dirty
-	if (dirty) {
+	//TODO: //FIXME:
+	//if (dirty)
+	{
 		float angle;
 		if (isfinite(minValue) && isfinite(maxValue)) {
 			angle = rescale(value, minValue, maxValue, minAngle, maxAngle);
@@ -43,11 +47,13 @@ void SVGKnob::step() {
 		tw->rotate(angle);
 		tw->translate(center.neg());
 	}
-	FramebufferWidget::step();
+	Widget::step();
 }
 
 void SVGKnob::onChange(EventChange &e) {
-	dirty = true;
+	// dirty = true;
+	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
+		v->dirty = true;
 	Knob::onChange(e);
 }
 

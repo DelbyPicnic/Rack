@@ -13,9 +13,9 @@ namespace rack {
 
 
 struct ModuleContainer : Widget {
-	void draw(NVGcontext *vg) override {
+	/*void draw(NVGcontext *vg) override {
 		// Draw shadows behind each ModuleWidget first, so the shadow doesn't overlap the front.
-		for (Widget *child : children) {
+		/*for (Widget *child : children) {
 			if (!child->visible)
 				continue;
 			nvgSave(vg);
@@ -23,10 +23,10 @@ struct ModuleContainer : Widget {
 			ModuleWidget *w = dynamic_cast<ModuleWidget*>(child);
 			w->drawShadow(vg);
 			nvgRestore(vg);
-		}
+		}*
 
 		Widget::draw(vg);
-	}
+	}*/
 };
 
 
@@ -421,7 +421,37 @@ void RackWidget::step() {
 }
 
 void RackWidget::draw(NVGcontext *vg) {
-	Widget::draw(vg);
+	// rails->draw(vg);
+
+	float zoom = 1./gRackScene->zoomWidget->zoom;
+	Vec pos = parent->parent->box.pos.neg().mult(zoom);
+	Vec size = parent->parent->parent->box.size.mult(zoom);
+
+	for (Widget *child : moduleContainer->children) {
+		if (child->box.pos.x-pos.x >= size.x || child->box.pos.y-pos.y >= size.y ||
+			child->box.pos.x+child->box.size.x < pos.x || child->box.pos.y+child->box.size.y < pos.y)
+			continue;
+
+		nvgSave(vg);
+		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
+		dynamic_cast<ModuleWidget*>(child)->panel->drawCachedOrFresh(vg);
+		nvgRestore(vg);
+		child->needsRender = false;
+	}
+
+	for (Widget *child : moduleContainer->children) {
+		if (child->box.pos.x-pos.x >= size.x || child->box.pos.y-pos.y >= size.y ||
+			child->box.pos.x+child->box.size.x < pos.x || child->box.pos.y+child->box.size.y < pos.y)
+			continue;
+
+		nvgSave(vg);
+		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
+		child->drawCachedOrFresh(vg);
+		nvgRestore(vg);
+		child->needsRender = false;
+	}
+
+	wireContainer->draw(vg);
 }
 
 void RackWidget::onMouseMove(EventMouseMove &e) {

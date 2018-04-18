@@ -5,6 +5,8 @@ namespace rack {
 
 
 SVGSlider::SVGSlider() {
+	canSquash = true;
+
 	background = new SVGWidget();
 	addChild(background);
 
@@ -21,15 +23,19 @@ void SVGSlider::setSVGs(std::shared_ptr<SVG> backgroundSVG, std::shared_ptr<SVG>
 }
 
 void SVGSlider::step() {
-	if (dirty) {
+	//TODO: //FIXME:
+	//if (dirty)
+	{
 		// Interpolate handle position
 		handle->box.pos = Vec(rescale(value, minValue, maxValue, minHandlePos.x, maxHandlePos.x), rescale(value, minValue, maxValue, minHandlePos.y, maxHandlePos.y));
 	}
-	FramebufferWidget::step();
+	Widget::step();
 }
 
 void SVGSlider::onChange(EventChange &e) {
-	dirty = true;
+	//dirty = true;
+	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
+		v->dirty = true;
 	Knob::onChange(e);
 }
 

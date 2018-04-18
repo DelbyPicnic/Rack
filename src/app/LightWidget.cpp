@@ -6,28 +6,41 @@ namespace rack {
 
 
 void LightWidget::draw(NVGcontext *vg) {
+	if (!needsRender)
+		return;
+	
 	drawLight(vg);
-	drawHalo(vg);
+	//drawHalo(vg);
 }
 
 void LightWidget::drawLight(NVGcontext *vg) {
+	return;
 	float radius = box.size.x / 2.0;
 
 	nvgBeginPath(vg);
 	nvgCircle(vg, radius, radius, radius);
 
 	// Background
-	nvgFillColor(vg, bgColor);
-	nvgFill(vg);
+	if (color.a < 1.f)
+	{
+		nvgFillColor(vg, bgColor);
+		nvgFill(vg);
+	}
 
 	// Foreground
-	nvgFillColor(vg, color);
-	nvgFill(vg);
+	if (color.a)
+	{
+		nvgFillColor(vg, color);
+		nvgFill(vg);
+	}
 
 	// Border
-	nvgStrokeWidth(vg, 0.5);
-	nvgStrokeColor(vg, borderColor);
-	nvgStroke(vg);
+	if (borderColor.a)
+	{
+		nvgStrokeWidth(vg, 0.5);
+		nvgStrokeColor(vg, borderColor);
+		nvgStroke(vg);
+	}
 }
 
 void LightWidget::drawHalo(NVGcontext *vg) {

@@ -1,8 +1,8 @@
 #pragma once
 #include "widgets.hpp"
-#include <GL/glew.h>
+#define GL_GLEXT_PROTOTYPES 1
+#define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>
-
 
 #ifdef ARCH_MAC
 	#define WINDOW_MOD_KEY_NAME "Cmd"

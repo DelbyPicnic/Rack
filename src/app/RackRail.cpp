@@ -4,6 +4,7 @@
 namespace rack {
 
 void RackRail::draw(NVGcontext *vg) {
+	return;
 	const float railHeight = RACK_GRID_WIDTH;
 
 	// Background color

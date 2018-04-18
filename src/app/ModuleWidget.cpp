@@ -25,21 +25,33 @@ ModuleWidget::~ModuleWidget() {
 	}
 }
 
+void ModuleWidget::addChild(Widget *widget) {
+	if (widget->canSquash)
+		panel->addChild(widget);
+	else
+		Widget::addChild(widget);
+}
+
 void ModuleWidget::addInput(Port *input) {
 	assert(input->type == Port::INPUT);
 	inputs.push_back(input);
-	addChild(input);
+	// Ports are always squashable for now
+	panel->addChild(input);
 }
 
 void ModuleWidget::addOutput(Port *output) {
 	assert(output->type == Port::OUTPUT);
 	outputs.push_back(output);
-	addChild(output);
+	// Ports are always squashable for now
+	panel->addChild(output);
 }
 
 void ModuleWidget::addParam(ParamWidget *param) {
 	params.push_back(param);
-	addChild(param);
+	if (param->canSquash)
+		panel->addChild(param);
+	else
+		Widget::addChild(param);
 }
 
 void ModuleWidget::setPanel(std::shared_ptr<SVG> svg) {
@@ -186,7 +198,19 @@ void ModuleWidget::randomize() {
 
 void ModuleWidget::draw(NVGcontext *vg) {
 	nvgScissor(vg, 0, 0, box.size.x, box.size.y);
-	Widget::draw(vg);
+	// FramebufferWidget::draw(vg);
+	for (Widget *child : children) {
+		if (child == panel)
+			continue;
+		if (!child->visible)
+			continue;
+		nvgSave(vg);
+		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
+		child->drawCachedOrFresh(vg);
+		nvgRestore(vg);
+		child->needsRender--;// = false;
+	}
+
 	nvgResetScissor(vg);
 }
 

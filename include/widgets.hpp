@@ -8,6 +8,7 @@
 #include "util/common.hpp"
 #include "events.hpp"
 
+struct NVGLUframebuffer;
 
 namespace rack {
 
@@ -53,7 +54,18 @@ struct Widget {
 	Widget *parent = NULL;
 	std::list<Widget*> children;
 	bool visible = true;
+	char needsRender = 2;
+	bool canSquash = false;
+	bool canCache = false;
 
+	NVGLUframebuffer *fb = NULL;
+	Vec fbSize;
+	Rect fbBox;
+	bool dirty = true;
+	float oversample = 1;
+
+	//bool alwaysRender = false;
+	
 	virtual ~Widget();
 
 	virtual Rect getChildrenBoundingBox();
@@ -102,6 +114,7 @@ struct Widget {
 	virtual void step();
 	/** Draws to NanoVG context */
 	virtual void draw(NVGcontext *vg);
+	void drawCachedOrFresh(NVGcontext *vg);
 
 	// Events
 
@@ -245,11 +258,11 @@ Events are not passed to the underlying scene.
 */
 struct FramebufferWidget : VirtualWidget {
 	/** Set this to true to re-render the children to the framebuffer the next time it is drawn */
-	bool dirty = true;
+	// bool dirty = true;
 	/** A margin in pixels around the children in the framebuffer
 	This prevents cutting the rendered SVG off on the box edges.
 	*/
-	float oversample;
+	// float oversample;
 	/** The root object in the framebuffer scene
 	The FramebufferWidget owns the pointer
 	*/

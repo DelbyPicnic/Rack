@@ -11,6 +11,7 @@ void MultiLightWidget::addBaseColor(NVGcolor baseColor) {
 
 void MultiLightWidget::setValues(const std::vector<float> &values) {
 	assert(values.size() == baseColors.size());
+	NVGcolor old = color;
 	color = nvgRGBAf(0, 0, 0, 0);
 	for (size_t i = 0; i < baseColors.size(); i++) {
 		NVGcolor c = baseColors[i];
@@ -18,6 +19,8 @@ void MultiLightWidget::setValues(const std::vector<float> &values) {
 		color = colorScreen(color, c);
 	}
 	color = colorClip(color);
+	if (color.a != old.a || color.r != old.r || color.g != old.g || color.b != old.b)
+		needsRender = true;
 }
 
 

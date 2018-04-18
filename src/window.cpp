@@ -2,17 +2,13 @@
 #include "app.hpp"
 #include "asset.hpp"
 #include "util/color.hpp"
-
 #include <map>
 #include <queue>
 #include <thread>
 
 #include "osdialog.h"
 
-#define NANOVG_GL2 1
-// #define NANOVG_GL3 1
-// #define NANOVG_GLES2 1
-#define NANOVG_GL_IMPLEMENTATION 1
+#define NANOVG_GLES2_IMPLEMENTATION 1
 #include "nanovg_gl.h"
 // Hack to get framebuffer objects working on OpenGL 2 (we blindly assume the extension is supported)
 #define NANOVG_FBO_VALID 1
@@ -41,6 +37,7 @@ float gWindowRatio = 1.0;
 bool gAllowCursorLock = true;
 int gGuiFrame;
 Vec gMousePos;
+int needRender=2;
 
 std::string lastWindowTitle;
 
@@ -59,6 +56,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 #endif
 
 	if (action == GLFW_PRESS) {
+		needRender+=2;
 		gTempWidget = NULL;
 		// onMouseDown
 		{
@@ -198,6 +196,7 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 				gDragHoveredWidget->onDragEnter(e);
 			}
 		}
+		needRender = 2;
 	}
 	else {
 		if (gTempWidget != gHoveredWidget) {
@@ -221,6 +220,7 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 		e.pos = mousePos;
 		e.scrollRel = mouseRel;
 		gScene->onScroll(e);
+		needRender = 2;
 	}
 }
 
@@ -289,15 +289,51 @@ void errorCallback(int error, const char *description) {
 	warn("GLFW error %d: %s", error, description);
 }
 
+void markDirtyWidgets(Widget *parent)
+{
+	for (Widget *w : parent->children)
+	{
+		markDirtyWidgets(w);
+		if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(w))
+		{
+			if (v->dirty/* || v->alwaysRender*/)
+			{
+				v->needsRender = 2;//true;
+			}
+		}
+	}	
+}
+
+void markDirtyWidgetsAll(Widget *parent)
+{
+	for (Widget *w : parent->children)
+	{
+		markDirtyWidgetsAll(w);
+		w->needsRender = 2;//true;
+	}	
+}
+
 void renderGui() {
 	int width, height;
 	glfwGetFramebufferSize(gWindow, &width, &height);
 
 	// Update and render
 	nvgBeginFrame(gVg, width, height, gPixelRatio);
-
 	nvgReset(gVg);
 	nvgScale(gVg, gPixelRatio, gPixelRatio);
+
+/*	if (1||needRender)
+	{
+		markDirtyWidgetsAll(gScene);
+		//gScene->draw(gVg);
+		needRender=0;
+	}
+	else
+	{
+		markDirtyWidgets(gScene);
+		gScene->draw(gVg);
+	}*/
+
 	gScene->draw(gVg);
 
 	glViewport(0, 0, width, height);
@@ -305,6 +341,7 @@ void renderGui() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	nvgEndFrame(gVg);
 	glfwSwapBuffers(gWindow);
+	// glFlush();
 }
 
 void windowInit() {
@@ -312,11 +349,13 @@ void windowInit() {
 
 	// Set up GLFW
 	glfwSetErrorCallback(errorCallback);
+	printf("#1\n");
 	err = glfwInit();
 	if (err != GLFW_TRUE) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Could not initialize GLFW.");
 		exit(1);
 	}
+	printf("#2\n");
 
 #if defined NANOVG_GL2
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -326,19 +365,28 @@ void windowInit() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#elif defined NANOVG_GLES2
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	
 	lastWindowTitle = "";
+	printf("#5\n");
 	gWindow = glfwCreateWindow(640, 480, lastWindowTitle.c_str(), NULL, NULL);
+	printf("#6\n");
 	if (!gWindow) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Cannot open window with OpenGL 2.0 renderer. Does your graphics card support OpenGL 2.0 or greater? If so, make sure you have the latest graphics drivers installed.");
 		exit(1);
 	}
 
 	glfwMakeContextCurrent(gWindow);
-
-	glfwSwapInterval(1);
+    printf("GL_VERSION  : %s\n", glGetString(GL_VERSION) );
+    printf("GL_RENDERER : %s\n", glGetString(GL_RENDERER) );
+	glfwSwapInterval(0);
 
 	glfwSetWindowSizeCallback(gWindow, windowSizeCallback);
 	glfwSetMouseButtonCallback(gWindow, mouseButtonStickyCallback);
@@ -351,7 +399,7 @@ void windowInit() {
 	glfwSetDropCallback(gWindow, dropCallback);
 
 	// Set up GLEW
-	glewExperimental = GL_TRUE;
+	/*glewExperimental = GL_TRUE;
 	err = glewInit();
 	if (err != GLEW_OK) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Could not initialize GLEW. Does your graphics card support OpenGL 2.0 or greater? If so, make sure you have the latest graphics drivers installed.");
@@ -359,10 +407,10 @@ void windowInit() {
 	}
 
 	// GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll consume it here.
-	glGetError();
+	glGetError();*/
 
-	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
-
+//	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
+printf("!!\n");
 	// Set up NanoVG
 #if defined NANOVG_GL2
 	gVg = nvgCreateGL2(NVG_ANTIALIAS);
@@ -416,12 +464,14 @@ void windowDestroy() {
 void windowRun() {
 	assert(gWindow);
 	gGuiFrame = 0;
+
+	double wait = 1./30.;
 	while(!glfwWindowShouldClose(gWindow)) {
-		double startTime = glfwGetTime();
 		gGuiFrame++;
 
 		// Poll events
-		glfwPollEvents();
+		glfwWaitEventsTimeout(wait);
+		double startTime = glfwGetTime();
 		{
 			double xpos, ypos;
 			glfwGetCursorPos(gWindow, &xpos, &ypos);
@@ -430,7 +480,7 @@ void windowRun() {
 		mouseButtonStickyPop();
 
 		// Set window title
-		std::string windowTitle;
+		/*std::string windowTitle;
 		windowTitle = gApplicationName;
 		windowTitle += " ";
 		windowTitle += gApplicationVersion;
@@ -441,7 +491,7 @@ void windowRun() {
 		if (windowTitle != lastWindowTitle) {
 			glfwSetWindowTitle(gWindow, windowTitle.c_str());
 			lastWindowTitle = windowTitle;
-		}
+		}*/
 
 		// Get desired scaling
 		float pixelRatio;
@@ -466,20 +516,22 @@ void windowRun() {
 		gScene->step();
 
 		// Render
-		bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
-		if (visible) {
+		// bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
+		// if (visible) {
 			renderGui();
+		// }
+
+		static int frame = 0;
+		static double t1, t2;
+		if (++frame == 30)
+		{
+			frame = 0;
+			t2 = glfwGetTime();
+			printf("%f %f\n", (t2-t1), 30./(t2-t1));
+			t1 = t2;
 		}
 
-		// Limit framerate manually if vsync isn't working
-		double endTime = glfwGetTime();
-		double frameTime = endTime - startTime;
-		double minTime = 1.0 / 90.0;
-		if (frameTime < minTime) {
-			std::this_thread::sleep_for(std::chrono::duration<double>(minTime - frameTime));
-		}
-		endTime = glfwGetTime();
-		// info("%lf fps", 1.0 / (endTime - startTime));
+		wait = std::max(0.,1./30. - (glfwGetTime()-startTime));
 	}
 }
 

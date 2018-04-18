@@ -5,6 +5,8 @@ namespace rack {
 
 
 SVGSwitch::SVGSwitch() {
+	canSquash = true;
+
 	sw = new SVGWidget();
 	addChild(sw);
 }
@@ -23,7 +25,8 @@ void SVGSwitch::onChange(EventChange &e) {
 	float valueScaled = rescale(value, minValue, maxValue, 0, frames.size() - 1);
 	int index = clamp((int) roundf(valueScaled), 0, (int) frames.size() - 1);
 	sw->setSVG(frames[index]);
-	dirty = true;
+	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
+		v->dirty = true;
 	ParamWidget::onChange(e);
 }
 

@@ -5,6 +5,7 @@ namespace rack {
 
 
 SVGScrew::SVGScrew() {
+	canSquash = true;
 	sw = new SVGWidget();
 	addChild(sw);
 }

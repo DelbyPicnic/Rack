@@ -60,6 +60,7 @@ struct ModuleWidget : OpaqueWidget {
 	ModuleWidget(Module *module);
 	~ModuleWidget();
 	/** Convenience functions for adding special widgets (calls addChild()) */
+	void addChild(Widget *widget);
 	void addInput(Port *input);
 	void addOutput(Port *output);
 	void addParam(ParamWidget *param);
@@ -267,7 +268,7 @@ struct SpriteKnob : Knob, SpriteWidget {
 };
 
 /** A knob which rotates an SVG and caches it in a framebuffer */
-struct SVGKnob : Knob, FramebufferWidget {
+struct SVGKnob : Knob {
 	TransformWidget *tw;
 	SVGWidget *sw;
 	CircularShadow *shadow;
@@ -283,7 +284,7 @@ struct SVGKnob : Knob, FramebufferWidget {
 /** Behaves like a knob but linearly moves an SVGWidget between two points.
 Can be used for horizontal or vertical linear faders.
 */
-struct SVGSlider : Knob, FramebufferWidget {
+struct SVGSlider : Knob {
 	SVGWidget *background;
 	SVGWidget *handle;
 	/** Intermediate positions will be interpolated between these positions */
@@ -299,7 +300,7 @@ struct SVGSlider : Knob, FramebufferWidget {
 typedef SVGSlider SVGFader;
 
 /** A ParamWidget with multiple frames corresponding to its value */
-struct SVGSwitch : virtual ParamWidget, FramebufferWidget {
+struct SVGSwitch : virtual ParamWidget {
 	std::vector<std::shared_ptr<SVG>> frames;
 	SVGWidget *sw;
 	SVGSwitch();
@@ -405,9 +406,9 @@ struct MidiWidget : LedDisplay {
 ////////////////////
 
 struct LightWidget : TransparentWidget {
-	NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
-	NVGcolor color = nvgRGBA(0, 0, 0, 0);
-	NVGcolor borderColor = nvgRGBA(0, 0, 0, 0);
+	NVGcolor bgColor = nvgRGBAf(0, 0, 0, 1);
+	NVGcolor color = nvgRGBAf(0, 0, 0, 1);
+	NVGcolor borderColor = nvgRGBAf(0, 0, 0, 1);
 	void draw(NVGcontext *vg) override;
 	virtual void drawLight(NVGcontext *vg);
 	virtual void drawHalo(NVGcontext *vg);
@@ -472,7 +473,7 @@ struct Port : Component {
 	}
 };
 
-struct SVGPort : Port, FramebufferWidget {
+struct SVGPort : Port {
 	SVGWidget *background;
 	CircularShadow *shadow;
 
@@ -482,7 +483,7 @@ struct SVGPort : Port, FramebufferWidget {
 };
 
 /** If you don't add these to your ModuleWidget, they will fall out of the rack... */
-struct SVGScrew : FramebufferWidget {
+struct SVGScrew : VirtualWidget {
 	SVGWidget *sw;
 
 	SVGScrew();

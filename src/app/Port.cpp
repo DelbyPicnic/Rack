@@ -12,7 +12,7 @@ struct PlugLight : MultiLightWidget {
 		addBaseColor(COLOR_GREEN);
 		addBaseColor(COLOR_RED);
 		box.size = Vec(8, 8);
-		bgColor = COLOR_BLACK_TRANSPARENT;
+		//bgColor = COLOR_BLACK_TRANSPARENT;
 	}
 };
 
