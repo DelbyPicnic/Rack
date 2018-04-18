@@ -26,6 +26,14 @@ ModuleWidget::~ModuleWidget() {
 }
 
 void ModuleWidget::addChild(Widget *widget) {
+	if (SVGPanel *p = dynamic_cast<SVGPanel*>(widget)) {
+		Widget::addChild(widget);
+		if (panel)
+			removeChild(panel);
+		panel = p;
+		return;
+	}
+	
 	if (widget->canSquash)
 		panel->addChild(widget);
 	else
