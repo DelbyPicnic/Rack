@@ -324,3 +324,14 @@ DEPRECATED inline void cmultf(float *cr, float *ci, float ar, float ai, float br
 
 
 } // namespace rack
+
+#if defined(__arm__) || defined(__aarch64__)
+	extern "C" {
+		#include "arm_math.h"
+		#include "math_neon.h"
+	}
+
+	#define powf ARM__powf
+	// #define sinf ARM__sinf
+	// #define cosf ARM__cosf
+#endif

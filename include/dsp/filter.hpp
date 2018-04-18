@@ -6,24 +6,26 @@
 namespace rack {
 
 struct RCFilter {
-	float c = 0.f;
-	float xstate[1] = {};
-	float ystate[1] = {};
+	float c = 0.f, c1, c2;
+	float xstate = 0;
+	float ystate = 0;
 
 	// `r` is the ratio between the cutoff frequency and sample rate, i.e. r = f_c / f_s
 	void setCutoff(float r) {
 		c = 2.f / r;
+		c1 = 1.0f - c;
+		c2 = 1.0f / (1.0f + c);
 	}
 	void process(float x) {
-		float y = (x + xstate[0] - ystate[0] * (1 - c)) / (1 + c);
-		xstate[0] = x;
-		ystate[0] = y;
+		float y = (x + xstate - ystate * c1) * c2;
+		xstate = x;
+		ystate = y;
 	}
 	float lowpass() {
-		return ystate[0];
+		return ystate;
 	}
 	float highpass() {
-		return xstate[0] - ystate[0];
+		return xstate - ystate;
 	}
 };
 
