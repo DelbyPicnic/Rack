@@ -143,4 +143,4 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 };
 
 
-Model *modelAudioInterface2 = Model::create<AudioInterface2, AudioInterfaceWidget2>("Core", "AudioInterface", "Audio", EXTERNAL_TAG);
+Model *modelAudioInterface2 = Model::create<AudioInterface2, AudioInterfaceWidget2>("Core", "AudioInterface", "Audio Out", EXTERNAL_TAG);
