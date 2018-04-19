@@ -115,6 +115,7 @@ struct Widget {
 	/** Draws to NanoVG context */
 	virtual void draw(NVGcontext *vg);
 	void drawCachedOrFresh(NVGcontext *vg);
+	void ensureCached(NVGcontext *vg);
 
 	// Events
 

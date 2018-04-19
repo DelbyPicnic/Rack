@@ -45,5 +45,7 @@ void windowSetWindowPos(Vec pos);
 bool windowIsMaximized();
 void windowSetTheme(NVGcolor bg, NVGcolor fg);
 
+NVGcontext* windowCreateNVGContext();
+void windowReleaseNVGContext(NVGcontext *ctx);
 
 } // namespace rack

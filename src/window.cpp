@@ -380,22 +380,10 @@ void windowInit() {
 	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
 	// Set up NanoVG
-#if defined NANOVG_GL2
-	gVg = nvgCreateGL2(NVG_ANTIALIAS);
-#elif defined NANOVG_GL3
-	gVg = nvgCreateGL3(NVG_ANTIALIAS);
-#elif defined NANOVG_GLES2
-	gVg = nvgCreateGLES2(NVG_ANTIALIAS);
-#endif
+	gVg = windowCreateNVGContext();
 	assert(gVg);
 
-#if defined NANOVG_GL2
-	gFramebufferVg = nvgCreateGL2(NVG_ANTIALIAS);
-#elif defined NANOVG_GL3
-	gFramebufferVg = nvgCreateGL3(NVG_ANTIALIAS);
-#elif defined NANOVG_GLES2
-	gFramebufferVg = nvgCreateGLES2(NVG_ANTIALIAS);
-#endif
+	gFramebufferVg = windowCreateNVGContext();
 	assert(gFramebufferVg);
 
 	// Set up Blendish
@@ -409,21 +397,7 @@ void windowInit() {
 void windowDestroy() {
 	gGuiFont.reset();
 
-#if defined NANOVG_GL2
-	nvgDeleteGL2(gVg);
-#elif defined NANOVG_GL3
-	nvgDeleteGL3(gVg);
-#elif defined NANOVG_GLES2
-	nvgDeleteGLES2(gVg);
-#endif
-
-#if defined NANOVG_GL2
-	nvgDeleteGL2(gFramebufferVg);
-#elif defined NANOVG_GL3
-	nvgDeleteGL3(gFramebufferVg);
-#elif defined NANOVG_GLES2
-	nvgDeleteGLES2(gFramebufferVg);
-#endif
+	windowReleaseNVGContext(gVg);
 
 	glfwDestroyWindow(gWindow);
 	glfwTerminate();
@@ -606,6 +580,28 @@ void windowSetTheme(NVGcolor bg, NVGcolor fg) {
 	t.menuTheme.textSelectedColor = t.menuTheme.textColor;
 
 	bndSetTheme(t);
+}
+
+NVGcontext* windowCreateNVGContext()
+{
+#if defined NANOVG_GL2
+	return nvgCreateGL2(NVG_ANTIALIAS);
+#elif defined NANOVG_GL3
+	return nvgCreateGL3(NVG_ANTIALIAS);
+#elif defined NANOVG_GLES2
+	return nvgCreateGLES2(NVG_ANTIALIAS);
+#endif
+}
+
+void windowReleaseNVGContext(NVGcontext *ctx)
+{
+#if defined NANOVG_GL2
+	nvgDeleteGL2(ctx);
+#elif defined NANOVG_GL3
+	nvgDeleteGL3(ctx);
+#elif defined NANOVG_GLES2
+	nvgDeleteGLES2(ctx);
+#endif	
 }
 
 
