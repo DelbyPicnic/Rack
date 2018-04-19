@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 
 	pluginInit();
 	engineInit();
-	bridgeInit();
+	// bridgeInit();
 	windowInit();
 	appInit();
 	settingsLoad(assetLocal("settings.json"));
