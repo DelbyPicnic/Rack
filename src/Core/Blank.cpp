@@ -41,6 +41,7 @@ struct ModuleResizeHandle : Widget {
 			newBox.pos.x = originalBox.pos.x + originalBox.size.x - newBox.size.x;
 		}
 		gRackWidget->requestModuleBox(m, newBox);
+		m->dirty = true;
 	}
 	void draw(NVGcontext *vg) override {
 		for (float x = 5.0; x <= 10.0; x += 5.0) {
@@ -64,6 +65,7 @@ struct BlankWidget : ModuleWidget {
 
 	BlankWidget(Module *module) : ModuleWidget(module) {
 		box.size = Vec(RACK_GRID_WIDTH * 10, RACK_GRID_HEIGHT);
+		canCache = true;
 
 		{
 			panel = new LightPanel();

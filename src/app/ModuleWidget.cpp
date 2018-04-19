@@ -34,7 +34,7 @@ void ModuleWidget::addChild(Widget *widget) {
 		return;
 	}
 	
-	if (widget->canSquash)
+	if (widget->canSquash && panel)
 		panel->addChild(widget);
 	else
 		Widget::addChild(widget);
@@ -44,19 +44,25 @@ void ModuleWidget::addInput(Port *input) {
 	assert(input->type == Port::INPUT);
 	inputs.push_back(input);
 	// Ports are always squashable for now
-	panel->addChild(input);
+	if (panel)
+		panel->addChild(input);
+	else
+		addChild(input);
 }
 
 void ModuleWidget::addOutput(Port *output) {
 	assert(output->type == Port::OUTPUT);
 	outputs.push_back(output);
 	// Ports are always squashable for now
-	panel->addChild(output);
+	if (panel)
+		panel->addChild(output);
+	else
+		addChild(output);
 }
 
 void ModuleWidget::addParam(ParamWidget *param) {
 	params.push_back(param);
-	if (param->canSquash)
+	if (param->canSquash && panel)
 		panel->addChild(param);
 	else
 		Widget::addChild(param);

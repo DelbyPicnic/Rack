@@ -428,13 +428,17 @@ void RackWidget::draw(NVGcontext *vg) {
 	Vec size = parent->parent->parent->box.size.mult(zoom);
 
 	for (Widget *child : moduleContainer->children) {
+		ModuleWidget *mw = dynamic_cast<ModuleWidget*>(child);
+		if (!mw->panel)
+			continue;
+
 		if (child->box.pos.x-pos.x >= size.x || child->box.pos.y-pos.y >= size.y ||
 			child->box.pos.x+child->box.size.x < pos.x || child->box.pos.y+child->box.size.y < pos.y)
 			continue;
 
 		nvgSave(vg);
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
-		dynamic_cast<ModuleWidget*>(child)->panel->drawCachedOrFresh(vg);
+		mw->panel->drawCachedOrFresh(vg);
 		nvgRestore(vg);
 		child->needsRender = false;
 	}
