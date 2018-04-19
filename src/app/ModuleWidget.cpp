@@ -71,7 +71,7 @@ void ModuleWidget::setPanel(std::shared_ptr<SVG> svg) {
 
 	panel = new SVGPanel();
 	panel->setBackground(svg);
-	addChild(panel);
+	Widget::addChild(panel);
 
 	box.size = panel->box.size;
 }
