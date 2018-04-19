@@ -154,7 +154,7 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 		dirty = false;
 
 		for (Widget *child : children)
-			child->ensureCached(vg);
+			child->ensureCached(gFramebufferVg);
 
 		fbBox = children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size.minus(box.pos));
 
@@ -176,7 +176,7 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 			if (fb)
 				nvgluDeleteFramebuffer(fb);
 			// Create a framebuffer from the main nanovg context. We will draw to this in the secondary nanovg context.
-			fb = nvgluCreateFramebuffer(gVg, fbSize.x, fbSize.y, 0); //gVg
+			fb = nvgluCreateFramebuffer(vg, fbSize.x, fbSize.y, 0); //gVg
 			if (!fb)
 				return;
 		}
