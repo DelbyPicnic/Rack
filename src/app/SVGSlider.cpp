@@ -22,20 +22,9 @@ void SVGSlider::setSVGs(std::shared_ptr<SVG> backgroundSVG, std::shared_ptr<SVG>
 	}
 }
 
-void SVGSlider::step() {
-	//TODO: //FIXME:
-	//if (dirty)
-	{
-		// Interpolate handle position
-		handle->box.pos = Vec(rescale(value, minValue, maxValue, minHandlePos.x, maxHandlePos.x), rescale(value, minValue, maxValue, minHandlePos.y, maxHandlePos.y));
-	}
-	Widget::step();
-}
-
 void SVGSlider::onChange(EventChange &e) {
-	//dirty = true;
-	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
-		v->dirty = true;
+	handle->box.pos = Vec(rescale(value, minValue, maxValue, minHandlePos.x, maxHandlePos.x), rescale(value, minValue, maxValue, minHandlePos.y, maxHandlePos.y));
+	dirty = true;
 	Knob::onChange(e);
 }
 

@@ -25,8 +25,7 @@ void SVGSwitch::onChange(EventChange &e) {
 	float valueScaled = rescale(value, minValue, maxValue, 0, frames.size() - 1);
 	int index = clamp((int) roundf(valueScaled), 0, (int) frames.size() - 1);
 	sw->setSVG(frames[index]);
-	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
-		v->dirty = true;
+	dirty = true;
 	ParamWidget::onChange(e);
 }
 

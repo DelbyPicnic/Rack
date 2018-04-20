@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	settingsSave(assetLocal("settings.json"));
 	appDestroy();
 	windowDestroy();
-	bridgeDestroy();
+	// bridgeDestroy();
 	engineDestroy();
 	pluginDestroy();
 	loggerDestroy();

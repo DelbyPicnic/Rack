@@ -277,7 +277,6 @@ struct SVGKnob : Knob {
 
 	SVGKnob();
 	void setSVG(std::shared_ptr<SVG> svg);
-	void step() override;
 	void onChange(EventChange &e) override;
 };
 
@@ -292,7 +291,6 @@ struct SVGSlider : Knob {
 
 	SVGSlider();
 	void setSVGs(std::shared_ptr<SVG> backgroundSVG, std::shared_ptr<SVG> handleSVG);
-	void step() override;
 	void onChange(EventChange &e) override;
 };
 

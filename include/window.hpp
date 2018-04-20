@@ -16,7 +16,6 @@ namespace rack {
 
 extern GLFWwindow *gWindow;
 extern NVGcontext *gVg;
-extern NVGcontext *gFramebufferVg;
 /** The default font to use for GUI elements */
 extern std::shared_ptr<Font> gGuiFont;
 /** The scaling ratio */
@@ -45,5 +44,7 @@ void windowSetWindowPos(Vec pos);
 bool windowIsMaximized();
 void windowSetTheme(NVGcolor bg, NVGcolor fg);
 
+NVGcontext* windowCreateNVGContext();
+void windowReleaseNVGContext(NVGcontext *ctx);
 
 } // namespace rack
