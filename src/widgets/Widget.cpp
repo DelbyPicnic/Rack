@@ -8,6 +8,23 @@
 
 namespace rack {
 
+DirtyWrapper& DirtyWrapper::operator =(bool _dirty) {
+	dirty = _dirty;
+	if (dirty && widget) {
+		Widget *p = widget;
+		while((p=p->parent)) {
+			if (p->dirty.dirty)
+				break;
+			p->dirty.dirty = true;
+		}
+	}
+	return *this;
+}
+
+Widget::Widget() : dirty(this, true) {
+
+}
+
 Widget::~Widget() {
 	// You should only delete orphaned widgets
 	assert(!parent);
@@ -123,43 +140,18 @@ void Widget::draw(NVGcontext *vg) {
 }
 
 void Widget::ensureCached(NVGcontext *vg) {
+	if (!dirty)
+		return;
+
 	for (Widget *child : children) {
 		child->ensureCached(vg);
 	}
 
 	if (canCache && dirty)
-		drawCachedOrFresh(vg);
-}
-
-void Widget::drawCachedOrFresh(NVGcontext *vg) {
-	if(!canCache)
-	{ 
-		draw(vg);
-		return;
-	}
-
-// Get world transform
-	float xform[6];
-	nvgCurrentTransform(vg, xform);
-	// Skew and rotate is not supported
-	// assert(fabsf(xform[1]) < 1e-6);
-	// assert(fabsf(xform[2]) < 1e-6);
-	Vec s = Vec(xform[0], xform[3]);
-	Vec b = Vec(xform[4], xform[5]);
-	Vec bi = b.floor();
-	Vec bf = b.minus(bi);
-
-	// Render to framebuffer
-	if (dirty) {
+	{
 		dirty = false;
 
-		for (Widget *child : children)
-			child->ensureCached(gFramebufferVg);
-
-		fbBox = children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size.minus(box.pos));
-
-		// fbBox.pos = fbBox.pos.mult(s).floor();
-		// fbBox.size = fbBox.size.mult(s).ceil().plus(Vec(1, 1));
+		fbBox = children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size);
 
 		Vec fbSize2 = fbBox.size.ceil().mult(gPixelRatio * oversample);
 
@@ -180,29 +172,31 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 			if (!fb)
 				return;
 		}
-int defaultFBO;
-glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-		printf("drawing %p %f %f %f %f   %f %f %f %f  %f %f  %d\n", this, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, box.pos.x, box.pos.y, box.size.x, box.size.y, gPixelRatio, oversample, defaultFBO);
+
+		// printf("drawing %p %f %f %f %f   %f %f %f %f  %f %f\n", this, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, box.pos.x, box.pos.y, box.size.x, box.size.y, gPixelRatio, oversample);
 		nvgluBindFramebuffer(fb);
 		glViewport(0.0, 0.0, fbSize.x, fbSize.y);
-		glClearColor(0.0, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		// glClearColor((float)rand()/RAND_MAX, (float)rand()/RAND_MAX, (float)rand()/RAND_MAX, 1);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		// NVGcontext *gFramebufferVg = windowCreateNVGContext();
-		nvgBeginFrame(gFramebufferVg, fbSize.x, fbSize.y, gPixelRatio * oversample);
+		nvgBeginFrame(vg, fbSize.x, fbSize.y, gPixelRatio * oversample);
 
-		nvgReset(gFramebufferVg);
-		nvgScale(gFramebufferVg, gPixelRatio * oversample, gPixelRatio * oversample);
-		// Use local scaling
-		// nvgTranslate(gFramebufferVg, bf.x, bf.y);
-		// nvgTranslate(gFramebufferVg, -fbBox.pos.x, -fbBox.pos.y);
-		// nvgScale(gFramebufferVg, s.x, s.y);
-		draw(gFramebufferVg);
-		nvgEndFrame(gFramebufferVg);
-		printf("drawing end %p %f %f %f %f   %f %f %f %f  %f %f  %d\n", this, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, box.pos.x, box.pos.y, box.size.x, box.size.y, gPixelRatio, oversample, defaultFBO);
-		// windowReleaseNVGContext(gFramebufferVg);
+		nvgReset(vg);
+		nvgScale(vg, gPixelRatio * oversample, gPixelRatio * oversample);
+		draw(vg);
+		nvgEndFrame(vg);
+		// printf("drawing end %p %f %f %f %f   %f %f %f %f  %f %f\n", this, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, box.pos.x, box.pos.y, box.size.x, box.size.y, gPixelRatio, oversample);
 		nvgluBindFramebuffer(NULL);
-		// glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
+		// fbPaint = nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0);		
+	}
+}
+
+void Widget::drawCachedOrFresh(NVGcontext *vg) {
+	if(!canCache)
+	{ 
+		draw(vg);
 		return;
 	}
 
@@ -211,19 +205,16 @@ glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
 	// Draw framebuffer image, using world coordinates
 	nvgSave(vg);
-	// nvgResetTransform(vg);
-	// nvgTranslate(vg, bi.x, bi.y);
-	printf("presenting framebuffer %f %f %f %f %d %p\n", fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, fb->image, vg);
+	// printf("presenting framebuffer %f %f %f %f %d %p\n", fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, fb->image, vg);
 	nvgBeginPath(vg);
 	nvgRect(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y);
 
-	NVGpaint paint = nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0);
-	nvgFillPaint(vg, paint);
+	nvgFillPaint(vg, nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0));
 	nvgFill(vg);
 
 	// For debugging the bounding box of the framebuffer
-	nvgStrokeWidth(vg, 2.0);
-	nvgStrokeColor(vg, nvgRGBA(255, 0, 0, 128));
+	// nvgStrokeWidth(vg, 2.0);
+	// nvgStrokeColor(vg, nvgRGBA(255, 0, 0, 128));
 	// nvgStroke(vg);
 
 	nvgRestore(vg);

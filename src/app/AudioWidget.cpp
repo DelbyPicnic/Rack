@@ -151,8 +151,7 @@ struct AudioBlockSizeChoice : LedDisplayChoice {
 
 
 AudioWidget::AudioWidget() {
-	// canSquash = true;
-
+	//canCache = true;
 	box.size = mm2px(Vec(44, 28));
 
 	Vec pos = Vec();

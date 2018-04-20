@@ -35,7 +35,6 @@ namespace rack {
 
 GLFWwindow *gWindow = NULL;
 NVGcontext *gVg = NULL;
-NVGcontext *gFramebufferVg = NULL;
 std::shared_ptr<Font> gGuiFont;
 float gPixelRatio = 1.0;
 float gWindowRatio = 1.0;
@@ -294,6 +293,8 @@ void renderGui() {
 	int width, height;
 	glfwGetFramebufferSize(gWindow, &width, &height);
 
+	gScene->ensureCached(gVg);
+
 	// Update and render
 	nvgBeginFrame(gVg, width, height, gPixelRatio);
 	nvgReset(gVg);
@@ -303,7 +304,7 @@ void renderGui() {
 
 	glViewport(0, 0, width, height);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	nvgEndFrame(gVg);
 	glfwSwapBuffers(gWindow);
 }
@@ -380,11 +381,14 @@ void windowInit() {
 	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
 	// Set up NanoVG
-	gVg = windowCreateNVGContext();
+#if defined NANOVG_GL2
+	gVg = nvgCreateGL2(NVG_ANTIALIAS);
+#elif defined NANOVG_GL3
+	gVg = nvgCreateGL3(NVG_ANTIALIAS);
+#elif defined NANOVG_GLES2
+	gVg = nvgCreateGLES2(NVG_ANTIALIAS);
+#endif
 	assert(gVg);
-
-	gFramebufferVg = windowCreateNVGContext();
-	assert(gFramebufferVg);
 
 	// Set up Blendish
 	gGuiFont = Font::load(assetGlobal("res/fonts/DejaVuSans.ttf"));
@@ -397,7 +401,13 @@ void windowInit() {
 void windowDestroy() {
 	gGuiFont.reset();
 
-	windowReleaseNVGContext(gVg);
+#if defined NANOVG_GL2
+	nvgDeleteGL2(gVg);
+#elif defined NANOVG_GL3
+	nvgDeleteGL3(gVg);
+#elif defined NANOVG_GLES2
+	nvgDeleteGLES2(gVg);
+#endif	
 
 	glfwDestroyWindow(gWindow);
 	glfwTerminate();
@@ -581,29 +591,6 @@ void windowSetTheme(NVGcolor bg, NVGcolor fg) {
 
 	bndSetTheme(t);
 }
-
-NVGcontext* windowCreateNVGContext()
-{
-#if defined NANOVG_GL2
-	return nvgCreateGL2(NVG_ANTIALIAS);
-#elif defined NANOVG_GL3
-	return nvgCreateGL3(NVG_ANTIALIAS);
-#elif defined NANOVG_GLES2
-	return nvgCreateGLES2(NVG_ANTIALIAS);
-#endif
-}
-
-void windowReleaseNVGContext(NVGcontext *ctx)
-{
-#if defined NANOVG_GL2
-	nvgDeleteGL2(ctx);
-#elif defined NANOVG_GL3
-	nvgDeleteGL3(ctx);
-#elif defined NANOVG_GLES2
-	nvgDeleteGLES2(ctx);
-#endif	
-}
-
 
 ////////////////////
 // resources

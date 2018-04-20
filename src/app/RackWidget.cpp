@@ -39,7 +39,7 @@ RackWidget::RackWidget() {
 		rail->box.size = Vec();
 		rails->addChild(rail);
 	}
-	addChild(rails);
+	// addChild(rails);
 
 	moduleContainer = new ModuleContainer();
 	addChild(moduleContainer);

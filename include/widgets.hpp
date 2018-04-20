@@ -45,6 +45,25 @@ struct SVG {
 // Base widget
 ////////////////////
 
+struct Widget;
+
+struct DirtyWrapper {
+	Widget *widget;
+	bool dirty;
+
+	DirtyWrapper(Widget *_widget, bool _dirty) {
+		widget = _widget;
+		dirty = _dirty;
+	}
+
+	DirtyWrapper& operator =(bool _dirty);
+
+	operator bool() {
+		return dirty;
+	};
+};
+
+
 /** A node in the 2D scene graph
 Never inherit from Widget directly. Instead, inherit from VirtualWidget declared below.
 */
@@ -61,11 +80,13 @@ struct Widget {
 	NVGLUframebuffer *fb = NULL;
 	Vec fbSize;
 	Rect fbBox;
-	bool dirty = true;
+	NVGpaint fbPaint;
+	DirtyWrapper dirty;
 	float oversample = 1;
 
 	//bool alwaysRender = false;
 	
+	Widget();
 	virtual ~Widget();
 
 	virtual Rect getChildrenBoundingBox();
@@ -244,8 +265,30 @@ struct SpriteWidget : VirtualWidget {
 	void draw(NVGcontext *vg) override;
 };
 
-struct SVGWidget : VirtualWidget {
+struct SVGWidget;
+
+struct SVGWrapper {
+	SVGWidget *widget;
 	std::shared_ptr<SVG> svg;
+
+	SVGWrapper(SVGWidget *_widget) {
+		widget = _widget;
+	}
+
+	SVGWrapper& operator =(std::shared_ptr<SVG> svg);
+
+	operator SVG*() {
+		return svg.get();
+	};
+	SVG* operator ->() {
+		return svg.operator->();
+	};
+};
+
+struct SVGWidget : VirtualWidget {
+	SVGWrapper svg;
+
+	SVGWidget();
 	/** Sets the box size to the svg image size */
 	void wrap();
 	/** Sets and wraps the SVG */
@@ -253,28 +296,10 @@ struct SVGWidget : VirtualWidget {
 	void draw(NVGcontext *vg) override;
 };
 
-/** Caches a widget's draw() result to a framebuffer so it is called less frequently
-When `dirty` is true, its children will be re-rendered on the next call to step() override.
-Events are not passed to the underlying scene.
-*/
 struct FramebufferWidget : VirtualWidget {
-	/** Set this to true to re-render the children to the framebuffer the next time it is drawn */
-	// bool dirty = true;
-	/** A margin in pixels around the children in the framebuffer
-	This prevents cutting the rendered SVG off on the box edges.
-	*/
-	// float oversample;
-	/** The root object in the framebuffer scene
-	The FramebufferWidget owns the pointer
-	*/
-	struct Internal;
-	Internal *internal;
-
-	FramebufferWidget();
-	~FramebufferWidget();
-	void draw(NVGcontext *vg) override;
-	int getImageHandle();
-	void onZoom(EventZoom &e) override;
+	FramebufferWidget() {
+		canCache = true;
+	};
 };
 
 /** A Widget representing a float value */

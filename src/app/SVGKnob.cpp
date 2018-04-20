@@ -27,33 +27,22 @@ void SVGKnob::setSVG(std::shared_ptr<SVG> svg) {
 	// shadow->box = shadow->box.grow(Vec(2, 2));
 }
 
-void SVGKnob::step() {
-	// Re-transform TransformWidget if dirty
-	//TODO: //FIXME:
-	//if (dirty)
-	{
-		float angle;
-		if (isfinite(minValue) && isfinite(maxValue)) {
-			angle = rescale(value, minValue, maxValue, minAngle, maxAngle);
-		}
-		else {
-			angle = rescale(value, -1.0, 1.0, minAngle, maxAngle);
-			angle = fmodf(angle, 2*M_PI);
-		}
-		tw->identity();
-		// Rotate SVG
-		Vec center = sw->box.getCenter();
-		tw->translate(center);
-		tw->rotate(angle);
-		tw->translate(center.neg());
-	}
-	Widget::step();
-}
-
 void SVGKnob::onChange(EventChange &e) {
-	// dirty = true;
-	if(FramebufferWidget* v = dynamic_cast<FramebufferWidget*>(parent))
-		v->dirty = true;
+	float angle;
+	if (isfinite(minValue) && isfinite(maxValue)) {
+		angle = rescale(value, minValue, maxValue, minAngle, maxAngle);
+	}
+	else {
+		angle = rescale(value, -1.0, 1.0, minAngle, maxAngle);
+		angle = fmodf(angle, 2*M_PI);
+	}
+	tw->identity();
+	// Rotate SVG
+	Vec center = sw->box.getCenter();
+	tw->translate(center);
+	tw->rotate(angle);
+	tw->translate(center.neg());
+	dirty = true;
 	Knob::onChange(e);
 }
 
