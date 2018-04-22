@@ -225,7 +225,8 @@ void AudioIO::openStream() {
 		if (rtAudio->isStreamOpen())
 			return;
 
-		setChannels(clamp((int) deviceInfo.outputChannels - offset, 0, maxChannels), clamp((int) deviceInfo.inputChannels - offset, 0, maxChannels));
+		//setChannels(clamp((int) deviceInfo.outputChannels - offset, 0, maxChannels), clamp((int) deviceInfo.inputChannels - offset, 0, maxChannels));
+		setChannels(min(deviceInfo.outputChannels, 2), 0);
 
 		if (numOutputs == 0 && numInputs == 0) {
 			warn("RtAudio device %d has 0 inputs and 0 outputs", device);
