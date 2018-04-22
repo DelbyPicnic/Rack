@@ -245,6 +245,7 @@ void AudioIO::openStream() {
 
 		RtAudio::StreamOptions options;
 		options.flags |= RTAUDIO_JACK_DONT_CONNECT;
+		options.flags |= RTAUDIO_MINIMIZE_LATENCY;
 
 		int closestSampleRate = deviceInfo.preferredSampleRate;
 		for (int sr : deviceInfo.sampleRates) {
