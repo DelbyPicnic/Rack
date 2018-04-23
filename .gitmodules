@@ -12,7 +12,7 @@ url=https://github.com/mi-rack/nanovg
 url=https://github.com/mi-rack/oui-blendish
 [submodule "dep/glfw"]
 	path = dep/glfw
-	url = https://github.com/glfw/glfw.git
+url=https://github.com/mi-rack/glfw.git
 [submodule "dep/rtaudio"]
 	path = dep/rtaudio
 	url = https://github.com/thestk/rtaudio.git
