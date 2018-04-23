@@ -256,10 +256,10 @@ void engineStepMT(int steps) {
 	cond.notify_all();
 
 	// printf("WAITING\n");
-	m.lock();
-	while(runningt)
-		cond2.wait(m);
-	m.unlock();
+	// m.lock();
+	// while(runningt)
+	// 	cond2.wait(m);
+	// m.unlock();
 
 	// printf("DONE\n");
 	if (outm)
@@ -274,6 +274,20 @@ void engineStepMT(int steps) {
 	}
 }
 
+void engineWaitMT() {
+	static bool primed = false;
+
+	if (!primed)
+	{
+		primed = true;
+		return;
+	}
+
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+	m.unlock();	
+}
 
 static void engineRun() {
 #if !(defined(__arm__) || defined(__aarch64__))

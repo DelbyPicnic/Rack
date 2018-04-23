@@ -131,6 +131,7 @@ float engineGetSampleTime();
 
 void engineStep();
 void engineStepMT(int steps);
+void engineWaitMT();
 
 extern bool gPaused;
 /** If plugins begin using this in harmful ways, I will remove it and break your API.
