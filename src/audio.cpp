@@ -245,7 +245,9 @@ void AudioIO::openStream() {
 
 		RtAudio::StreamOptions options;
 		options.flags |= RTAUDIO_JACK_DONT_CONNECT;
-		options.flags |= RTAUDIO_MINIMIZE_LATENCY;
+		// Without this, ALSA defaults to 4 periods (buffers) which is too much
+		if (driver == RtAudio::LINUX_ALSA)
+			options.flags |= RTAUDIO_MINIMIZE_LATENCY;
 
 		int closestSampleRate = deviceInfo.preferredSampleRate;
 		for (int sr : deviceInfo.sampleRates) {
