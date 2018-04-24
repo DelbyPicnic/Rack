@@ -8,9 +8,9 @@ void init(rack::Plugin *p) {
 	// p->addModel(modelAudioInterface);
 	p->addModel(modelAudioInterface2);	
 	p->addModel(modelMIDIToCVInterface);
-	// p->addModel(modelQuadMIDIToCVInterface);
+	p->addModel(modelQuadMIDIToCVInterface);
 	p->addModel(modelMIDICCToCVInterface);
-	// p->addModel(modelMIDITriggerToCVInterface);
+	p->addModel(modelMIDITriggerToCVInterface);
 	p->addModel(modelBlank);
 	p->addModel(modelNotes);
 }
