@@ -101,7 +101,7 @@ void ScrollWidget::step() {
 
 	// Resize scroll bars
 	Vec inner = Vec(box.size.x - verticalScrollBar->box.size.x, box.size.y - horizontalScrollBar->box.size.y);
-	horizontalScrollBar->box.pos.y = inner.y;
+	horizontalScrollBar->box.pos.y = inner.y+1;
 	verticalScrollBar->box.pos.x = inner.x;
 	horizontalScrollBar->box.size.x = verticalScrollBar->visible ? inner.x : box.size.x;
 	verticalScrollBar->box.size.y = horizontalScrollBar->visible ? inner.y : box.size.y;
