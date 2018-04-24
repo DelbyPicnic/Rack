@@ -85,9 +85,9 @@ struct EngineSampleRateChoice : ChoiceButton {
 		menu->box.pos = getAbsoluteOffset(Vec(0, box.size.y));
 		menu->box.size.x = box.size.x;
 
-		EnginePauseItem *pauseItem = new EnginePauseItem();
-		pauseItem->text = gPaused ? "Resume engine" : "Pause engine";
-		menu->addChild(pauseItem);
+		// EnginePauseItem *pauseItem = new EnginePauseItem();
+		// pauseItem->text = gPaused ? "Resume engine" : "Pause engine";
+		// menu->addChild(pauseItem);
 
 		std::vector<float> sampleRates = {44100, 48000, 88200, 96000, 176400, 192000};
 		for (float sampleRate : sampleRates) {

@@ -1,6 +1,6 @@
 #include "app.hpp"
 #include "audio.hpp"
-
+#include "engine.hpp"
 
 namespace rack {
 
@@ -90,6 +90,7 @@ struct AudioSampleRateItem : MenuItem {
 	int sampleRate;
 	void onAction(EventAction &e) override {
 		audioIO->setSampleRate(sampleRate);
+		engineSetSampleRate(sampleRate);
 	}
 };
 
