@@ -51,9 +51,9 @@ int main(int argc, char* argv[]) {
 	}
 	gRackWidget->lastPath = oldLastPath;
 
-	// engineStart();
+	engineStart();
 	windowRun();
-	// engineStop();
+	engineStop();
 
 	gRackWidget->savePatch(assetLocal("autosave.vcv"));
 	settingsSave(assetLocal("settings.json"));

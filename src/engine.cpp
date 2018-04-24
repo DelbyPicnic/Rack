@@ -24,9 +24,7 @@ static bool running = false;
 static float sampleRate;
 static float sampleTime;
 
-static std::mutex mutex;
-static std::thread thread;
-static VIPMutex vipMutex;
+// static std::thread thread;
 
 // Parameter interpolation
 static Module *smoothModule = NULL;
@@ -230,6 +228,7 @@ void engineStepMT(int steps) {
 
 	// Step modules
 	// printf("---\n");
+	m.lock();
 	Module *outm = NULL;
 	for (Module *module : gModules) {
 		if(0&&module->outputs.size() == 0 && !outm)
@@ -253,6 +252,7 @@ void engineStepMT(int steps) {
 	}
 
 	runningt = numWorkers;
+	m.unlock();
 	cond.notify_all();
 
 	// printf("WAITING\n");
@@ -290,13 +290,7 @@ void engineWaitMT() {
 }
 
 static void engineRun() {
-#if !(defined(__arm__) || defined(__aarch64__))
-	// Set CPU to flush-to-zero (FTZ) and denormals-are-zero (DAZ) mode
-	// https://software.intel.com/en-us/node/682949
-	_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
-#endif
-
+	/*
 	// Every time the engine waits and locks a mutex, it steps this many frames
 	const int mutexSteps = 64;
 	// Time in seconds that the engine is rushing ahead of the estimated clock time
@@ -328,33 +322,44 @@ static void engineRun() {
 		if (ahead > aheadMax) {
 			std::this_thread::sleep_for(std::chrono::duration<double>(stepTime));
 		}
-	}
+	}*/
 }
 
 void engineStart() {
-	running = true;
-	thread = std::thread(engineRun);
+	// running = true;
+	// thread = std::thread(engineRun);
+
+#if !(defined(__arm__) || defined(__aarch64__))
+	// Set CPU to flush-to-zero (FTZ) and denormals-are-zero (DAZ) mode
+	// https://software.intel.com/en-us/node/682949
+	_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+#endif
 }
 
 void engineStop() {
-	running = false;
-	thread.join();
+	// running = false;
+	// thread.join();
 }
 
 void engineAddModule(Module *module) {
 	assert(module);
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+
 	// Check that the module is not already added
 	auto it = std::find(gModules.begin(), gModules.end(), module);
 	assert(it == gModules.end());
+
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+
 	gModules.push_back(module);
+	m.unlock();	
 }
 
 void engineRemoveModule(Module *module) {
 	assert(module);
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+
 	// If a param is being smoothed on this module, stop smoothing it immediately
 	if (module == smoothModule) {
 		smoothModule = NULL;
@@ -368,7 +373,12 @@ void engineRemoveModule(Module *module) {
 	auto it = std::find(gModules.begin(), gModules.end(), module);
 	assert(it != gModules.end());
 	// Remove it
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+
 	gModules.erase(it);
+	m.unlock();	
 }
 
 static void updateActive() {
@@ -390,8 +400,7 @@ static void updateActive() {
 
 void engineAddWire(Wire *wire) {
 	assert(wire);
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+
 	// Check wire properties
 	assert(wire->outputModule);
 	assert(wire->inputModule);
@@ -400,26 +409,37 @@ void engineAddWire(Wire *wire) {
 		assert(wire2 != wire);
 		assert(!(wire2->inputModule == wire->inputModule && wire2->inputId == wire->inputId));
 	}
+
 	// Add the wire
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+
 	gWires.push_back(wire);
 	wire->outputModule->outputs[wire->outputId].wires.push_back(wire);
 	updateActive();
+	m.unlock();
 }
 
 void engineRemoveWire(Wire *wire) {
 	assert(wire);
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+
 	// Check that the wire is already added
 	auto it = std::find(gWires.begin(), gWires.end(), wire);
 	auto it2 = std::find(wire->outputModule->outputs[wire->outputId].wires.begin(), wire->outputModule->outputs[wire->outputId].wires.end(), wire);
 	assert(it != gWires.end());
 	// Set input to 0V
 	wire->inputModule->inputs[wire->inputId].value = 0.0;
+
 	// Remove the wire
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+
 	gWires.erase(it);
 	wire->outputModule->outputs[wire->outputId].wires.erase(it2);
 	updateActive();
+	m.unlock();
 }
 
 void engineSetParam(Module *module, int paramId, float value) {
@@ -427,8 +447,8 @@ void engineSetParam(Module *module, int paramId, float value) {
 }
 
 void engineSetParamSmooth(Module *module, int paramId, float value) {
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+	// VIPLock vipLock(vipMutex);
+	// std::lock_guard<std::mutex> lock(mutex);
 	// Since only one param can be smoothed at a time, if another param is currently being smoothed, skip to its final state
 	if (smoothModule && !(smoothModule == module && smoothParamId == paramId)) {
 		smoothModule->params[smoothParamId].value = smoothValue;
@@ -439,14 +459,19 @@ void engineSetParamSmooth(Module *module, int paramId, float value) {
 }
 
 void engineSetSampleRate(float newSampleRate) {
-	VIPLock vipLock(vipMutex);
-	std::lock_guard<std::mutex> lock(mutex);
+	// VIPLock vipLock(vipMutex);
+	// std::lock_guard<std::mutex> lock(mutex);
 	sampleRate = newSampleRate;
 	sampleTime = 1.0 / sampleRate;
+
 	// onSampleRateChange
-	for (Module *module : gModules) {
+	m.lock();
+	while(runningt)
+		cond2.wait(m);
+
+	for (Module *module : gModules)
 		module->onSampleRateChange();
-	}
+	m.unlock();
 }
 
 float engineGetSampleRate() {
