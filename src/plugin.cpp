@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <thread>
 #include <stdexcept>
+#include <algorithm>
 
 #include <zip.h>
 #include <jansson.h>
@@ -113,10 +114,16 @@ static bool loadPlugin(std::string path) {
 	// Reject plugin if slug already exists
 	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
 	if (oldPlugin) {
-		warn("Plugin \"%s\" is already loaded, not attempting to load it again", plugin->slug.c_str());
-		// TODO
-		// Fix memory leak with `plugin` here
-		return false;
+		for (Model *model : plugin->models) {
+			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
+				if (model->slug == (*it)->slug) {
+					it = oldPlugin->models.erase(it);
+					oldPlugin->models.insert(it, model);
+					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", libraryFilename.c_str(), model->slug.c_str(), plugin->slug.c_str());
+				} else
+					it++;
+			}
+		}
 	}
 
 	// Add plugin to list
@@ -222,7 +229,11 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 
 static void loadPlugins(std::string path) {
 	std::string message;
-	for (std::string pluginPath : systemListEntries(path)) {
+	
+	auto entries = systemListEntries(path);
+	std::sort (entries.begin(), entries.end());
+
+	for (std::string pluginPath : entries) {
 		if (!systemIsDirectory(pluginPath))
 			continue;
 		if (!loadPlugin(pluginPath)) {
