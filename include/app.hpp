@@ -483,8 +483,10 @@ struct SVGPort : Port {
 /** If you don't add these to your ModuleWidget, they will fall out of the rack... */
 struct SVGScrew : VirtualWidget {
 	SVGWidget *sw;
+	float angle;
 
 	SVGScrew();
+	void draw(NVGcontext *vg) override;
 };
 
 ////////////////////
