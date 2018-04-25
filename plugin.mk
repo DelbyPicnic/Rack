@@ -33,6 +33,10 @@ all: $(TARGET)
 
 include $(RACK_DIR)/compile.mk
 
+ifdef DEPS
+	include $(RACK_DIR)/dep.mk
+endif
+
 clean:
 	rm -rfv build $(TARGET) dist
 
