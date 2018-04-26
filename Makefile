@@ -3,7 +3,8 @@ VERSION = master
 
 FLAGS += \
 	-Iinclude \
-	-Idep/include -Idep/lib/libzip/include -Idep/tinythread/source
+	-Idep/include -I$(RACK_DIR)/dep/nanovg/src -Idep/nanosvg/src -Idep/osdialog \
+	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source
 
 ifdef RELEASE
 	FLAGS += -DRELEASE=$(RELEASE)

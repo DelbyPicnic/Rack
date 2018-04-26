@@ -8,7 +8,8 @@ endif
 
 FLAGS += -DSLUG=$(SLUG)
 FLAGS += -fPIC
-FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include
+FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include \
+         -I$(RACK_DIR)/dep/nanovg/src -I$(RACK_DIR)/dep/nanosvg/src -I$(RACK_DIR)/dep/oui-blendish
 
 
 include $(RACK_DIR)/arch.mk

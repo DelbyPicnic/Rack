@@ -140,17 +140,5 @@ $(rtaudio):
 	$(MAKE) -C rtaudio/build
 	$(MAKE) -C rtaudio/build install
 
-$(nanovg):
-	cp nanovg/src/*.h include/
-
-$(nanosvg):
-	cp nanosvg/src/*.h include/
-
-$(oui-blendish):
-	cp oui-blendish/*.h include/
-
-$(osdialog):
-	cp osdialog/*.h include/
-
 clean:
 	git clean -ffdx
