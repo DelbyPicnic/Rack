@@ -18,7 +18,7 @@ struct AudioIO {
 	int offset = 0;
 	int maxChannels = 8;
 	int sampleRate = 48000;
-	int blockSize = 256;
+	int blockSize = 512;
 	int numOutputs = 0;
 	int numInputs = 0;
 	RtAudio *rtAudio = NULL;
