@@ -152,8 +152,14 @@ void Widget::ensureCached(NVGcontext *vg) {
 		dirty = false;
 
 		fbBox = children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size);
+		fbBox.size = fbBox.size.ceil();
 
-		Vec fbSize2 = fbBox.size.ceil().mult(gPixelRatio * oversample);
+		if (isNear(gPixelRatio, 1.0)) {
+			// Small details draw poorly at low DPI, so oversample when drawing to the framebuffer
+			oversample = 2.0;
+		}
+
+		Vec fbSize2 = fbBox.size.mult(gPixelRatio * oversample);
 
 		if (!fbSize2.isFinite())
 			return;
