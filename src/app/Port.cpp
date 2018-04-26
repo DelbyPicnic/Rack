@@ -28,16 +28,16 @@ Port::~Port() {
 }
 
 void Port::step() {
-	std::vector<float> values(2);
-	if (type == INPUT) {
-		values[0] = module->inputs[portId].plugLights[0].getBrightness();
-		values[1] = module->inputs[portId].plugLights[1].getBrightness();
-	}
-	else {
-		values[0] = module->outputs[portId].plugLights[0].getBrightness();
-		values[1] = module->outputs[portId].plugLights[1].getBrightness();
-	}
-	plugLight->setValues(values);
+	// std::vector<float> values(2);
+	// if (type == INPUT) {
+	// 	values[0] = module->inputs[portId].plugLights[0].getBrightness();
+	// 	values[1] = module->inputs[portId].plugLights[1].getBrightness();
+	// }
+	// else {
+	// 	values[0] = module->outputs[portId].plugLights[0].getBrightness();
+	// 	values[1] = module->outputs[portId].plugLights[1].getBrightness();
+	// }
+	// plugLight->setValues(values);
 }
 
 void Port::draw(NVGcontext *vg) {

@@ -26,7 +26,13 @@ ModuleWidget::~ModuleWidget() {
 }
 
 void ModuleWidget::addChild(Widget *widget) {
-	if (SVGPanel *p = dynamic_cast<SVGPanel*>(widget)) {
+	if (LightWidget *l = dynamic_cast<LightWidget*>(widget)) {
+		l->parent = this;
+		gRackWidget->lights.push_back(l);
+		return;
+	}
+
+	if (PanelBase *p = dynamic_cast<PanelBase*>(widget)) {
 		Widget::addChild(widget);
 		if (panel)
 			removeChild(panel);
@@ -76,7 +82,7 @@ void ModuleWidget::setPanel(std::shared_ptr<SVG> svg) {
 	}
 
 	panel = new SVGPanel();
-	panel->setBackground(svg);
+	((SVGPanel*)panel)->setBackground(svg);
 	Widget::addChild(panel);
 
 	box.size = panel->box.size;

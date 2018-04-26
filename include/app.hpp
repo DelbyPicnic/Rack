@@ -35,7 +35,8 @@ struct Wire;
 struct RackWidget;
 struct ParamWidget;
 struct Port;
-struct SVGPanel;
+struct PanelBase;
+struct LightWidget;
 
 ////////////////////
 // module
@@ -52,7 +53,7 @@ struct ModuleWidget : OpaqueWidget {
 	/** Owns the module pointer */
 	Module *module = NULL;
 
-	SVGPanel *panel = NULL;
+	PanelBase *panel = NULL;
 	std::vector<Port*> inputs;
 	std::vector<Port*> outputs;
 	std::vector<ParamWidget*> params;
@@ -145,6 +146,7 @@ struct RackWidget : OpaqueWidget {
 	WireContainer *wireContainer;
 	std::string lastPath;
 	Vec lastMousePos;
+	std::vector<LightWidget*> lights;
 
 	RackWidget();
 	~RackWidget();
@@ -186,14 +188,23 @@ struct RackRail : TransparentWidget {
 	void draw(NVGcontext *vg) override;
 };
 
-struct Panel : TransparentWidget {
+// Base class for panels - a cachable widget holding background and all but frequently updated widgets
+struct PanelBase : VirtualWidget {
+	PanelBase() {
+		canCache = true;
+	};
+};
+
+// Panel showin a solid colour and/or an image
+struct Panel : PanelBase {
 	NVGcolor backgroundColor;
 	std::shared_ptr<Image> backgroundImage;
 	void draw(NVGcontext *vg) override;
 };
 
-struct SVGPanel : FramebufferWidget {
-	void step() override;
+// SVG-based panel
+struct SVGPanel : PanelBase {
+	SVGPanel();
 	void setBackground(std::shared_ptr<SVG> svg);
 };
 

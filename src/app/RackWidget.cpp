@@ -455,6 +455,64 @@ void RackWidget::draw(NVGcontext *vg) {
 		child->needsRender = false;
 	}
 
+	static int lightImage = 0;
+	static unsigned char lightData[256*4];
+	if (!lightImage) {
+		// for (int i = 0; i < 256; i++)
+		// {
+		// 	lightData[i*4+0] = 255;
+		// 	lightData[i*4+1] = 0;
+		// 	lightData[i*4+2] = 0;
+		// 	lightData[i*4+3] = 255;
+		// }
+		lightImage = nvgCreateImageRGBA(vg, 256, 1, NVG_IMAGE_NEAREST|NVG_IMAGE_PREMULTIPLIED, lightData);
+	}
+
+	nvgBeginPath(vg);
+	nvgAllowMergeSubpaths(vg);
+
+	int i = 0;
+	for (LightWidget *light : lights) {
+		light->step();
+		// if (!child->visible)
+		// 	continue;
+		// light->draw(vg);
+		// wire->needsRender = false;
+
+		float radius = light->box.size.x / 2.0;
+
+		// nvgBeginPath(vg);
+		nvgCircle(vg, light->parent->box.pos.x+light->box.pos.x+radius, light->parent->box.pos.y+light->box.pos.y+radius, radius);
+		nvgSubpathTexPos(vg, i/256., 0.5f);
+		float a = light->color.a;
+		float bga = 1. - light->color.a;
+		lightData[i*4+0] = (light->bgColor.r * bga + light->color.r * a) * 255.;
+		lightData[i*4+1] = (light->bgColor.g * bga + light->color.g * a) * 255.;
+		lightData[i*4+2] = (light->bgColor.b * bga + light->color.b * a) * 255.;
+		lightData[i*4+3] = (light->bgColor.a * bga + light->color.a) * 255.;
+// printf("%p %f %f\n", light, light->color.r, light->color.g);
+
+		// // Background
+		// if (color.a < 1.f)
+		// {
+		// 	nvgFillColor(vg, bgColor);
+		// 	nvgFill(vg);
+		// }
+
+		// Foreground
+		// if (color.a)
+		// {
+		// 	nvgFillColor(vg, color);
+		// 	nvgFill(vg);
+		// }		
+		i++;
+	}
+
+	// nvgFillColor(vg, nvgRGB(0x47, 0x18, 0xc9));
+	nvgUpdateImage(vg, lightImage, lightData);
+	nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 256, 1, 0.0, lightImage, 1.0));
+	nvgFill(vg);
+
 	wireContainer->draw(vg);
 }
 

@@ -132,7 +132,6 @@ void WireContainer::draw(NVGcontext *vg) {
 
 	nvgFillColor(vg, nvgRGB(0xc9, 0x18, 0x47));
 	nvgFill(vg);
-
 }
 
 

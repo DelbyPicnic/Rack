@@ -17,12 +17,11 @@ struct PanelBorder : TransparentWidget {
 };
 
 
-void SVGPanel::step() {
+SVGPanel::SVGPanel() {
 	if (isNear(gPixelRatio, 1.0)) {
 		// Small details draw poorly at low DPI, so oversample when drawing to the framebuffer
 		oversample = 2.0;
 	}
-	FramebufferWidget::step();
 }
 
 void SVGPanel::setBackground(std::shared_ptr<SVG> svg) {
