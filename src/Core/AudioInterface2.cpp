@@ -37,6 +37,7 @@ struct AudioInterfaceIO2 : AudioIO {
 	float *bufEnd = buf+(1<<16);
 	volatile bool bufReady = false;
 	bool active = false;
+	Module *module;
 
 	~AudioInterfaceIO2() {
 		// Close stream here before destructing AudioInterfaceIO, so the mutexes are still valid when waiting to close.
@@ -53,6 +54,8 @@ struct AudioInterfaceIO2 : AudioIO {
 	void onCloseStream() override {
 		inputBuffer.clear();
 		outputBuffer.clear();
+		active = false;
+		module->lights[0].value = 0; // Because step() won't be called
 	}
 
 	void onChannelsChange() override {
@@ -89,6 +92,7 @@ struct AudioInterface2 : Module {
 
 	AudioInterface2() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
 		onSampleRateChange();
+		audioIO.module = this;
 	}
 
 	void step() override;
@@ -114,12 +118,8 @@ void AudioInterface2::step() {
 	*(audioIO.bufPtr+0) = clamp(inputs[AUDIO_INPUT + 0].value / 10.f, -1.f, 1.f);
 	*(audioIO.bufPtr+1) = clamp(inputs[AUDIO_INPUT + 1].value / 10.f, -1.f, 1.f);
 	audioIO.bufPtr += 2;
-	// printf("STEP\n");
-	return;
 
-	// Turn on light if at least one port is enabled in the nearby pair
-	for (int i = 0; i < AUDIO_INPUTS / 2; i++)
-		lights[INPUT_LIGHT + i].value = (audioIO.active && audioIO.numOutputs >= 2*i+1);
+	lights[INPUT_LIGHT + 0].value = (/*audioIO.active &&*/ audioIO.numOutputs > 0);
 }
 
 
@@ -135,7 +135,7 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		addInput(Port::create<PJ301MPort>(mm2px(Vec(6.5+3.7069211, 10+55.530807)), Port::INPUT, module, AudioInterface2::AUDIO_INPUT + 0));
 		addInput(Port::create<PJ301MPort>(mm2px(Vec(6.5+15.307249, 10+55.530807)), Port::INPUT, module, AudioInterface2::AUDIO_INPUT + 1));
 		
-		addChild(ModuleLightWidget::create<SmallLight<GreenLight>>(mm2px(Vec(12.524985, 54.577202)), module, AudioInterface2::INPUT_LIGHT + 0));
+		addChild(ModuleLightWidget::create<SmallLight<GreenLight>>(mm2px(Vec(19, 62)), module, AudioInterface2::INPUT_LIGHT + 0));
 
 		AudioWidget *audioWidget = Widget::create<AudioWidget>(mm2px(Vec(3.2122073, 14.837339)));
 		audioWidget->box.size = mm2px(Vec(34.5, 28));
