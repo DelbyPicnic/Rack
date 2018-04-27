@@ -17,6 +17,17 @@ ModuleWidget::ModuleWidget(Module *module) {
 ModuleWidget::~ModuleWidget() {
 	// Make sure WireWidget destructors are called *before* removing `module` from the rack.
 	disconnect();
+
+	// Remove lights
+	for (auto it = gRackWidget->lights.begin(); it != gRackWidget->lights.end();) {
+		if ((*it)->parent == this) {
+			(*it)->parent = NULL;
+			delete *it;
+			it = gRackWidget->lights.erase(it);
+		} else
+			it++;
+	}
+
 	// Remove and delete the Module instance
 	if (module) {
 		engineRemoveModule(module);

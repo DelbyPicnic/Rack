@@ -49,6 +49,10 @@ RackWidget::RackWidget() {
 }
 
 RackWidget::~RackWidget() {
+	// Without this, our lights vector will be destroyed first,
+	// and only then superclass will eventually destroy ModuleWidget instances
+	// that need the lights vector.
+	clearChildren();
 }
 
 void RackWidget::clear() {
