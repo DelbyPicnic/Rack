@@ -223,8 +223,6 @@ void SVGWidget::setSVG(std::shared_ptr<SVG> svg) {
 
 void SVGWidget::draw(NVGcontext *vg) {
 	if (svg && svg->handle) {
-		printf("draw svg\n");
-		// printf("drawing svg %f %f\n", box.size.x, box.size.y);
 		// nvgScissor(vg, 0, 0, box.size.x, box.size.y);
 		drawSVG(vg, svg->handle);
 		// nvgResetScissor(vg);	

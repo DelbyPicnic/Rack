@@ -19,7 +19,7 @@ void SVGScrew::draw(NVGcontext *vg) {
 		nvgRotate(vg, angle);
 		nvgTranslate(vg, -center.x, -center.y);
 	}
-	sw->draw(vg);
+	sw->drawCachedOrFresh(vg);
 }
 
 } // namespace rack
