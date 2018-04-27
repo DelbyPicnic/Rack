@@ -430,6 +430,7 @@ void engineRemoveWire(Wire *wire) {
 	assert(it != gWires.end());
 	// Set input to 0V
 	wire->inputModule->inputs[wire->inputId].value = 0.0;
+	memset(wire->inputModule->inputs[wire->inputId].queue, 0, sizeof(wire->inputModule->inputs[wire->inputId].queue));
 
 	// Remove the wire
 	m.lock();
