@@ -593,6 +593,7 @@ struct ScrewSilver : SVGScrew {
 	ScrewSilver() {
 		sw->setSVG(SVG::load(assetGlobal("res/ComponentLibrary/ScrewSilver.svg")));
 		box.size = sw->box.size;
+		angle = rand();
 	}
 };
 
@@ -600,6 +601,7 @@ struct ScrewBlack : SVGScrew {
 	ScrewBlack() {
 		sw->setSVG(SVG::load(assetGlobal("res/ComponentLibrary/ScrewBlack.svg")));
 		box.size = sw->box.size;
+		angle = rand();
 	}
 };
 
