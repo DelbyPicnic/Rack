@@ -428,19 +428,22 @@ void engineRemoveWire(Wire *wire) {
 	auto it = std::find(gWires.begin(), gWires.end(), wire);
 	auto it2 = std::find(wire->outputModule->outputs[wire->outputId].wires.begin(), wire->outputModule->outputs[wire->outputId].wires.end(), wire);
 	assert(it != gWires.end());
-	// Set input to 0V
-	wire->inputModule->inputs[wire->inputId].value = 0.0;
-	memset(wire->inputModule->inputs[wire->inputId].queue, 0, sizeof(wire->inputModule->inputs[wire->inputId].queue));
 
 	// Remove the wire
 	m.lock();
 	while(runningt)
 		cond2.wait(m);
 
+	// Set input to 0V
+	wire->inputModule->inputs[wire->inputId].value = 0.0;
+	memset(wire->inputModule->inputs[wire->inputId].queue, 0, sizeof(wire->inputModule->inputs[wire->inputId].queue));
+
 	gWires.erase(it);
 	wire->outputModule->outputs[wire->outputId].wires.erase(it2);
 	updateActive();
 	m.unlock();
+
+	printf("removed wire\n");
 }
 
 void engineSetParam(Module *module, int paramId, float value) {
