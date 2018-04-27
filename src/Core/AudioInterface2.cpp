@@ -135,7 +135,7 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		addInput(Port::create<PJ301MPort>(mm2px(Vec(6.5+3.7069211, 10+55.530807)), Port::INPUT, module, AudioInterface2::AUDIO_INPUT + 0));
 		addInput(Port::create<PJ301MPort>(mm2px(Vec(6.5+15.307249, 10+55.530807)), Port::INPUT, module, AudioInterface2::AUDIO_INPUT + 1));
 		
-		addChild(ModuleLightWidget::create<SmallLight<GreenLight>>(mm2px(Vec(20, 62)), module, AudioInterface2::INPUT_LIGHT + 0));
+		addChild(ModuleLightWidget::create<SmallLight<GreenLight>>(mm2px(Vec(19, 62)), module, AudioInterface2::INPUT_LIGHT + 0));
 
 		AudioWidget *audioWidget = Widget::create<AudioWidget>(mm2px(Vec(3.2122073, 14.837339)));
 		audioWidget->box.size = mm2px(Vec(34.5, 28));
