@@ -189,10 +189,8 @@ struct RackRail : TransparentWidget {
 };
 
 // Base class for panels - a cachable widget holding background and all but frequently updated widgets
-struct PanelBase : VirtualWidget {
-	PanelBase() {
-		canCache = true;
-	};
+struct PanelBase : FramebufferWidget {
+	virtual void setBackground(std::shared_ptr<SVG> svg) {};
 };
 
 // Panel showin a solid colour and/or an image
@@ -204,8 +202,7 @@ struct Panel : PanelBase {
 
 // SVG-based panel
 struct SVGPanel : PanelBase {
-	SVGPanel();
-	void setBackground(std::shared_ptr<SVG> svg);
+	void setBackground(std::shared_ptr<SVG> svg) override;
 };
 
 ////////////////////

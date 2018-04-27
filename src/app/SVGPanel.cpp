@@ -16,10 +16,6 @@ struct PanelBorder : TransparentWidget {
 	}
 };
 
-
-SVGPanel::SVGPanel() {
-}
-
 void SVGPanel::setBackground(std::shared_ptr<SVG> svg) {
 	SVGWidget *sw = new SVGWidget();
 	sw->setSVG(svg);
