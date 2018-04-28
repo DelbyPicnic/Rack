@@ -3,10 +3,9 @@
 
 namespace rack {
 
-std::string gApplicationName = "VCV Rack";
+std::string gApplicationName = "miRack";
 std::string gApplicationVersion = TOSTRING(VERSION);
-std::string gApiHost = "https://api.vcvrack.com";
-// std::string gApiHost = "http://localhost:8081";
+std::string gApiHost = "http://localhost:8081";
 
 RackWidget *gRackWidget = NULL;
 Toolbar *gToolbar = NULL;
