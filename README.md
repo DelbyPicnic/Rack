@@ -1,105 +1,77 @@
-# Rack
+# miRack
 
-*Rack* is the engine for the VCV open-source virtual modular synthesizer.
+**miRack** is a fork of [VCVRack](http://github.com/VCVRack/Rack) (an open-source virtual modular synthesizer) with optimisations and tweaks primarily targeting Raspberry Pi, ASUS Tinker Board and similar hardware. Can be used on desktop systems as well.
 
-![Rack screenshot](https://vcvrack.com/images/screenshot.png)
+**Rack** itself is the main application/engine/plugin host. See below for information about plugins implementing actual modules.
 
-This README includes instructions for building Rack from source. For information about the software, go to https://vcvrack.com/.
+miRack is a work in progress. Some features are broken or deliberately turned off. Read carefully below.
 
-## The [Issue Tracker](https://github.com/VCVRack/Rack/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) *is* the official developer's forum
+## Comparison to VCVRack
 
-Bug reports, feature requests, and even *questions/discussions* are welcome on the GitHub Issue Tracker for all VCVRack repos.
-However, please search before posting to avoid duplicates, and limit to one issue per post.
+* Reworked and greatly optimised user interface rendering.
 
-Please vote on feature requests by using the Thumbs Up/Down reaction on the first post.
+* Multithreaded audio/signal processing.
 
-I rarely accept code contributions to Rack itself, so please notify me in advance if you wish to send a pull request.
+* Individual plugins are forked and optimised if it is neccessary.
 
-## Setting up your development environment
+* Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valud output device.** This is likely to be improved in future but is not a high priority task at the moment.
 
-Rack's dependencies (GLEW, glfw, etc) do not need to be installed on your system, since specific versions are compiled locally during the build process. However, you need proper tools to build these dependencies.
+* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling.
 
-### Mac
+* Some of the visual effects are turned off or simplified. This may change in future, but in general due to constrained CPU resources, audio processing and UI performance is the main priority.
 
-Install [Xcode](https://developer.apple.com/xcode/).
-Using [Homebrew](https://brew.sh/), install the build dependencies.
-```
-brew install git cmake autoconf automake libtool
-```
+## Platforms
 
-### Windows
+Currently the development is done using ASUS Tinker Board, with Raspberry Pi 3 being the second main supported platform. There's a lot of similar ARM-based boards that should work too. On desktop, the development is done on macOS, and I guess Linux should be supported as well but it's not being tested.
 
-Install [MSYS2](http://www.msys2.org/) and launch the MinGW 64-bit shell (not the default MSYS shell).
-```
-pacman -S git make tar unzip mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake autoconf automake mingw-w64-x86_64-libtool
-```
+OpenGL ES will be used on ARM boards for for rendering, OpenGL will be used on desktops.
 
-### Linux
+### Performance
 
-On Arch Linux:
-```
-pacman -S git gcc make cmake tar unzip curl
-```
+ARM-based hardware is not able to run complex patches that are possible on desktop. Some modules may perform better and some worse. Only a few of the plugins have been checked for possible optimisations and optimised so far. See below and ensure to install an optimised version if it's available.
 
-Other distro build instructions coming soon.
+Currently, Rack will spawn 3 audio processing threads (because Raspberry Pi and Tinker Board have 4 CPU cores) and will attempt to assing higher priority to them (requires the user to have appropriate permissions). More details on configuring system for better performance and to ensure uninterrupted audio will be added later.
 
-## Building
+### Tinker Board Notes
 
-*If the build fails for you, please report the issue with a detailed error message to help the portability of Rack.*
+When configuring Audio Out module, choose ... for HDMI output, and ... for 3.5mm jack output.
 
-Clone this repository with `git clone https://github.com/VCVRack/Rack.git` and `cd Rack`.
-Make sure there are no spaces in your path, as this breaks many build systems.
+Due to some issues with Xorg, the framerate is less than the hardware can achive. Support for running without an X server is in development.
 
-The `master` branch contains the latest public code and breaks its plugin [API](https://en.wikipedia.org/wiki/Application_programming_interface) and [ABI](https://en.wikipedia.org/wiki/Application_binary_interface) frequently.
-If you wish to build a previous version of Rack which is API/ABI-compatible with an official Rack release, check out the desired branch with `git checkout v0.5` for example.
+### Raspberry Pi Notes
 
-Clone submodules.
+GL driver must be enabled either manually via `config.txt` or using `raspi-config` (Advanced Options -> GL Driver).
 
-	git submodule update --init --recursive
+Right click the volume icon on the desktop taskbar to switch between HDMI and 3.5mm jack audio output.
 
-Build dependencies locally.
-You may use make's `-j$(nproc)` flag to parallelize builds across all your CPU cores.
+## Plugins
 
-	make dep
+VCVRack plugins are source-compatible with miRack. There may be issues with individual plugins, but the ultimate goal is to maintain source code compatibility. However plugins are not binary-compatible, so closed-source plugins are not supported. This is unlikely to change in the future, although existing binaries would not work on ARM-based boards anyway.
 
-You may use `make dep RTAUDIO_ALL_APIS=1` to attempt to build with all audio driver APIs enabled for your operating system, although this is unsupported.
+Some plugins have been forked to include optimisations and tweaks. See (VCVRack plugin list](https://vcvrack.com/plugins.html) and Installing Plugins section below.
 
-You should see a message that all dependencies built successfully.
+## Building & Running
 
-Build Rack.
+When cloning this repository, use `--recursive` option, or do `git submodule update --init --recursive`.
 
-	make
+Assuming you have the basic tools (GCC and make on Linux, Xcode and [Homebrew](http://brew.sh) on macOS), execute `make prereq`. This will attempt to automatically install the required packages on Debian-based distros (Tinker OS and Raspbian) and macOS.
 
-Run Rack.
+Build dependencies with `make dep`, and then build Rack with `make`.
 
-	make run
+To run Rack, execute `make run`.
 
-## Building plugins
+## Installing Plugins
 
-Be sure to check out and build the version of Rack you wish to build your plugins against.
+### Automatic
 
-You must clone the plugin in Rack's `plugins/` directory, e.g.
+### Manual
 
-	cd plugins
-	git clone https://github.com/VCVRack/Fundamental.git
+Clone a plugin respository into a folder inside `plugins` folder. Use `--recursive` option, or do `git submodule update --init --recursive` afterwards.
 
-Clone submodules.
-
-	cd Fundamental
-	git submodule update --init --recursive
-
-Build plugin.
-
-	make
+To build, execute `make -C plugins/PLUGIN_FOLDER`. No installation is required.
 
 ## Licenses
 
-All **source code** in this repository is licensed under [BSD-3-Clause](LICENSE.txt) by [Andrew Belt](https://andrewbelt.name/).
+All **source code** in this repository is licensed under [BSD-3-Clause](LICENSE.txt).
 
 **Component Library graphics** in `res/ComponentLibrary` are licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) by [Grayscale](http://grayscale.info/). Commercial plugins must request a commercial license to use Component Library graphics by emailing contact@vcvrack.com.
-
-**Core** panel graphics in `res/Core` are copyright © 2017 Grayscale. You may not create derivative works of Core panels.
-
-The **VCV logo and icon** are copyright © 2017 Andrew Belt and may not be used in derivative works.
-
-The **"VCV" name** is trademarked and may not be used for unofficial products. However, it is acceptable to use the phrase "for VCV Rack" for promotion of your plugin. For all other purposes, email contact@vcvrack.com.

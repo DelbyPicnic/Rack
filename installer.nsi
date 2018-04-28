@@ -1,16 +1,16 @@
 
 !include "MUI2.nsh"
 
-Name "VCV Rack"
+Name "miRack"
 OutFile "Rack-setup.exe"
 SetCompressor "bzip2"
 CRCCheck On
 
 ;Default installation folder
-InstallDir "$PROGRAMFILES\VCV"
+InstallDir "$PROGRAMFILES\miRack"
 
 ;Get installation folder from registry if available
-InstallDirRegKey HKCU "Software\VCV Rack" ""
+InstallDirRegKey HKCU "Software\miRack" ""
 
 ;Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -48,18 +48,18 @@ RequestExecutionLevel admin
 
 
 
-Section "!VCV Rack" VCVRACK
+Section "!miRack" MIRACK
 	SetOutPath "$INSTDIR"
 
 	File /r "dist\Rack"
 
 	;Store installation folder
-	WriteRegStr HKCU "Software\VCV Rack" "" $INSTDIR
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack" "DisplayName" "VCV Rack"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack" "UninstallString" "$\"$INSTDIR\UninstallRack.exe$\""
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack" "QuietUninstallString" "$\"$INSTDIR\UninstallRack.exe$\" /S"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack" "InstallLocation" "$\"$INSTDIR$\""
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack" "Publisher" "VCV"
+	WriteRegStr HKCU "Software\miRack" "" $INSTDIR
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack" "DisplayName" "miRack"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack" "UninstallString" "$\"$INSTDIR\UninstallRack.exe$\""
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack" "QuietUninstallString" "$\"$INSTDIR\UninstallRack.exe$\" /S"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack" "InstallLocation" "$\"$INSTDIR$\""
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack" "Publisher" "mifki"
 
 	;Create uninstaller
 	WriteUninstaller "$INSTDIR\UninstallRack.exe"
@@ -68,7 +68,7 @@ Section "!VCV Rack" VCVRACK
 	CreateDirectory "$SMPROGRAMS"
 	; Set working directory of shortcut
 	SetOutPath "$INSTDIR\Rack"
-	CreateShortcut "$SMPROGRAMS\VCV Rack.lnk" "$INSTDIR\Rack\Rack.exe"
+	CreateShortcut "$SMPROGRAMS\miRack.lnk" "$INSTDIR\Rack\Rack.exe"
 SectionEnd
 
 
@@ -81,8 +81,8 @@ Section "Uninstall"
 	Delete "$INSTDIR\UninstallRack.exe"
 	RMDir "$INSTDIR"
 
-	Delete "$SMPROGRAMS\VCV Rack.lnk"
+	Delete "$SMPROGRAMS\miRack.lnk"
 
-	DeleteRegKey /ifempty HKCU "Software\VCV Rack"
-	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VCV Rack"
+	DeleteRegKey /ifempty HKCU "Software\miRack"
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\miRack"
 SectionEnd
