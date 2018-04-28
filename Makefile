@@ -60,6 +60,37 @@ endif
 
 all: $(TARGET)
 
+PREREQS = cmake autoconf automake pkgconfig libtool
+ifeq ($(ARCH), lin)
+	PREREQS += libgtk2.0-dev libgles2-mesa-dev
+	APT = $(shell which apt)
+endif
+ifeq ($(ARCH), mac)
+	PREREQS += 
+	BREW = $(shell which brew)
+endif
+
+prereq:
+ifeq ($(ARCH), lin)
+ifeq ($(APT),)
+	@echo Install the following packages or their equivalents for your OS: $(PREREQS)
+else
+	@echo Will install using apt: $(PREREQS)
+	@echo -----------------------
+	sudo apt install $(PREREQS)
+endif
+endif
+
+ifeq ($(ARCH), mac)
+ifeq ($(BREW),)
+	@echo Install Homebrew first from http://brew.sh
+else
+	@echo Will install using Homebrew: $(PREREQS)
+	@echo ----------------------------
+	brew install $(PREREQS)
+endif
+endif
+
 dep:
 	$(MAKE) -C dep
 
@@ -201,22 +232,6 @@ ifeq ($(ARCH), win)
 	cp libRack.a dist/Rack-SDK/
 endif
 	cd dist && zip -5 -r Rack-SDK-$(VERSION)-$(ARCH).zip Rack-SDK
-
-
-# Obviously this will only work if you have the private keys to my server
-UPLOAD_URL := vortico@vcvrack.com:files/
-upload: dist distplugins
-ifeq ($(ARCH), mac)
-	rsync dist/*.dmg $(UPLOAD_URL) -zP
-endif
-ifeq ($(ARCH), win)
-	rsync dist/*.exe $(UPLOAD_URL) -P
-	rsync dist/*.zip $(UPLOAD_URL) -P
-endif
-ifeq ($(ARCH), lin)
-	rsync dist/*.zip $(UPLOAD_URL) -zP
-endif
-	rsync plugins/*/dist/*.zip $(UPLOAD_URL) -zP
 
 
 # Plugin helpers

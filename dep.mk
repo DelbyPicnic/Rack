@@ -4,9 +4,8 @@ DEP_LOCAL ?= .
 DEP_FLAGS += -g -O3
 
 ifneq (,$(findstring arm,$(CPU)))
-#	DEP_FLAGS += -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
-	DEP_FLAGS += -march=armv7 -mtune=cortex-a17 -mfpu=neon -mfloat-abi=hard -ffast-math -fno-finite-math-only
-	DEP_FLAGS += -I$(RACK_DIR)/dep/optimized-routines/build/include -I$(RACK_DIR)/dep/math-neon
+	DEP_FLAGS += $(ARM_CPU_FLAGS)
+	DEP_FLAGS += -I$(RACK_DIR)/dep/optimized-routines/build/include -I$(RACK_DIR)/dep/math-neon/src
 else
 	DEP_FLAGS += -march=nocona
 endif

@@ -41,12 +41,7 @@ ifeq ($(ARCH), win)
 	openssl = bin/libssl-1_1-x64.dll
 endif
 
-nanovg = include/nanovg.h
-nanosvg = include/nanosvg.h
-oui-blendish = include/blendish.h
-osdialog = include/osdialog.h
-
-DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(nanovg) $(nanosvg) $(oui-blendish) $(osdialog) $(mathlib)
+DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(mathlib)
 include $(RACK_DIR)/dep.mk
 
 
