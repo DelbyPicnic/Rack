@@ -1,7 +1,11 @@
 #pragma once
 #include "widgets.hpp"
-#define GL_GLEXT_PROTOTYPES 1
-#define GLFW_INCLUDE_GLEXT
+#ifdef ARCH_WIN
+	#include <GL/glew.h>
+#else
+	#define GL_GLEXT_PROTOTYPES 1
+	#define GLFW_INCLUDE_GLEXT
+#endif
 #include <GLFW/glfw3.h>
 
 #ifdef ARCH_MAC

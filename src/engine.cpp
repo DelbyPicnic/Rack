@@ -73,8 +73,7 @@ void Wire::step() {
 }
 
 void Wire::stepMultiple(int steps) {
-    for (int i = 0; i < steps;i++)
-    {
+    for (int i = 0; i < steps; i++) {
         float value = outputModule->outputs[outputId].queue[i];
         inputModule->inputs[inputId].queue[i] = value;
     }
@@ -85,23 +84,21 @@ void do_work(int qq)
     pthread_t tID = pthread_self();
     sched_param prio = { 15 };
     if (!pthread_setschedparam(tID, SCHED_RR, &prio))
-        printf("Set higher priority for audio thread.\n");
+        info("Set higher priority for audio thread.");
     else
-        printf("NOT set higher priority for audio thread.\n");
+        info("NOT set higher priority for audio thread.");
 
-    // int qq=0;
-    // printf("MM? %d\n",qq);
     m.lock();
     while(1)
     {
-        // printf("READY %d\n",qq);
-        cond.wait(m);
+        do
+            cond.wait(m);
+        while (runningt <= 0);
         m.unlock();
-        // printf("WAKE %d\n",qq);
+
         UOW item;
         while(q.try_dequeue(item))
         {
-            // printf("%d deq %p %d %d\n", qq, item.module, item.step, item.step2);
             Module *module = item.module;
             for (int step = item.step; step < item.step2; step++)
             {
@@ -112,29 +109,21 @@ void do_work(int qq)
                     {
                         item.step = step;
                         q.enqueue(*ptoks[qq], item);
-                        // printf("%d enq %p %d %d\n", qq, item.module, item.step, item.step2);
                         goto nope;
                     }
                     in.value = *(volatile float*)(in.queue + step);
-                    // if (in.active)
-                    //  printf("%d :: read %p %d @ %d = %f\n", qq, module, id, step, in.value);
                     id++;
                 }
                 
-            // printf("work %p %d\n", item.module, step);
                 module->step();
 
                 for (auto &out : module->outputs)
                 {
-                    //out.queue[i] = out.value;
                     for (Wire *w : out.wires)
                     {
-                        // if (w->inputModule == outm)
-                        //  printf("wrote OUT %d\n",step+1);
                         *(volatile float*)(w->inputModule->inputs[w->inputId].queue + step + 1) = out.value;
                         __sync_synchronize();
                         w->inputModule->inputs[w->inputId].pos = step+1;
-                        // printf("%d :: wrote %p to %p %d @ %d = %f\n", qq, module, w->inputModule, w->inputId, w->inputModule->inputs[w->inputId].pos, out.value);
                     }
                 }                   
             }
@@ -144,10 +133,9 @@ void do_work(int qq)
 
         m.lock();
         runningt--;
-        // printf("FINISHED %d\n",qq);
+        __sync_synchronize();
         cond2.notify_all();
     }
-    // printf("EXITED %d\n",qq);
 }
 
 void engineInit() {
@@ -159,7 +147,7 @@ void engineInit() {
         ptoks[i] = new moodycamel::ProducerToken(q);
         (new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
     }
-    printf("Started %d DSP threads\n", numWorkers);
+    info("Started %d DSP threads", numWorkers);
 }
 
 void engineDestroy() {
@@ -220,9 +208,9 @@ void engineStep() {
 void engineStepMT(int steps) {
     if (smoothModule) {
         float value = smoothModule->params[smoothParamId].value;
-        const float lambda = 60.0; // decay rate is 1 graphics frame
+        const float lambda = 30.0; // decay rate is 1 graphics frame
         float delta = smoothValue - value;
-        float newValue = value + delta * lambda * sampleTime*steps;
+        float newValue = value + delta * lambda * sampleTime * steps;
         if (value == newValue) {
             // Snap to actual smooth value if the value doesn't change enough (due to the granularity of floats)
             smoothModule->params[smoothParamId].value = smoothValue;
@@ -233,65 +221,53 @@ void engineStepMT(int steps) {
         }
     }
 
-    // Step modules
-    // printf("---\n");
+    // Enqueue module steps
     m.lock();
     Module *outm = NULL;
     for (Module *module : gModules) {
-        if(0&&module->outputs.size() == 0 && !outm)
+        /*if(module->outputs.size() == 0 && !outm)
         {
             for (Input &in : module->inputs)
                 in.queue[0] = in.queue[steps];
             outm = module;
             continue;
-        }
-        bool good = true;
-        for (Input &in : module->inputs)
-        {
+        }*/
+
+        for (Input &in : module->inputs) {
             in.pos = in.active ? 0 : steps-1;
             in.queue[0] = in.queue[steps];
-            // if (in.active)
-            //  good = false;
         }
-        module->curstep = 0;
-        UOW uow = { module, 0, good ? steps : 1 };
+
+        UOW uow = { module, 0, steps };
         q.enqueue(*ptoks[0], uow);
     }
 
     runningt = numWorkers;
+    __sync_synchronize();
     m.unlock();
     cond.notify_all();
 
-    // printf("WAITING\n");
-    // m.lock();
-    // while(runningt)
-    //  cond2.wait(m);
-    // m.unlock();
-
-    // printf("DONE\n");
-    if (outm)
+    /*if (outm)
     {
-        // printf("OUT\n");
         for (int step = 0; step < steps; step++)
         {
             for (auto &in : outm->inputs)
                 in.value = in.queue[step];
             outm->step();
         }
-    }
+    }*/
 }
 
 void engineWaitMT() {
     static bool primed = false;
 
-    if (!primed)
-    {
+    if (!primed) {
         primed = true;
         return;
     }
 
     m.lock();
-    while(runningt)
+    while(runningt > 0)
         cond2.wait(m);
     m.unlock(); 
 }
