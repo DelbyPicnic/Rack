@@ -202,6 +202,13 @@ SVGWrapper& SVGWrapper::operator =(std::shared_ptr<SVG> _svg) {
 	return *this;
 };
 
+SVGWrapper& SVGWrapper::operator =(std::nullptr_t _svg) {
+	svg = _svg;
+	widget->dirty = true;
+
+	return *this;
+};
+
 SVGWidget::SVGWidget() : svg(this) {
 	canCache = true;
 };

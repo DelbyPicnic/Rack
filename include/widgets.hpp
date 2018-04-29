@@ -276,6 +276,7 @@ struct SVGWrapper {
 	}
 
 	SVGWrapper& operator =(std::shared_ptr<SVG> svg);
+	SVGWrapper& operator =(std::nullptr_t svg);
 
 	operator SVG*() {
 		return svg.get();
