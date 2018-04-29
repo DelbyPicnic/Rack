@@ -1,61 +1,61 @@
-Aaron-MicroTools | a2aaron/VCVMicroTools | MicroTools
-Alikins | alikins/Alikins-rack-plugins | Alikins
-alto777_LFSR | alto777/LFSR | Linear Feedback Shift Register synth sequencer(s)
-AmalgamatedHarmonics | jhoar/AmalgamatedHarmonics | Amalgamated Harmonics
-ArableInstruments | adbrant/ArableInstruments | Arable Instruments
-AS | mi-rack/AS | AS
-AudibleInstruments | VCVRack/AudibleInstruments | Based on Mutable Instruments Eurorack modules.
-Autodafe | mi-rack/Autodafe | Incomplete.
-Autodafe-Drums | mi-rack/Autodafe-Drums | 8 modules containing samples of various drum machines and a 8 channel mixer. Currently have some UI issues.
-BaconMusic | baconpaul/BaconPlugs | Bacon Music
-Befaco | VCVRack/Befaco | Based on Befaco Eurorack modules.
-Bidoo | sebastien-bouffier/Bidoo | Bidoo's plugins
-Bogaudio | bogaudio/BogaudioModules | Bogaudio Modules
-CastleRocktronics | KieranPringle/CastleRocktronics | Castle Rocktronics
-cf | cfoulc/cf | cf
-CharredDesert | JerrySievert/CharredDesert | Charred Desert
-com-soundchasing-stochasm | teletypist/stochasm | Stochasm - Stochastic Computing-style Bitstream Synthesis Modules
-dBiz | dBiz/dBiz | dBiz Modules
-DHE-Modules | dhemery/DHE-Modules | DHE Modules
-DrumKit | JerrySievert/DrumKit | Drum Modules
-ErraticInstruments | bafonso/Erratic | Modules designed for using "MIDI Polyphonic Expression" (MPE) controllers.
-ESeries | VCVRack/ESeries | Based on Synthesis Technology Eurorack modules.
-FrozenWasteland | mi-rack/FrozenWasteland | A collection of unusual plugins that will add a certain coolness to your patches.
-Fundamental | VCVRack/Fundamental | The Fundamental plugin pack gives you a basic foundation to create simple synthesizers, route and analyze signals.
-Gratrix | gratrix/vcv-gratrix | Gratrix Modules
-HetrickCV | mhetrick/hetrickcv | HetrickCV is a collection of modules by Michael Hetrick of Unfiltered Audio. Many of these are ported from Euro Reakt for Reaktor 6.
-ImpromptuModular | MarcBoule/ImpromptuModular | Impromptu Modular
-IO-Simple | IohannRabeson/VCVRack-Simple | Clock divider, Clock, Trigger
-JW-Modules | mi-rack/JW-Modules | JW-Modules
-KarateSnoopy | KarateSnoopy/vcv-karatesnoopy | KarateSnoopy's 2D grid sequencer
-Koralfx-Modules | koralfx/Koralfx-Modules | Koralfx modules 
-LindenbergResearch | lindenbergresearch/LRTRack | Lindenberg Research Tec. modules
-LOGinstruments | leopard86/LOGinstruments | LOGinstruments
-luckyxxl | luckyxxl/vcv_luckyxxl | luckyxxl
-mental | Strum/Strums_Mental_VCV_Modules | Strum's Mental Module Suite. The modules are mostly utilities, which you can never have enough of, and I have focused on keeping them small to pack a lot of functionality into as little possible screen area.
-ML_modules | martin-lueders/ML_modules | This package will contribute some utiliy modules, such as voltage quantizers, trigger utilities, etc.
-moDllz | dllmusic/moDllz | moDllz
-modular80 | cschol/modular80 | modular80
-MrLumps | djpeterso23662/MrLumps | MrLumps
-mscHack | mi-rack/mscHack | mscHack
-mtsch-plugins | mtsch/mtsch-vcvrack-plugins | mtsch modules
-NauModular | naus3a/NauModular | NauModular
-Nohmad | joelrobichaud/Nohmad | Nohmad
-NonLinearInstruments | NonLinearInstruments/NLNRI_VCVRackPlugins | Nonlinear instruments
-Ohmer | DomiKamu/Ohmer-Modules | Flagship of Ohmer Modules is KlokSpid (pronunciation of "clock speed"), a modern "CPU-controlled"-style clocking module, designed for any rack requiring BPM-based clock sources and/or clock modulators (clock multipliers and dividers).
-PG-Instruments | imekon/PG-Instruments | An implementation of SEQ-3 with 16 steps instead of 8
-PvC | phdsg/PvC | PvC, most of them are simple utilities.
-Qwelk | raincheque/qwelk | qwelk
-RJModules | Miserlou/RJModules | So far, mostly simple utilities and effects, hopefully some more interesting ones soon!
-RODENTMODULES | RODENTCAT/RODENTMODULES | RODENTMODULES
-s-ol | s-ol/vcvmods | Designed for Oscilloscope Music
-SonusModular | https://gitlab.com/sonusdept/sonusmodular | Sonus Modular
-Southpole | gbrandt1/southpole-vcvrack | Southpole Modules
-squinkylabs-plug1 | squinkylabs/SquinkyVCV | This project is a frequency shifter module.  Over time project is expected to grow from a single module to a collection of several modules.
-SubmarineFree | david-c14/SubmarineFree | SubmarineFree
-SubmarinePrototype | david-c14/submarine-prototype-vcv | submarine-prototype
-SynthKit | https://github.com/JerrySievert/SynthKit | A series of modules for VCVRack. This are meant to be basic building blocks of synthesis, that will help you create bigger and more complicated synthesizers.
-TheXOR | The-XOR/RackPlugins | The XOR
-tnorris-BostonBrightonModules | tnorris/BBI | Boston Brighton Instruments
-trowaSoft | j4s0n-c/trowaSoft-VCV | trowaSoft Modules. Currently have some UI issues.
-Valley | ValleyAudio/ValleyRackFree | ValleyRack Free
+Aaron-MicroTools | a2aaron/VCVMicroTools | ? | MicroTools
+Alikins | alikins/Alikins-rack-plugins | ? | Alikins
+alto777_LFSR | alto777/LFSR | ? | Linear Feedback Shift Register synth sequencer(s)
+AmalgamatedHarmonics | jhoar/AmalgamatedHarmonics | ? | Amalgamated Harmonics
+ArableInstruments | adbrant/ArableInstruments | ? | Arable Instruments
+AS | mi-rack/AS | + | AS
+AudibleInstruments | VCVRack/AudibleInstruments | + | Based on Mutable Instruments Eurorack modules.
+Autodafe | mi-rack/Autodafe | ! | Incomplete.
+Autodafe-Drums | mi-rack/Autodafe-Drums | ! | 8 modules containing samples of various drum machines and a 8 channel mixer. Currently have some UI issues.
+BaconMusic | baconpaul/BaconPlugs | ? | Bacon Music
+Befaco | VCVRack/Befaco | ~ | Based on Befaco Eurorack modules.
+Bidoo | sebastien-bouffier/Bidoo | ? | Bidoo's plugins
+Bogaudio | bogaudio/BogaudioModules | ? | Bogaudio Modules
+CastleRocktronics | KieranPringle/CastleRocktronics | ? | Castle Rocktronics
+cf | cfoulc/cf | ~ | cf
+CharredDesert | JerrySievert/CharredDesert | ? | Charred Desert
+com-soundchasing-stochasm | teletypist/stochasm | ? | Stochasm - Stochastic Computing-style Bitstream Synthesis Modules
+dBiz | dBiz/dBiz | ? | dBiz Modules
+DHE-Modules | dhemery/DHE-Modules | ? | DHE Modules
+DrumKit | JerrySievert/DrumKit | ? | Drum Modules
+ErraticInstruments | bafonso/Erratic | ? | Modules designed for using "MIDI Polyphonic Expression" (MPE) controllers.
+ESeries | VCVRack/ESeries | ~ | Based on Synthesis Technology Eurorack modules.
+FrozenWasteland | mi-rack/FrozenWasteland | ? | A collection of unusual plugins that will add a certain coolness to your patches.
+Fundamental | VCVRack/Fundamental | + | The Fundamental plugin pack gives you a basic foundation to create simple synthesizers, route and analyze signals.
+Gratrix | gratrix/vcv-gratrix | ? | Gratrix Modules
+HetrickCV | mhetrick/hetrickcv | ? | HetrickCV is a collection of modules by Michael Hetrick of Unfiltered Audio. Many of these are ported from Euro Reakt for Reaktor 6.
+ImpromptuModular | MarcBoule/ImpromptuModular | ? | Impromptu Modular
+IO-Simple | IohannRabeson/VCVRack-Simple | ? | Clock divider, Clock, Trigger
+JW-Modules | mi-rack/JW-Modules | ! | JW-Modules
+KarateSnoopy | KarateSnoopy/vcv-karatesnoopy | ? | KarateSnoopy's 2D grid sequencer
+Koralfx-Modules | koralfx/Koralfx-Modules | ? | Koralfx modules 
+LindenbergResearch | lindenbergresearch/LRTRack | ?  | Lindenberg Research Tec. modules
+LOGinstruments | leopard86/LOGinstruments | ? | LOGinstruments
+luckyxxl | luckyxxl/vcv_luckyxxl | ? | luckyxxl
+mental | Strum/Strums_Mental_VCV_Modules | ? | Strum's Mental Module Suite. The modules are mostly utilities, which you can never have enough of, and I have focused on keeping them small to pack a lot of functionality into as little possible screen area.
+ML_modules | martin-lueders/ML_modules | ? | This package will contribute some utiliy modules, such as voltage quantizers, trigger utilities, etc.
+moDllz | dllmusic/moDllz | ? | moDllz
+modular80 | cschol/modular80 | ? | modular80
+MrLumps | djpeterso23662/MrLumps | ? | MrLumps
+mscHack | mi-rack/mscHack | ~ | mscHack
+mtsch-plugins | mtsch/mtsch-vcvrack-plugins | ? | mtsch modules
+NauModular | naus3a/NauModular | ? | NauModular
+Nohmad | joelrobichaud/Nohmad | ? | Nohmad
+NonLinearInstruments | NonLinearInstruments/NLNRI_VCVRackPlugins | ? | Nonlinear instruments
+Ohmer | DomiKamu/Ohmer-Modules | ? | Flagship of Ohmer Modules is KlokSpid (pronunciation of "clock speed"), a modern "CPU-controlled"-style clocking module, designed for any rack requiring BPM-based clock sources and/or clock modulators (clock multipliers and dividers).
+PG-Instruments | imekon/PG-Instruments | ? | An implementation of SEQ-3 with 16 steps instead of 8
+PvC | phdsg/PvC | ? | PvC, most of them are simple utilities.
+Qwelk | raincheque/qwelk | ? | qwelk
+RJModules | Miserlou/RJModules | ? | So far, mostly simple utilities and effects, hopefully some more interesting ones soon!
+RODENTMODULES | RODENTCAT/RODENTMODULES | ? | RODENTMODULES
+s-ol | s-ol/vcvmods | ? | Designed for Oscilloscope Music
+SonusModular | https://gitlab.com/sonusdept/sonusmodular | ? | Sonus Modular
+Southpole | gbrandt1/southpole-vcvrack | ? | Southpole Modules
+squinkylabs-plug1 | squinkylabs/SquinkyVCV | ? | This project is a frequency shifter module.  Over time project is expected to grow from a single module to a collection of several modules.
+SubmarineFree | david-c14/SubmarineFree | ? | SubmarineFree
+SubmarinePrototype | david-c14/submarine-prototype-vcv | ? | submarine-prototype
+SynthKit | https://github.com/JerrySievert/SynthKit | ? | A series of modules for VCVRack. This are meant to be basic building blocks of synthesis, that will help you create bigger and more complicated synthesizers.
+TheXOR | The-XOR/RackPlugins | ? | The XOR
+tnorris-BostonBrightonModules | tnorris/BBI | ? | Boston Brighton Instruments
+trowaSoft | j4s0n-c/trowaSoft-VCV | - | trowaSoft Modules. Currently have some UI issues.
+Valley | ValleyAudio/ValleyRackFree | ? | ValleyRack Free
