@@ -66,9 +66,9 @@ To run Rack, execute `make run`.
 
 ### Automatic
 
-There's a list of plugins that can be viewed by executing `make list-plugins`. To install a plugin, execute `make +PluginSlug`. You will get plugin slugs from the list, and also they are shown by Rack when you try to open a patch that uses modules from missing plugins.
+There's a list of plugins that can be viewed by executing `make list-plugins`. To install plugins, execute `make +PluginSlug +PluginSlug ...`. You will get the slugs from the list, and also they are shown by Rack when you try to open a patch that uses modules from missing plugins. Also, you can install all plugins at once with `make +all`.
 
-Again, most of the plugins have not been tested and may or may not be usable on ARM hardware in their current states (and some may not even build).
+Again, most of the plugins have not been tested and may or may not be usable on ARM hardware in their current states (and some may fail to build).
 
 Installing plugins this way ensures that an optimised version will be installed if it's available.
 
