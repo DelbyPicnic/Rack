@@ -31,7 +31,7 @@ ifneq (,$(findstring arm,$(CPU)))
 	LDFLAGS += -lGLESv2 dep/optimized-routines/lib/libmathlib_static.a
 else
 	LDFLAGS += -lGL
-endif		
+endif
 
 	TARGET := Rack
 endif
@@ -63,13 +63,18 @@ all: $(TARGET)
 	@echo Rack built. Now type \"make run\".
 	@echo ---
 
-PREREQS = cmake autoconf automake pkgconfig libtool
+PREREQS = cmake autoconf automake pkg-config libtool
 ifeq ($(ARCH), lin)
-	PREREQS += libgtk2.0-dev libgles2-mesa-dev
+	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound-dev
+ifneq (,$(findstring arm,$(CPU)))
+	PREREQS += libmpfr-dev libmpc-dev libgles2-mesa-dev
+else
+	PREREQS += libgl1-mesa-dev
+endif
 	APT = $(shell which apt)
 endif
 ifeq ($(ARCH), mac)
-	PREREQS += 
+	PREREQS +=
 	BREW = $(shell which brew)
 endif
 

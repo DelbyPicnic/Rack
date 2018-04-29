@@ -3,6 +3,9 @@
 #ifdef ARCH_WIN
 	#include <GL/glew.h>
 #else
+#if (defined(__arm__) || defined(__aarch64__))
+        #define GLFW_INCLUDE_ES2
+#endif
 	#define GL_GLEXT_PROTOTYPES 1
 	#define GLFW_INCLUDE_GLEXT
 #endif
