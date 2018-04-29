@@ -7,11 +7,11 @@ ifneq (,$(findstring linux,$(MACHINE)))
 ifneq (,$(findstring arm,$(CPU)))
 	BOARD = $(shell cat /sys/firmware/devicetree/base/model)
 
-ifneq (,$(findstring Raspberry,$(BOARD)))
+ifneq (,$(findstring Raspberry Pi 3,$(BOARD)))
 	ARM_CPU_FLAGS += -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon -mfloat-abi=hard
 endif
 
-ifneq (,$(findstring Tinker,$(BOARD)))
+ifneq (,$(findstring Tinker Board,$(BOARD)))
 	ARM_CPU_FLAGS = -march=armv7 -mtune=cortex-a17 -mfpu=neon -mfloat-abi=hard
 endif
 endif
