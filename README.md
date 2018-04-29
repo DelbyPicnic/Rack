@@ -12,7 +12,7 @@ miRack is a work in progress. Some features are broken or deliberately turned of
 
 * Multithreaded audio/signal processing.
 
-* Individual plugins are forked and optimised if it is neccessary.
+* Individual plugins are being forked and optimised if it is neccessary.
 
 * Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valud output device.** This is likely to be improved in future but is not a high priority task at the moment.
 
@@ -58,11 +58,21 @@ Assuming you have the basic tools (GCC and make on Linux, Xcode and [Homebrew](h
 
 Build dependencies with `make dep`, and then build Rack with `make`.
 
+Install the Fundamental module pack with `make +Fundamental`.
+
 To run Rack, execute `make run`.
 
 ## Installing Plugins
 
 ### Automatic
+
+There's a list of plugins that can be viewed by executing `make list-plugins`. To install a plugin, execute `make +PluginSlug`. You will get plugin slugs from the list, and also they are shown by Rack when you try to open a patch that uses modules from missing plugins.
+
+Again, most of the plugins have not been tested and may or may not be usable on ARM hardware in their current states (and some may not even build).
+
+Installing plugins this way ensures that an optimised version will be installed if it's available.
+
+Also, since miRack is under active development, plugins need to be rebuilt when miRack is updated. This can be done for all installed plugins at once by executing `make allplugins`.
 
 ### Manual
 
