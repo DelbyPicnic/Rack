@@ -23,8 +23,6 @@ list-plugins:
 rebuild-plugins:
 	for f in plugins/*; do $(MAKE) -C "$$f"; done
 
-#ALL_PLUGINS = $(shell awk -F ' *\\| *' '{ if(match($$1,"^\#")) next; printf "+%s ", $$1 }' plugin-list.txt)
-
 +all:
 	for slug in $$(awk -F ' *\\| *' '{ if(match($$1,"^#")) next; print "+" $$1 }' plugin-list.txt) ; do $(MAKE) $$slug ; done
 
@@ -40,3 +38,4 @@ PLUGIN_URL = $(strip $(shell echo "$(PLUGIN)" | cut -d "|" -f 2 ))
 +%:
 	@if [ ! -n "$(PLUGIN_DIR)" ] ; then echo --- ; echo "No such plugin: $*" ; echo "Type \"make list-plugins\" for a list of plugins known to this build script." ; echo --- ; false ; else true ; fi
 	URL="$(PLUGIN_URL)" DIR="$(PLUGIN_DIR)" $(MAKE) plugin
+	
