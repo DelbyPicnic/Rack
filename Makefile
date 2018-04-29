@@ -59,6 +59,9 @@ endif
 
 
 all: $(TARGET)
+	@echo ---
+	@echo Rack built. Now type \"make run\".
+	@echo ---
 
 PREREQS = cmake autoconf automake pkgconfig libtool
 ifeq ($(ARCH), lin)
@@ -76,8 +79,11 @@ ifeq ($(APT),)
 	@echo Install the following packages or their equivalents for your OS: $(PREREQS)
 else
 	@echo Will install using apt: $(PREREQS)
-	@echo -----------------------
+	@echo ---
 	sudo apt install $(PREREQS)
+	@echo ---
+	@echo Prerequisites installed. Now type \"make dep\".
+	@echo ---
 endif
 endif
 
@@ -86,13 +92,19 @@ ifeq ($(BREW),)
 	@echo Install Homebrew first from http://brew.sh
 else
 	@echo Will install using Homebrew: $(PREREQS)
-	@echo ----------------------------
+	@echo ---
 	brew install $(PREREQS)
+	@echo ---
+	@echo Prerequisites installed. Now type \"make dep\".
+	@echo ---
 endif
 endif
 
 dep:
 	$(MAKE) -C dep
+	@echo ---
+	@echo Dependencies built. Now type \"make\".
+	@echo ---
 
 run: $(TARGET)
 ifeq ($(ARCH), lin)
@@ -247,5 +259,7 @@ distplugins:
 
 plugins:
 	for f in plugins/*; do (cd "$$f" && ${CMD}); done
+
+include plugin-list.mk
 
 .PHONY: all dep run debug clean dist allplugins cleanplugins distplugins plugins

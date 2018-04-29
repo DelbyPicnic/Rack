@@ -1,0 +1,5 @@
+AudibleInstruments | VCVRack/AudibleInstruments | Based on Mutable Instruments Eurorack modules.
+Befaco | VCVRack/Befaco | Based on Befaco Eurorack modules.
+Fundamental | VCVRack/Fundamental | The Fundamental plugin pack gives you a basic foundation to create simple synthesizers, route and analyze signals.
+SonusModular | https://gitlab.com/sonusdept/sonusmodular | Sonus Modular
+SynthKit | https://github.com/JerrySievert/SynthKit | A series of modules for VCVRack. This are meant to be basic building blocks of synthesis, that will help you create bigger and more complicated synthesizers.
