@@ -1,5 +1,6 @@
 include $(RACK_DIR)/arch.mk
 
+# The install location for `make install`
 DEP_LOCAL ?= .
 DEP_FLAGS += -g -O3
 

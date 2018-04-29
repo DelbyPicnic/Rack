@@ -7,17 +7,18 @@ FLAGS += \
 	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source
 
 ifdef RELEASE
-	FLAGS += -DRELEASE=$(RELEASE)
+	FLAGS += -DRELEASE
 endif
 
+# Sources and build flags
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp
+
+include arch.mk
 
 ifneq (,$(findstring arm,$(CPU)))
 	SOURCES += $(wildcard dep/math-neon/*.c)
 endif
-
-include arch.mk
 
 ifeq ($(ARCH), lin)
 	SOURCES += dep/osdialog/osdialog_gtk2.c
@@ -38,7 +39,7 @@ endif
 
 ifeq ($(ARCH), mac)
 	SOURCES += dep/osdialog/osdialog_mac.m
-	CXXFLAGS += -DAPPLE -stdlib=libc++
+	CXXFLAGS += -stdlib=libc++
 	LDFLAGS += -stdlib=libc++ -lpthread -ldl \
 		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo \
 		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
@@ -138,20 +139,18 @@ ifeq ($(ARCH), lin)
 	LD_LIBRARY_PATH=dep/lib perf record --call-graph dwarf ./Rack
 endif
 
-
 clean:
 	rm -rfv $(TARGET) libRack.a Rack.res build dist
 
+ifeq ($(ARCH), win)
 # For Windows resources
 %.res: %.rc
 	windres $^ -O coff -o $@
-
-include compile.mk
+endif
 
 
 dist: all
 	rm -rf dist
-
 	# Rack distribution
 	$(MAKE) -C plugins/Fundamental dist
 
@@ -197,8 +196,8 @@ endif
 ifeq ($(ARCH), win)
 	mkdir -p dist/Rack
 	cp -R LICENSE* res dist/Rack/
-	cp Rack.exe dist/Rack/
-	strip dist/Rack/Rack.exe
+	cp $(TARGET) dist/Rack/
+	strip dist/Rack/$(TARGET)
 	cp /mingw64/bin/libwinpthread-1.dll dist/Rack/
 	cp /mingw64/bin/zlib1.dll dist/Rack/
 	cp /mingw64/bin/libstdc++-6.dll dist/Rack/
@@ -223,7 +222,8 @@ endif
 ifeq ($(ARCH), lin)
 	mkdir -p dist/Rack
 	cp -R LICENSE* res dist/Rack/
-	cp Rack Rack.sh dist/Rack/
+	cp $(TARGET) Rack.sh dist/Rack/
+	strip dist/Rack/$(TARGET)
 	cp dep/lib/libspeexdsp.so dist/Rack/
 	cp dep/lib/libjansson.so.4 dist/Rack/
 	cp dep/lib/libglfw.so.3 dist/Rack/
@@ -248,7 +248,7 @@ endif
 ifeq ($(ARCH), win)
 	cp libRack.a dist/Rack-SDK/
 endif
-	cd dist && zip -5 -r Rack-SDK-$(VERSION)-$(ARCH).zip Rack-SDK
+	cd dist && zip -5 -r Rack-SDK-$(VERSION).zip Rack-SDK
 
 
 # Plugin helpers
@@ -265,6 +265,11 @@ distplugins:
 plugins:
 	for f in plugins/*; do (cd "$$f" && ${CMD}); done
 
+
+# Includes
+
+include compile.mk
 include plugin-list.mk
 
 .PHONY: all dep run debug clean dist allplugins cleanplugins distplugins plugins list-plugins
+.DEFAULT_GOAL := all
