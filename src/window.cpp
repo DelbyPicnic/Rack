@@ -481,7 +481,7 @@ void windowRun() {
 		{
 			frame = 0;
 			t2 = glfwGetTime();
-			info("%f %f", (t2-t1), 30./(t2-t1));
+			// info("%f %f", (t2-t1), 30./(t2-t1));
 			t1 = t2;
 		}
 
