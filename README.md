@@ -32,6 +32,8 @@ ARM-based hardware is not able to run complex patches that are possible on deskt
 
 Currently, Rack will spawn 3 audio processing threads (because Raspberry Pi and Tinker Board have 4 CPU cores) and will attempt to assing higher priority to them (requires the user to have appropriate permissions). More details on configuring system for better performance and to ensure uninterrupted audio will be added later.
 
+Please note that Tinker Board that I'm currently using for development is about twice faster than Raspberry Pi 3. Also, make sure your board has proper active cooling. Without it, all these boards get quite hot under heavy load and that will cause CPU frequency to reduce very quickly.
+
 ### Tinker Board Notes
 
 When configuring Audio Out module, choose "hw:rockchip,miniarm-codec,0" for HDMI output, and "hw:USB Audio OnBoard,2" for 3.5mm jack output.
