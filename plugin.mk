@@ -33,10 +33,6 @@ ifeq ($(ARCH), win)
 endif
 
 
-DEP_FLAGS += -fPIC
-include $(RACK_DIR)/dep.mk
-
-
 all: $(TARGET)
 
 include $(RACK_DIR)/compile.mk

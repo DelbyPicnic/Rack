@@ -50,33 +50,30 @@ CXXFLAGS += $(FLAGS)
 
 
 # Derive object files from sources and place them before user-defined objects
-OBJECTS := $(patsubst %, build/%.o, $(SOURCES)) $(OBJECTS)
+SOURCE_OBJECTS += $(patsubst %, build/%.o, $(SOURCES))
 DEPENDENCIES := $(patsubst %, build/%.d, $(SOURCES))
+
 
 # Final targets
 
-$(TARGET): $(OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+$(TARGET): $(RESOURCES) $(OBJECTS) $(SOURCE_OBJECTS)
+	$(CXX) -o $@ $(SOURCE_OBJECTS) $(OBJECTS) $(LDFLAGS)
 
 -include $(DEPENDENCIES)
 
-build/%.c.o: %.c | dep
+
+build/%.c.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-build/%.cpp.o: %.cpp | dep
+build/%.cpp.o: %.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-build/%.cc.o: %.cc | dep
+build/%.cc.o: %.cc
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-build/%.m.o: %.m | dep
+build/%.m.o: %.m
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
-
-# Dummy target
-dep:
-
-.PHONY: dep
