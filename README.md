@@ -16,7 +16,7 @@ miRack is a work in progress. Some features are broken or deliberately turned of
 
 * Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valud output device.** This is likely to be improved in future but is not a high priority task at the moment.
 
-* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling.
+* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling. When loading existing patches, make sure that engine and audio output sample rates match.
 
 * Some visual effects are turned off or simplified. This may change in future, but in general due to constrained CPU resources, audio processing and UI performance is the main priority.
 
