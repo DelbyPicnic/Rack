@@ -9,9 +9,9 @@ Autodafe | mi-rack/Autodafe | ! | Incomplete.
 Autodafe-Drums | mi-rack/Autodafe-Drums | ! | 8 modules containing samples of various drum machines and a 8 channel mixer. Currently have some UI issues.
 BaconMusic | baconpaul/BaconPlugs | ? | Bacon Music
 Befaco | VCVRack/Befaco | ~ | Based on Befaco Eurorack modules.
-Bidoo | sebastien-bouffier/Bidoo | ? | Bidoo's plugins
+Bidoo | sebastien-bouffier/Bidoo | - | Bidoo's plugins
 Bogaudio | bogaudio/BogaudioModules | ? | Bogaudio Modules
-CastleRocktronics | KieranPringle/CastleRocktronics | ? | Castle Rocktronics
+CastleRocktronics | KieranPringle/CastleRocktronics | - | Castle Rocktronics
 cf | cfoulc/cf | ~ | cf
 CharredDesert | JerrySievert/CharredDesert | ? | Charred Desert
 com-soundchasing-stochasm | teletypist/stochasm | ? | Stochasm - Stochastic Computing-style Bitstream Synthesis Modules
@@ -29,8 +29,8 @@ IO-Simple | IohannRabeson/VCVRack-Simple | ? | Clock divider, Clock, Trigger
 JW-Modules | mi-rack/JW-Modules | ! | JW-Modules
 KarateSnoopy | KarateSnoopy/vcv-karatesnoopy | ? | KarateSnoopy's 2D grid sequencer
 Koralfx-Modules | koralfx/Koralfx-Modules | ? | Koralfx modules 
-LindenbergResearch | lindenbergresearch/LRTRack | ?  | Lindenberg Research Tec. modules
-LOGinstruments | leopard86/LOGinstruments | ? | LOGinstruments
+LindenbergResearch | lindenbergresearch/LRTRack | - | Lindenberg Research Tec. modules
+LOGinstruments | leopard86/LOGinstruments | - | LOGinstruments
 luckyxxl | luckyxxl/vcv_luckyxxl | ? | luckyxxl
 mental | Strum/Strums_Mental_VCV_Modules | ? | Strum's Mental Module Suite. The modules are mostly utilities, which you can never have enough of, and I have focused on keeping them small to pack a lot of functionality into as little possible screen area.
 ML_modules | martin-lueders/ML_modules | ? | This package will contribute some utiliy modules, such as voltage quantizers, trigger utilities, etc.
