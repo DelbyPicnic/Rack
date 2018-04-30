@@ -124,7 +124,7 @@ struct ModelItem : BrowserListItem {
 
 		pluginLabel = Widget::create<Label>(Vec(0, itemMargin));
 		pluginLabel->alignment = Label::RIGHT_ALIGNMENT;
-		pluginLabel->text = model->plugin->slug + " " + model->plugin->version;
+		pluginLabel->text = model->author;
 		pluginLabel->color.a = 0.5;
 		addChild(pluginLabel);
 	}
