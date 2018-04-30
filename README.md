@@ -6,6 +6,9 @@
 
 miRack is a work in progress. Some features are broken or deliberately turned off. Read carefully below.
 
+![miRack running on Tinker Board](http://mifki.com/assets/uploads/mirack-scr-1-large.png)
+*miRack with various plugins playing [Wales](https://patchstorage.com/wales/) on ASUS Tinker Board*
+
 ## Comparison to VCVRack
 
 * Reworked and greatly optimised user interface rendering.
