@@ -367,6 +367,9 @@ bool RackWidget::requestModuleBox(ModuleWidget *m, Rect box) {
 			return false;
 		}
 	}
+	if (!box.size.isEqual(m->box.size))
+		if (m->staticPanel)
+			m->staticPanel->dirty = true;
 	m->box = box;
 	return true;
 }
@@ -433,7 +436,7 @@ void RackWidget::draw(NVGcontext *vg) {
 
 	for (Widget *child : moduleContainer->children) {
 		ModuleWidget *mw = dynamic_cast<ModuleWidget*>(child);
-		if (!mw->panel)
+		if (!mw->staticPanel)
 			continue;
 
 		if (child->box.pos.x-pos.x >= size.x || child->box.pos.y-pos.y >= size.y ||
@@ -442,9 +445,8 @@ void RackWidget::draw(NVGcontext *vg) {
 
 		nvgSave(vg);
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
-		mw->panel->drawCachedOrFresh(vg);
+		mw->staticPanel->drawCachedOrFresh(vg);
 		nvgRestore(vg);
-		child->needsRender = false;
 	}
 
 	for (Widget *child : moduleContainer->children) {
@@ -456,7 +458,6 @@ void RackWidget::draw(NVGcontext *vg) {
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
 		child->drawCachedOrFresh(vg);
 		nvgRestore(vg);
-		child->needsRender = false;
 	}
 
 	static int lightImage = 0;

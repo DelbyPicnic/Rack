@@ -381,7 +381,7 @@ void windowInit() {
 	glGetError();
 #endif
 
-	glfwSetWindowSizeLimits(gWindow, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
+	glfwSetWindowSizeLimits(gWindow, 800, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
 	// Set up NanoVG
 #if defined NANOVG_GL2

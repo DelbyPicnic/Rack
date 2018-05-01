@@ -6,15 +6,11 @@ namespace rack {
 
 
 void LightWidget::draw(NVGcontext *vg) {
-	if (!needsRender)
-		return;
-	
-	drawLight(vg);
+	//drawLight(vg);
 	//drawHalo(vg);
 }
 
 void LightWidget::drawLight(NVGcontext *vg) {
-	return;
 	float radius = box.size.x / 2.0;
 
 	nvgBeginPath(vg);

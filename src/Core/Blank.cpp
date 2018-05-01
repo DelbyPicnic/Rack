@@ -8,6 +8,7 @@ struct ModuleResizeHandle : Widget {
 	float dragX;
 	Rect originalBox;
 	ModuleResizeHandle() {
+		canSquash = true;
 		box.size = Vec(RACK_GRID_WIDTH * 1, RACK_GRID_HEIGHT);
 	}
 	void onMouseDown(EventMouseDown &e) override {
@@ -41,7 +42,7 @@ struct ModuleResizeHandle : Widget {
 			newBox.pos.x = originalBox.pos.x + originalBox.size.x - newBox.size.x;
 		}
 		gRackWidget->requestModuleBox(m, newBox);
-		m->dirty = true;
+		//m->dirty = true;
 	}
 	void draw(NVGcontext *vg) override {
 		for (float x = 5.0; x <= 10.0; x += 5.0) {
