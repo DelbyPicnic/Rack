@@ -340,11 +340,20 @@ void windowInit() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
-	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-	
+
+#if (defined(__arm__) || defined(__aarch64__))
+	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	int w = mode->width, h = mode->height;
+#else
+	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+	GLFWmonitor *monitor = NULL;
+	int w = 800, h = 600;
+#endif	
+
 	lastWindowTitle = "";
-	gWindow = glfwCreateWindow(640, 480, lastWindowTitle.c_str(), NULL, NULL);
+	gWindow = glfwCreateWindow(w, h, lastWindowTitle.c_str(), monitor, NULL);
 	if (!gWindow) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Cannot open window with OpenGL 2.0 renderer. Does your graphics card support OpenGL 2.0 or greater? If so, make sure you have the latest graphics drivers installed.");
 		exit(1);
