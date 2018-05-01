@@ -7,6 +7,9 @@ namespace rack {
 SVGKnob::SVGKnob() {
 	canSquash = true;
 
+	//XXX: We still inherit from FramebufferWidget to preserve class hierarchy but we don't really want this
+	canCache = false;
+
 	shadow = new CircularShadow();
 	addChild(shadow);
 	shadow->box.size = Vec();

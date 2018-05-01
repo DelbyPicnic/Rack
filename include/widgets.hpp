@@ -73,7 +73,6 @@ struct Widget {
 	Widget *parent = NULL;
 	std::list<Widget*> children;
 	bool visible = true;
-	char needsRender = 2;
 	bool canSquash = false;
 	bool canCache = false;
 
@@ -83,8 +82,6 @@ struct Widget {
 	NVGpaint fbPaint;
 	DirtyWrapper dirty;
 	float oversample = 1;
-
-	//bool alwaysRender = false;
 	
 	Widget();
 	virtual ~Widget();

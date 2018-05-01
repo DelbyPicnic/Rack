@@ -155,9 +155,6 @@ void WireWidget::fromJson(json_t *rootJ) {
 }
 
 void WireWidget::draw(NVGcontext *vg) {
-	if (!needsRender)
-		return;
-
 	float opacity = gToolbar->wireOpacitySlider->value / 100.0;
 	float tension = gToolbar->wireTensionSlider->value;
 
@@ -182,16 +179,9 @@ void WireWidget::drawPlugs(NVGcontext *vg) {
 	// TODO Figure out a way to draw plugs first and wires last, and cut the plug portion of the wire off.
 	Vec outputPos = getOutputPos();
 	Vec inputPos = getInputPos();
-	if (needsRender)
-	{
-		drawPlug(vg, outputPos, color);
-		drawPlug(vg, inputPos, color);
 
-		if (outputPort)
-			outputPort->plugLight->needsRender = true;
-		if (inputPort)
-			inputPort->plugLight->needsRender = true;
-	}
+	drawPlug(vg, outputPos, color);
+	drawPlug(vg, inputPos, color);
 
 	// Draw plug light
 	// TODO

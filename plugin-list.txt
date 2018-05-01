@@ -57,5 +57,5 @@ SubmarinePrototype | david-c14/submarine-prototype-vcv | ? | submarine-prototype
 SynthKit | https://github.com/JerrySievert/SynthKit | ? | A series of modules for VCVRack. This are meant to be basic building blocks of synthesis, that will help you create bigger and more complicated synthesizers.
 TheXOR | The-XOR/RackPlugins | ? | The XOR
 tnorris-BostonBrightonModules | tnorris/BBI | ? | Boston Brighton Instruments
-trowaSoft | j4s0n-c/trowaSoft-VCV | - | trowaSoft Modules. Currently have some UI issues.
+trowaSoft | j4s0n-c/trowaSoft-VCV | ! | trowaSoft Modules. Currently have some UI issues.
 Valley | ValleyAudio/ValleyRackFree | ? | ValleyRack Free

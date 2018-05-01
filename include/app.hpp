@@ -36,7 +36,7 @@ struct Wire;
 struct RackWidget;
 struct ParamWidget;
 struct Port;
-struct PanelBase;
+struct SVGPanel;
 struct LightWidget;
 
 ////////////////////
@@ -54,7 +54,10 @@ struct ModuleWidget : OpaqueWidget {
 	/** Owns the module pointer */
 	Module *module = NULL;
 
-	PanelBase *panel = NULL;
+	// A widget holding background and all but frequently updated widgets, usually an SVGPanel
+	Widget *staticPanel = NULL;
+
+	SVGPanel *panel = NULL;
 	std::vector<Port*> inputs;
 	std::vector<Port*> outputs;
 	std::vector<ParamWidget*> params;
@@ -189,21 +192,16 @@ struct RackRail : TransparentWidget {
 	void draw(NVGcontext *vg) override;
 };
 
-// Base class for panels - a cachable widget holding background and all but frequently updated widgets
-struct PanelBase : FramebufferWidget {
-	virtual void setBackground(std::shared_ptr<SVG> svg) {};
-};
-
-// Panel showin a solid colour and/or an image
-struct Panel : PanelBase {
+// Panel showing a solid colour and/or an image
+struct Panel : FramebufferWidget {
 	NVGcolor backgroundColor;
 	std::shared_ptr<Image> backgroundImage;
 	void draw(NVGcontext *vg) override;
 };
 
 // SVG-based panel
-struct SVGPanel : PanelBase {
-	void setBackground(std::shared_ptr<SVG> svg) override;
+struct SVGPanel : FramebufferWidget {
+	void setBackground(std::shared_ptr<SVG> svg);
 };
 
 ////////////////////
@@ -276,8 +274,8 @@ struct SpriteKnob : Knob, SpriteWidget {
 	void step() override;
 };
 
-/** A knob which rotates an SVG and caches it in a framebuffer */
-struct SVGKnob : Knob {
+/** A knob which rotates an SVG */
+struct SVGKnob : Knob, FramebufferWidget {
 	TransformWidget *tw;
 	SVGWidget *sw;
 	CircularShadow *shadow;
@@ -292,7 +290,7 @@ struct SVGKnob : Knob {
 /** Behaves like a knob but linearly moves an SVGWidget between two points.
 Can be used for horizontal or vertical linear faders.
 */
-struct SVGSlider : Knob {
+struct SVGSlider : Knob, FramebufferWidget {
 	SVGWidget *background;
 	SVGWidget *handle;
 	/** Intermediate positions will be interpolated between these positions */
@@ -307,7 +305,7 @@ struct SVGSlider : Knob {
 typedef SVGSlider SVGFader;
 
 /** A ParamWidget with multiple frames corresponding to its value */
-struct SVGSwitch : virtual ParamWidget {
+struct SVGSwitch : virtual ParamWidget, FramebufferWidget {
 	std::vector<std::shared_ptr<SVG>> frames;
 	SVGWidget *sw;
 	SVGSwitch();

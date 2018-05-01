@@ -43,16 +43,16 @@ void ModuleWidget::addChild(Widget *widget) {
 		return;
 	}
 
-	if (PanelBase *p = dynamic_cast<PanelBase*>(widget)) {
+	if (!children.size() && widget->canCache) {
 		Widget::addChild(widget);
-		if (panel)
-			removeChild(panel);
-		panel = p;
+		// if (panel)
+		// 	removeChild(panel);
+		staticPanel = widget;
 		return;
 	}
 	
-	if (widget->canSquash && panel)
-		panel->addChild(widget);
+	if (widget->canSquash && staticPanel)
+		staticPanel->addChild(widget);
 	else
 		Widget::addChild(widget);
 }
@@ -61,8 +61,8 @@ void ModuleWidget::addInput(Port *input) {
 	assert(input->type == Port::INPUT);
 	inputs.push_back(input);
 	// Ports are always squashable for now
-	if (panel)
-		panel->addChild(input);
+	if (staticPanel)
+		staticPanel->addChild(input);
 	else
 		addChild(input);
 }
@@ -71,16 +71,16 @@ void ModuleWidget::addOutput(Port *output) {
 	assert(output->type == Port::OUTPUT);
 	outputs.push_back(output);
 	// Ports are always squashable for now
-	if (panel)
-		panel->addChild(output);
+	if (staticPanel)
+		staticPanel->addChild(output);
 	else
 		addChild(output);
 }
 
 void ModuleWidget::addParam(ParamWidget *param) {
 	params.push_back(param);
-	if (param->canSquash && panel)
-		panel->addChild(param);
+	if (param->canSquash && staticPanel)
+		staticPanel->addChild(param);
 	else
 		Widget::addChild(param);
 }
@@ -89,12 +89,15 @@ void ModuleWidget::setPanel(std::shared_ptr<SVG> svg) {
 	// Remove old panel
 	if (panel) {
 		removeChild(panel);
-		panel = NULL;
+		staticPanel = panel = NULL;
 	}
 
 	panel = new SVGPanel();
-	((SVGPanel*)panel)->setBackground(svg);
+	panel->setBackground(svg);
+	staticPanel = panel;	
 	Widget::addChild(panel);
+
+	//TODO: need to transfer children from old panel to the new one!
 
 	box.size = panel->box.size;
 }
@@ -229,9 +232,9 @@ void ModuleWidget::randomize() {
 
 void ModuleWidget::draw(NVGcontext *vg) {
 	nvgScissor(vg, 0, 0, box.size.x, box.size.y);
-	// FramebufferWidget::draw(vg);
+
 	for (Widget *child : children) {
-		if (child == panel)
+		if (child == staticPanel)
 			continue;
 		if (!child->visible)
 			continue;
@@ -239,7 +242,6 @@ void ModuleWidget::draw(NVGcontext *vg) {
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
 		child->drawCachedOrFresh(vg);
 		nvgRestore(vg);
-		child->needsRender--;// = false;
 	}
 
 	nvgResetScissor(vg);

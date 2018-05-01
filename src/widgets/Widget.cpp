@@ -131,11 +131,11 @@ void Widget::draw(NVGcontext *vg) {
 	for (Widget *child : children) {
 		if (!child->visible)
 			continue;
+
 		nvgSave(vg);
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
 		child->drawCachedOrFresh(vg);
 		nvgRestore(vg);
-		child->needsRender--;// = false;
 	}
 }
 
@@ -151,7 +151,7 @@ void Widget::ensureCached(NVGcontext *vg) {
 	{
 		dirty = false;
 
-		fbBox = children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size);
+		fbBox = Rect(Vec(0,0), box.size);//children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size);
 		fbBox.size = fbBox.size.ceil();
 
 		if (isNear(gPixelRatio, 1.0)) {
