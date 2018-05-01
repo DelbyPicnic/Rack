@@ -153,10 +153,12 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 	Vec mousePos = Vec(xpos, ypos).div(gPixelRatio / gWindowRatio).round();
 	Vec mouseRel = mousePos.minus(gMousePos);
 
-	int cursorMode = glfwGetInputMode(gWindow, GLFW_CURSOR);
-	(void) cursorMode;
+	if (mouseRel.isZero())
+		return;
 
 #ifdef ARCH_MAC
+	int cursorMode = glfwGetInputMode(gWindow, GLFW_CURSOR);
+
 	// Workaround for Mac. We can't use GLFW_CURSOR_DISABLED because it's buggy, so implement it on our own.
 	// This is not an ideal implementation. For example, if the user drags off the screen, the new mouse position will be clamped.
 	if (cursorMode == GLFW_CURSOR_HIDDEN) {
