@@ -341,6 +341,8 @@ void windowInit() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_DEPTH_BITS, 0);
+	glfwWindowHint(GLFW_ALPHA_BITS, 0);
 
 #if (defined(__arm__) || defined(__aarch64__))
 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
