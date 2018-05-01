@@ -405,7 +405,8 @@ bool RackWidget::requestModuleBoxNearest(ModuleWidget *m, Rect box) {
 		right = w->box.pos.x + w->box.size.x;
 	}
 
-	if (left >= 0 && fabsf(gMousePos.x - (left+box.size.x)) <= fabsf(gMousePos.x - right))
+	float mouseX = gMousePos.x + gRackScene->scrollWidget->offset.x;
+	if (left >= 0 && fabsf(mouseX - (left+box.size.x)) <= fabsf(mouseX - right))
 		box.pos.x = left;
 	else
 		box.pos.x = right;
