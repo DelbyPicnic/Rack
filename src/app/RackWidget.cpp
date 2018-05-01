@@ -371,30 +371,45 @@ bool RackWidget::requestModuleBox(ModuleWidget *m, Rect box) {
 	return true;
 }
 
+static inline Widget* moduleIntersectingBox(Widget *container, Widget *self, Rect box) {
+	for (Widget *child2 : container->children) {
+		if (self == child2) continue;
+		if (box.intersects(child2->box))
+			return child2;
+	}
+
+	return NULL;
+}
+
 bool RackWidget::requestModuleBoxNearest(ModuleWidget *m, Rect box) {
-	// Create possible positions
-	int x0 = roundf(box.pos.x / RACK_GRID_WIDTH);
-	int y0 = roundf(box.pos.y / RACK_GRID_HEIGHT);
-	std::vector<Vec> positions;
-	for (int y = max(0, y0 - 8); y < y0 + 8; y++) {
-		for (int x = max(0, x0 - 400); x < x0 + 400; x++) {
-			positions.push_back(Vec(x * RACK_GRID_WIDTH, y * RACK_GRID_HEIGHT));
-		}
+	int x0 = std::max(0.f, roundf(box.pos.x / RACK_GRID_WIDTH) * RACK_GRID_WIDTH);
+	box.pos.y = std::max(0.f, roundf(box.pos.y / RACK_GRID_HEIGHT) * RACK_GRID_HEIGHT);
+
+	float left, right;
+	for (left = x0; left >= 0;) {
+		box.pos.x = left;
+		Widget *w = moduleIntersectingBox(moduleContainer, m, box);
+		if (!w)
+			break;
+		left = w->box.pos.x - m->box.size.x;
 	}
 
-	// Sort possible positions by distance to the requested position
-	std::sort(positions.begin(), positions.end(), [box](Vec a, Vec b) {
-		return a.minus(box.pos).norm() < b.minus(box.pos).norm();
-	});
-
-	// Find a position that does not collide
-	for (Vec position : positions) {
-		Rect newBox = box;
-		newBox.pos = position;
-		if (requestModuleBox(m, newBox))
-			return true;
+	for (right = x0; ;) {
+		box.pos.x = right;
+		Widget *w = moduleIntersectingBox(moduleContainer, m, box);
+		if (!w)
+			break;
+		right = w->box.pos.x + w->box.size.x;
 	}
-	return false;
+
+	if (left >= 0 && fabsf(gMousePos.x - (left+box.size.x)) <= fabsf(gMousePos.x - right))
+		box.pos.x = left;
+	else
+		box.pos.x = right;
+
+	m->box = box;
+
+	return true;
 }
 
 void RackWidget::step() {
