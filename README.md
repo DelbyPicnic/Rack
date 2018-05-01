@@ -6,6 +6,9 @@
 
 miRack is a work in progress. Some features are broken or deliberately turned off. Read carefully below.
 
+![miRack running on Tinker Board](http://mifki.com/assets/uploads/mirack-scr-1-large.png)
+*miRack with various plugins playing [Wales](https://patchstorage.com/wales/) on ASUS Tinker Board*
+
 ## Comparison to VCVRack
 
 * Reworked and greatly optimised user interface rendering.
@@ -16,15 +19,15 @@ miRack is a work in progress. Some features are broken or deliberately turned of
 
 * Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valud output device.** This is likely to be improved in future but is not a high priority task at the moment.
 
-* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling.
+* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling. When loading existing patches, make sure that engine and audio output sample rates match.
 
-* Some of the visual effects are turned off or simplified. This may change in future, but in general due to constrained CPU resources, audio processing and UI performance is the main priority.
+* Some visual effects are turned off or simplified. This may change in future, but in general due to constrained CPU resources, audio processing and UI performance is the main priority.
 
 ## Platforms
 
 Currently the development is done using ASUS Tinker Board, with Raspberry Pi 3 being the second main supported platform. There's a lot of similar ARM-based boards that should work too. On desktop, the development is done on macOS, and I guess Linux should be supported as well but it's not being tested.
 
-OpenGL ES will be used on ARM boards for for rendering, OpenGL will be used on desktops.
+OpenGL ES will be used on ARM boards for for rendering, OpenGL will be used on desktop.
 
 ### Performance
 
@@ -32,13 +35,17 @@ ARM-based hardware is not able to run complex patches that are possible on deskt
 
 Currently, Rack will spawn 3 audio processing threads (because Raspberry Pi and Tinker Board have 4 CPU cores) and will attempt to assing higher priority to them (requires the user to have appropriate permissions). More details on configuring system for better performance and to ensure uninterrupted audio will be added later.
 
+Please note that Tinker Board that I'm currently using for development is about twice faster than Raspberry Pi 3. Also, make sure your board has proper active cooling. Without it, all these boards get quite hot under heavy load and that will cause CPU frequency to reduce very quickly.
+
 ### Tinker Board Notes
 
-When configuring Audio Out module, choose ... for HDMI output, and ... for 3.5mm jack output.
+When configuring Audio Out module, choose "hw:rockchip,miniarm-codec,0" for HDMI output, and "hw:USB Audio OnBoard,2" for 3.5mm jack output.
 
 Due to some issues with Xorg, the framerate is less than the hardware can achive. Support for running without an X server is in development.
 
 ### Raspberry Pi Notes
+
+Raspberry Pi 3 is supported. I don't expect any good results with older models.
 
 GL driver must be enabled either manually via `config.txt` or using `raspi-config` (Advanced Options -> GL Driver).
 
@@ -58,7 +65,7 @@ Assuming you have the basic tools (GCC and make on Linux, Xcode and [Homebrew](h
 
 Build dependencies with `make dep`, and then build Rack with `make`.
 
-Install the Fundamental module pack with `make +Fundamental`.
+Install Fundamental module pack with `make +Fundamental` to have several basic modules to begin with.
 
 To run Rack, execute `make run`.
 

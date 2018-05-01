@@ -86,6 +86,7 @@ ifeq ($(ARCH), lin)
 ifeq ($(APT),)
 	@echo Install the following packages or their equivalents for your OS: $(PREREQS)
 else
+	@echo ---
 	@echo Will install using apt: $(PREREQS)
 	@echo ---
 	sudo apt install $(PREREQS)
@@ -99,6 +100,7 @@ ifeq ($(ARCH), mac)
 ifeq ($(BREW),)
 	@echo Install Homebrew first from http://brew.sh
 else
+	@echo ---
 	@echo Will install using Homebrew: $(PREREQS)
 	@echo ---
 	brew install $(PREREQS)
