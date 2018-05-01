@@ -433,7 +433,8 @@ void windowRun() {
 	assert(gWindow);
 	gGuiFrame = 0;
 
-	double wait = 1./30.;
+	const double fps = 30.;
+	double wait = 1./fps;
 	while(!glfwWindowShouldClose(gWindow)) {
 		gGuiFrame++;
 
@@ -488,17 +489,17 @@ void windowRun() {
 		if (visible)
 			renderGui();
 
-		static int frame = 0;
+		/*static int frame = 0;
 		static double t1, t2;
-		if (++frame == 30)
-		{
+		frame++;
+		t2 = glfwGetTime();
+		if (t2 - t1 > 2.) {
+			info("%d frames @ %f FPS", frame, frame/(t2-t1));
 			frame = 0;
-			t2 = glfwGetTime();
-			// info("%f %f", (t2-t1), 30./(t2-t1));
 			t1 = t2;
-		}
+		}*/
 
-		wait = std::max(0., 1./30. - (glfwGetTime()-startTime));
+		wait = std::max(0., 1./fps - (glfwGetTime()-startTime));
 	}
 }
 
