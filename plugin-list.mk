@@ -5,17 +5,25 @@ plugin:
 	@[ ! -e plugins/$(DIR) ] && true || ( echo -e "---\nPlugin folder plugins/$(DIR) already exists and will be overwritten. Press \033[1my\033[0m to proceed or any other key to skip this plugin.\n---" ; read -n 1 R; [ "$$R" = "y" ] )
 	rm -rf plugins/$(DIR)
 ifeq (,$(findstring http,$(URL)))
-	git clone http://github.com/$(URL) plugins/$(DIR) --recursive
+	git clone http://github.com/$(URL) plugins/$(DIR) --recursive --depth 1
 else
-	git clone $(URL) plugins/$(DIR) --recursive
+	git clone $(URL) plugins/$(DIR) --recursive --depth 1
 endif
+	cd plugins/$(DIR) && $(MAKE) -i -f ../../plugin-list.mk pre-$(DIR)
 	$(MAKE) -C plugins/$(DIR)
-ifeq ($(DIR),DHE-Modules)
-	cp -r plugins/$(DIR)/gui/res plugins/$(DIR)/
-endif
+	cd plugins/$(DIR) && $(MAKE) -i -f ../../plugin-list.mk post-$(DIR)
 	@echo ---
 	@echo Plugin $(DIR) built.
 	@echo ---
+
+pre-Bidoo:
+	make dep/lib/libmpg123.a
+
+post-DHE-Modules:
+	cp -r gui/res .
+
+pre-%: ;
+post-%: ;
 
 list-plugins:
 	@awk -F ' *\\| *' '{ if(match($$1,"^#")) next; print "[" $$3 "] \033[1m"$$1"\033[0m" "\n\t" $$4; if(index($$2,"http")) print "\t"$$2 ; else print "\thttp://github.com/"$$2 ; print ""; }' plugin-list.txt 
