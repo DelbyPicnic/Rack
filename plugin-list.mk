@@ -10,6 +10,9 @@ else
 	git clone $(URL) plugins/$(DIR) --recursive
 endif
 	$(MAKE) -C plugins/$(DIR)
+ifeq ($(DIR),DHE-Modules)
+	cp -r plugins/$(DIR)/gui/res plugins/$(DIR)/
+endif
 	@echo ---
 	@echo Plugin $(DIR) built.
 	@echo ---
@@ -27,16 +30,15 @@ rebuild-plugins:
 +all:
 	for slug in $$(awk -F ' *\\| *' '{ if(match($$1,"^#")) next; print "+" $$1 }' plugin-list.txt) ; do $(MAKE) $$slug ; done
 
+PLUGIN = $(shell cat plugin-list.txt | grep -i "^$* *|")
+PLUGIN_DIR = $(strip $(shell echo "$(PLUGIN)" | cut -d "|" -f 1 ))
+PLUGIN_URL = $(strip $(shell echo "$(PLUGIN)" | cut -d "|" -f 2 ))
+
 # Special case as it actually builds two plugins
 +Fundamental:
 	URL=VCVRack/Fundamental DIR=Fundamental $(MAKE) plugin
 	URL=mi-rack/zFundamental DIR=zFundamental $(MAKE) plugin
 
-PLUGIN = $(shell cat plugin-list.txt | grep -i "^$* *|")
-PLUGIN_DIR = $(strip $(shell echo "$(PLUGIN)" | cut -d "|" -f 1 ))
-PLUGIN_URL = $(strip $(shell echo "$(PLUGIN)" | cut -d "|" -f 2 ))
-
 +%:
 	@if [ ! -n "$(PLUGIN_DIR)" ] ; then echo --- ; echo "No such plugin: $*" ; echo "Type \"make list-plugins\" for a list of plugins known to this build script." ; echo --- ; false ; else true ; fi
 	URL="$(PLUGIN_URL)" DIR="$(PLUGIN_DIR)" $(MAKE) plugin
-	

@@ -16,7 +16,7 @@ cf | cfoulc/cf | ~ | cf
 CharredDesert | JerrySievert/CharredDesert | ? | Charred Desert
 com-soundchasing-stochasm | teletypist/stochasm | ? | Stochasm - Stochastic Computing-style Bitstream Synthesis Modules
 dBiz | dBiz/dBiz | ? | dBiz Modules
-DHE-Modules | dhemery/DHE-Modules | ? | DHE Modules
+DHE-Modules | dhemery/DHE-Modules | ~ | DHE Modules
 DrumKit | JerrySievert/DrumKit | ? | Drum Modules
 ErraticInstruments | bafonso/Erratic | ? | Modules designed for using "MIDI Polyphonic Expression" (MPE) controllers.
 ESeries | VCVRack/ESeries | ~ | Based on Synthesis Technology Eurorack modules.
