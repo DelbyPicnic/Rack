@@ -18,6 +18,7 @@ endif
 
 pre-Bidoo:
 	make dep/lib/libmpg123.a
+	echo -e "#include <cstddef>\n$$(cat src/dep/gist/src/mfcc/MFCC.h)" > src/dep/gist/src/mfcc/MFCC.h
 
 post-DHE-Modules:
 	cp -r gui/res .
