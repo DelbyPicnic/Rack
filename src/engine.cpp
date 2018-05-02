@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #if !(defined(__arm__) || defined(__aarch64__))
+#include <pmmintrin.h>
 #include <xmmintrin.h>
 #endif
 #include "tinythread.h"
