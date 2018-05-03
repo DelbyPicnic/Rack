@@ -143,21 +143,16 @@ void Widget::ensureCached(NVGcontext *vg) {
 	if (!dirty)
 		return;
 
-	for (Widget *child : children) {
+	for (Widget *child : children)
 		child->ensureCached(vg);
-	}
 
-	if (canCache && dirty)
-	{
-		dirty = false;
-
+	if (canCache && dirty) {
 		fbBox = Rect(Vec(0,0), box.size);//children.size() ? getChildrenBoundingBox() : Rect(Vec(0,0), box.size);
 		fbBox.size = fbBox.size.ceil();
 
-		if (isNear(gPixelRatio, 1.0)) {
-			// Small details draw poorly at low DPI, so oversample when drawing to the framebuffer
+		// Small details draw poorly at low DPI, so oversample when drawing to the framebuffer
+		if (isNear(gPixelRatio, 1.0))
 			oversample = 2.0;
-		}
 
 		Vec fbSize2 = fbBox.size.mult(gPixelRatio * oversample);
 
@@ -166,8 +161,7 @@ void Widget::ensureCached(NVGcontext *vg) {
 		if (fbSize2.isZero())
 			return;
 
-		if (!fbSize2.isEqual(fbSize))
-		{
+		if (!fbSize2.isEqual(fbSize)) {
 			fbSize = fbSize2;
 			// info("rendering framebuffer %f %f", fbSize.x, fbSize.y);
 			// Delete old one first to free up GPU memory
@@ -197,11 +191,12 @@ void Widget::ensureCached(NVGcontext *vg) {
 
 		// fbPaint = nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0);		
 	}
+
+	dirty = false;	
 }
 
 void Widget::drawCachedOrFresh(NVGcontext *vg) {
-	if(!canCache)
-	{ 
+	if(!canCache) { 
 		draw(vg);
 		return;
 	}

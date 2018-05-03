@@ -139,10 +139,10 @@ struct ModelItem : BrowserListItem {
 		ModuleWidget *moduleWidget = model->createModuleWidget();
 		if (!moduleWidget)
 			return;
-		gRackWidget->moduleContainer->addChild(moduleWidget);
 		// Move module nearest to the mouse position
 		moduleWidget->box.pos = gRackWidget->lastMousePos.minus(moduleWidget->box.size.div(2));
 		gRackWidget->requestModuleBoxNearest(moduleWidget, moduleWidget->box);
+		gRackWidget->addModule(moduleWidget);
 	}
 };
 

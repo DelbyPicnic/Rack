@@ -271,7 +271,7 @@ void RackWidget::fromJson(json_t *rootJ) {
 		ModuleWidget *moduleWidget = model->createModuleWidget();
 		assert(moduleWidget);
 		moduleWidget->fromJson(moduleJ);
-		moduleContainer->addChild(moduleWidget);
+		gRackWidget->addModule(moduleWidget);
 		moduleWidgets[moduleId] = moduleWidget;
 	}
 
@@ -336,6 +336,7 @@ void RackWidget::fromJson(json_t *rootJ) {
 
 void RackWidget::addModule(ModuleWidget *m) {
 	moduleContainer->addChild(m);
+	m->dirty = true;
 	m->create();
 }
 
