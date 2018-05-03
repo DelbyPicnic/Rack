@@ -188,12 +188,10 @@ AudioWidget::AudioWidget() {
 	bufferSizeChoice->audioWidget = this;
 	addChild(bufferSizeChoice);
 	this->bufferSizeChoice = bufferSizeChoice;
-
-	this->driverChoice->box.size.x = box.size.x;
-	printf("%f\n",box.size.x);
 }
 
 void AudioWidget::step() {
+	this->driverChoice->box.size.x = box.size.x;
 	this->driverSeparator->box.size.x = box.size.x;
 	this->deviceChoice->box.size.x = box.size.x;
 	this->deviceSeparator->box.size.x = box.size.x;
