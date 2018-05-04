@@ -391,7 +391,7 @@ struct AudioWidget : LedDisplay {
 	LedDisplaySeparator *sampleRateSeparator;
 	LedDisplayChoice *bufferSizeChoice;
 	AudioWidget();
-	void step() override;
+	void onResize() override;
 };
 
 struct MidiWidget : LedDisplay {
@@ -403,7 +403,7 @@ struct MidiWidget : LedDisplay {
 	LedDisplaySeparator *deviceSeparator;
 	LedDisplayChoice *channelChoice;
 	MidiWidget();
-	void step() override;
+	void onResize() override;
 };
 
 ////////////////////

@@ -8,6 +8,49 @@
 
 namespace rack {
 
+/*PosWrapper& PosWrapper::operator=(Vec v) {
+	x = v.x;
+	y = v.y;
+
+	return *this;
+};*/
+
+SizeWrapper& SizeWrapper::operator=(Vec v) {
+	bool changed = !isEqual(v);
+
+	x = v.x;
+	y = v.y;
+	
+	if (changed)
+		widget->onResize();	
+	return *this;
+};
+
+SizeWrapper& SizeWrapper::operator=(SizeWrapper another) {
+	bool changed = !isEqual(another);
+
+	x = another.x;
+	y = another.y;
+
+	if (changed)
+		widget->onResize();	
+	return *this;
+};
+
+BoxWrapper& BoxWrapper::operator=(Rect r) {
+	pos = r.pos;
+	size = r.size;
+
+	return *this;
+};
+
+BoxWrapper& BoxWrapper::operator=(BoxWrapper another) {
+	pos = another.pos;
+	size = another.size;
+
+	return *this;
+};
+
 DirtyWrapper& DirtyWrapper::operator =(bool _dirty) {
 	dirty = _dirty;
 	if (dirty && widget) {
@@ -21,7 +64,7 @@ DirtyWrapper& DirtyWrapper::operator =(bool _dirty) {
 	return *this;
 }
 
-Widget::Widget() : dirty(this, true) {
+Widget::Widget() : box(this, Rect(Vec(), Vec(INFINITY, INFINITY))), dirty(this, true) {
 
 }
 
@@ -267,6 +310,11 @@ void Widget::onZoom(EventZoom &e) {
 		Widget *child = *it;
 		child->onZoom(e);
 	}
+}
+
+void Widget::onResize() {
+	if (canCache)
+		dirty = true;
 }
 
 } // namespace rack

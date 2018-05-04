@@ -152,9 +152,6 @@ struct AudioBlockSizeChoice : LedDisplayChoice {
 
 
 AudioWidget::AudioWidget() {
-	//canCache = true;
-	box.size = mm2px(Vec(44, 28));
-
 	Vec pos = Vec();
 
 	AudioDriverChoice *driverChoice = Widget::create<AudioDriverChoice>(pos);
@@ -188,9 +185,11 @@ AudioWidget::AudioWidget() {
 	bufferSizeChoice->audioWidget = this;
 	addChild(bufferSizeChoice);
 	this->bufferSizeChoice = bufferSizeChoice;
+
+	box.size = mm2px(Vec(44, 28));	
 }
 
-void AudioWidget::step() {
+void AudioWidget::onResize() {
 	this->driverChoice->box.size.x = box.size.x;
 	this->driverSeparator->box.size.x = box.size.x;
 	this->deviceChoice->box.size.x = box.size.x;
@@ -199,7 +198,8 @@ void AudioWidget::step() {
 	this->sampleRateSeparator->box.pos.x = box.size.x / 2;
 	this->bufferSizeChoice->box.pos.x = box.size.x / 2;
 	this->bufferSizeChoice->box.size.x = box.size.x / 2;
-	LedDisplay::step();
+
+	LedDisplay::onResize();
 }
 
 

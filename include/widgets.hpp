@@ -47,6 +47,120 @@ struct SVG {
 
 struct Widget;
 
+/*struct PosWrapper : Vec {
+	Widget *widget;
+
+	PosWrapper(Widget *_widget, Vec v) {
+		widget = _widget;
+		x = v.x;
+		y = v.y;
+	};
+
+	PosWrapper& operator=(Vec r);
+};*/
+
+struct SizeWrapper : Vec {
+	Widget *widget;
+
+	//TODO: should also intercept individual x/y changes (only X really)
+
+	SizeWrapper(Widget *_widget, Vec v) {
+		widget = _widget;
+		x = v.x;
+		y = v.y;
+	};
+
+	SizeWrapper& operator=(Vec r);
+	SizeWrapper& operator=(SizeWrapper another);
+};
+
+struct BoxWrapper {
+	Widget *widget;
+	
+	Vec pos;
+	SizeWrapper size;
+
+	BoxWrapper(Widget *_widget, Rect r) : pos(r.pos), size(_widget, r.size) {
+		widget = _widget;
+	};
+
+	BoxWrapper& operator=(Rect r);
+	BoxWrapper& operator=(BoxWrapper another);
+
+	operator Rect() {
+		return Rect(pos, size);
+	};
+
+	/** Returns whether this Rect contains an entire point, inclusive on the top/left, non-inclusive on the bottom/right */
+	bool contains(Vec v) {
+		return pos.x <= v.x && v.x < pos.x + size.x
+			&& pos.y <= v.y && v.y < pos.y + size.y;
+	}
+	/** Returns whether this Rect contains an entire Rect */
+	bool contains(Rect r) {
+		return pos.x <= r.pos.x && r.pos.x + r.size.x <= pos.x + size.x
+			&& pos.y <= r.pos.y && r.pos.y + r.size.y <= pos.y + size.y;
+	}
+	/** Returns whether this Rect overlaps with another Rect */
+	bool intersects(Rect r) {
+		return (pos.x + size.x > r.pos.x && r.pos.x + r.size.x > pos.x)
+			&& (pos.y + size.y > r.pos.y && r.pos.y + r.size.y > pos.y);
+	}
+	bool isEqual(Rect r) {
+		return pos.isEqual(r.pos) && size.isEqual(r.size);
+	}
+	Vec getCenter() {
+		return pos.plus(size.mult(0.5f));
+	}
+	Vec getTopRight() {
+		return pos.plus(Vec(size.x, 0.0f));
+	}
+	Vec getBottomLeft() {
+		return pos.plus(Vec(0.0f, size.y));
+	}
+	Vec getBottomRight() {
+		return pos.plus(size);
+	}
+	/** Clamps the edges of the rectangle to fit within a bound */
+	Rect clamp(Rect bound) {
+		Rect r;
+		r.pos.x = clamp2(pos.x, bound.pos.x, bound.pos.x + bound.size.x);
+		r.pos.y = clamp2(pos.y, bound.pos.y, bound.pos.y + bound.size.y);
+		r.size.x = rack::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
+		r.size.y = rack::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
+		return r;
+	}
+	/** Nudges the position to fix inside a bounding box */
+	Rect nudge(Rect bound) {
+		Rect r;
+		r.size = size;
+		r.pos.x = clamp2(pos.x, bound.pos.x, bound.pos.x + bound.size.x - size.x);
+		r.pos.y = clamp2(pos.y, bound.pos.y, bound.pos.y + bound.size.y - size.y);
+		return r;
+	}
+	/** Expands this Rect to contain `other` */
+	Rect expand(Rect other) {
+		Rect r;
+		r.pos.x = min(pos.x, other.pos.x);
+		r.pos.y = min(pos.y, other.pos.y);
+		r.size.x = max(pos.x + size.x, other.pos.x + other.size.x) - r.pos.x;
+		r.size.y = max(pos.y + size.y, other.pos.y + other.size.y) - r.pos.y;
+		return r;
+	}
+	/** Returns a Rect with its position set to zero */
+	Rect zeroPos() {
+		Rect r;
+		r.size = size;
+		return r;
+	}
+	Rect grow(Vec delta) {
+		Rect r;
+		r.pos = pos.minus(delta);
+		r.size = size.plus(delta.mult(2.f));
+		return r;
+	}	
+};
+
 struct DirtyWrapper {
 	Widget *widget;
 	bool dirty;
@@ -69,7 +183,7 @@ Never inherit from Widget directly. Instead, inherit from VirtualWidget declared
 */
 struct Widget {
 	/** Stores position and size */
-	Rect box = Rect(Vec(), Vec(INFINITY, INFINITY));
+	BoxWrapper box;
 	Widget *parent = NULL;
 	std::list<Widget*> children;
 	bool visible = true;
@@ -172,6 +286,7 @@ struct Widget {
 	virtual void onAction(EventAction &e) {}
 	virtual void onChange(EventChange &e) {}
 	virtual void onZoom(EventZoom &e);
+	virtual void onResize();
 
 	/** Helper function for creating and initializing a Widget with certain arguments (in this case just the position).
 	In this project, you will find this idiom everywhere, as an easier alternative to constructor arguments, for building a Widget (or a subclass) with a one-liner.

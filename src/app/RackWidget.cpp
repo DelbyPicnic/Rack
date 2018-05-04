@@ -336,7 +336,13 @@ void RackWidget::fromJson(json_t *rootJ) {
 
 void RackWidget::addModule(ModuleWidget *m) {
 	moduleContainer->addChild(m);
+
+	// To update dirty flag for all ancestors
 	m->dirty = true;
+
+	//TODO: this is temporary until we handle individual dimension chages that resizable modules do in fromJson()
+	m->onResize();
+
 	m->create();
 }
 
@@ -368,9 +374,9 @@ bool RackWidget::requestModuleBox(ModuleWidget *m, Rect box) {
 			return false;
 		}
 	}
-	if (!box.size.isEqual(m->box.size))
-		if (m->staticPanel)
-			m->staticPanel->dirty = true;
+	// if (!box.size.isEqual(m->box.size))
+	// 	if (m->staticPanel)
+	// 		m->staticPanel->dirty = true;
 	m->box = box;
 	return true;
 }

@@ -65,12 +65,8 @@ struct BlankWidget : ModuleWidget {
 	Widget *rightHandle;
 
 	BlankWidget(Module *module) : ModuleWidget(module) {
-		box.size = Vec(RACK_GRID_WIDTH * 10, RACK_GRID_HEIGHT);
-		canCache = true;
-
 		{
 			panel = new LightPanel();
-			panel->box.size = box.size;
 			addChild(panel);
 		}
 
@@ -87,26 +83,28 @@ struct BlankWidget : ModuleWidget {
 		bottomRightScrew = Widget::create<ScrewSilver>(Vec(box.size.x - 30, 365));
 		addChild(topRightScrew);
 		addChild(bottomRightScrew);
+
+		box.size = Vec(RACK_GRID_WIDTH * 10, RACK_GRID_HEIGHT);		
 	}
 
-	void step() override {
+	void onResize() override {
 		panel->box.size = box.size;
+
 		topRightScrew->box.pos.x = box.size.x - 30;
 		bottomRightScrew->box.pos.x = box.size.x - 30;
-		if (box.size.x < RACK_GRID_WIDTH * 6) {
+		if (box.size.x < RACK_GRID_WIDTH * 6)
 			topRightScrew->visible = bottomRightScrew->visible = false;
-		}
-		else {
+		else
 			topRightScrew->visible = bottomRightScrew->visible = true;
-		}
 		rightHandle->box.pos.x = box.size.x - rightHandle->box.size.x;
-		ModuleWidget::step();
+
+		ModuleWidget::onResize();
 	}
 
 	json_t *toJson() override {
 		json_t *rootJ = ModuleWidget::toJson();
 
-		// // width
+		// width
 		json_object_set_new(rootJ, "width", json_real(box.size.x));
 
 		return rootJ;

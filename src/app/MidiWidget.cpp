@@ -104,8 +104,6 @@ struct MidiChannelChoice : LedDisplayChoice {
 
 
 MidiWidget::MidiWidget() {
-	box.size = mm2px(Vec(44, 28));
-
 	Vec pos = Vec();
 
 	MidiDriverChoice *driverChoice = Widget::create<MidiDriverChoice>(pos);
@@ -130,15 +128,18 @@ MidiWidget::MidiWidget() {
 	channelChoice->midiWidget = this;
 	addChild(channelChoice);
 	this->channelChoice = channelChoice;
+
+	box.size = mm2px(Vec(44, 28));	
 }
 
-void MidiWidget::step() {
+void MidiWidget::onResize() {
 	this->driverChoice->box.size.x = box.size.x;
 	this->driverSeparator->box.size.x = box.size.x;
 	this->deviceChoice->box.size.x = box.size.x;
 	this->deviceSeparator->box.size.x = box.size.x;
 	this->channelChoice->box.size.x = box.size.x;
-	LedDisplay::step();
+	
+	LedDisplay::onResize();
 }
 
 
