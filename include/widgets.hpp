@@ -183,7 +183,8 @@ Never inherit from Widget directly. Instead, inherit from VirtualWidget declared
 */
 struct Widget {
 	/** Stores position and size */
-	BoxWrapper box;
+	Rect box = Rect(Vec(), Vec(INFINITY, INFINITY));
+	Rect lastBox;
 	Widget *parent = NULL;
 	std::list<Widget*> children;
 	bool visible = true;

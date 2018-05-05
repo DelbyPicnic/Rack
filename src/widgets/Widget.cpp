@@ -64,7 +64,7 @@ DirtyWrapper& DirtyWrapper::operator =(bool _dirty) {
 	return *this;
 }
 
-Widget::Widget() : box(this, Rect(Vec(), Vec(INFINITY, INFINITY))), dirty(this, true) {
+Widget::Widget() : /*box(this, Rect(Vec(), Vec(INFINITY, INFINITY))),*/ dirty(this, true) {
 
 }
 
@@ -165,6 +165,11 @@ void Widget::finalizeEvents() {
 }
 
 void Widget::step() {
+	if (!box.size.isEqual(lastBox.size)) {
+		onResize();
+		lastBox.size = box.size;
+	}
+
 	for (Widget *child : children) {
 		child->step();
 	}
