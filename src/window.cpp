@@ -345,6 +345,8 @@ void windowInit() {
 	glfwWindowHint(GLFW_ALPHA_BITS, 0);
 
 #if (defined(__arm__) || defined(__aarch64__))
+	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+
 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	int w = mode->width, h = mode->height;
