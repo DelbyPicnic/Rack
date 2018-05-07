@@ -125,6 +125,21 @@ struct MenuItem : MenuEntry {
 	}
 };
 
+struct ChoiceMenuItem : MenuItem {
+	Widget *choice;
+	void onDragDrop(EventDragDrop &e) override;
+
+	template <typename T = ChoiceMenuItem>
+	static T *create(Widget *choice, std::string text, std::string rightText = "") {
+		T *o = MenuEntry::create<T>();
+		o->choice = choice;
+		o->text = text;
+		o->rightText = rightText;
+		return o;
+	}
+};
+
+
 struct WindowOverlay : OpaqueWidget {
 };
 
@@ -213,6 +228,7 @@ struct TextField : OpaqueWidget {
 	void onMouseDown(EventMouseDown &e) override;
 	void onMouseMove(EventMouseMove &e) override;
 	void onFocus(EventFocus &e) override;
+	void onDefocus(EventDefocus &e) override;
 	void onText(EventText &e) override;
 	void onKey(EventKey &e) override;
 	/** Inserts text at the cursor, replacing the selection if necessary */

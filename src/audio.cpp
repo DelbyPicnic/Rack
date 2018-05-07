@@ -155,6 +155,7 @@ void AudioIO::setDevice(int device, int offset) {
 	this->device = device;
 	this->offset = offset;
 	openStream();
+	onDeviceChange();
 }
 
 std::vector<int> AudioIO::getSampleRates() {
@@ -367,6 +368,7 @@ void AudioIO::fromJson(json_t *rootJ) {
 		blockSize = json_integer_value(blockSizeJ);
 
 	openStream();
+	onDeviceChange();
 }
 
 

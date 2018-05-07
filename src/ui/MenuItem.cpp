@@ -63,4 +63,23 @@ void MenuItem::onDragDrop(EventDragDrop &e) {
 }
 
 
+void ChoiceMenuItem::onDragDrop(EventDragDrop &e) {
+	if (e.origin != this)
+		return;
+
+	EventAction eAction;
+	// Consume event by default, but allow action to un-consume it to prevent the menu from being removed.
+	eAction.consumed = true;
+	onAction(eAction);
+	if (eAction.consumed) {
+		// deletes `this`
+		gScene->setOverlay(NULL);
+
+		if (choice) {
+			EventChange e2;
+			choice->onChange(e2);
+		}
+	}
+}
+
 } // namespace rack

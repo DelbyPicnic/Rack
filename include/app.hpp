@@ -358,7 +358,7 @@ struct LedDisplaySeparator : TransparentWidget {
 };
 
 struct LedDisplayChoice : TransparentWidget {
-	std::string text;
+	FieldWrapper<std::string> text;
 	std::shared_ptr<Font> font;
 	Vec textOffset;
 	NVGcolor color;
@@ -391,6 +391,7 @@ struct AudioWidget : LedDisplay {
 	LedDisplaySeparator *sampleRateSeparator;
 	LedDisplayChoice *bufferSizeChoice;
 	AudioWidget();
+	void onChange(EventChange &e) override;
 	void onResize() override;
 };
 

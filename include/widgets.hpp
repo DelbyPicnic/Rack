@@ -177,7 +177,6 @@ struct DirtyWrapper {
 	};
 };
 
-
 /** A node in the 2D scene graph
 Never inherit from Widget directly. Instead, inherit from VirtualWidget declared below.
 */
@@ -300,6 +299,29 @@ struct Widget {
 		o->box.pos = pos;
 		return o;
 	}
+};
+
+template <typename T>
+struct FieldWrapper : T {
+	Widget *widget;
+
+	FieldWrapper(Widget *_widget, T v) {
+		widget = _widget;
+	};
+
+	FieldWrapper& operator=(T v) {
+		T::operator=(v);
+		widget->dirty = true;
+
+		return *this;
+	};
+
+	FieldWrapper& operator=(FieldWrapper<T> &another) {
+		T::operator=(another);
+		widget->dirty = true;
+
+		return *this;		
+	};
 };
 
 /** Instead of inheriting from Widget directly, inherit from VirtualWidget to guarantee that only one copy of Widget's member variables are used by each instance of the Widget hierarchy.
