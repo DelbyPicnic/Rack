@@ -33,6 +33,7 @@ void TextField::draw(NVGcontext *vg) {
 void TextField::onMouseDown(EventMouseDown &e) {
 	if (e.button == 0) {
 		cursor = selection = getTextPosition(e.pos);
+		dirty = true;
 	}
 	OpaqueWidget::onMouseDown(e);
 }
@@ -42,6 +43,7 @@ void TextField::onMouseMove(EventMouseMove &e) {
 		int pos = getTextPosition(e.pos);
 		if (pos != selection) {
 			cursor = pos;
+			dirty = true;
 		}
 	}
 	OpaqueWidget::onMouseMove(e);
@@ -49,6 +51,12 @@ void TextField::onMouseMove(EventMouseMove &e) {
 
 void TextField::onFocus(EventFocus &e) {
 	e.consumed = true;
+	dirty = true;
+}
+
+void TextField::onDefocus(EventDefocus &e) {
+	e.consumed = true;
+	dirty = true;
 }
 
 void TextField::onText(EventText &e) {
@@ -169,6 +177,7 @@ void TextField::onKey(EventKey &e) {
 	cursor = clamp(cursor, 0, (int) text.size());
 	selection = clamp(selection, 0, (int) text.size());
 	e.consumed = true;
+	dirty = true;
 }
 
 void TextField::insertText(std::string text) {
@@ -181,12 +190,14 @@ void TextField::insertText(std::string text) {
 	cursor += text.size();
 	selection = cursor;
 	onTextChange();
+	dirty = true;
 }
 
 void TextField::setText(std::string text) {
 	this->text = text;
 	selection = cursor = text.size();
 	onTextChange();
+	dirty = true;
 }
 
 int TextField::getTextPosition(Vec mousePos) {

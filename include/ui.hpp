@@ -223,6 +223,7 @@ struct TextField : OpaqueWidget {
 
 	TextField() {
 		box.size.y = BND_WIDGET_HEIGHT;
+		canSquash = true;
 	}
 	void draw(NVGcontext *vg) override;
 	void onMouseDown(EventMouseDown &e) override;
