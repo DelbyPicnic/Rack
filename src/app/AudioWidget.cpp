@@ -5,7 +5,7 @@
 namespace rack {
 
 
-struct AudioDriverItem : MenuItem {
+struct AudioDriverItem : ChoiceMenuItem {
 	AudioIO *audioIO;
 	int driver;
 	void onAction(EventAction &e) override {
@@ -19,21 +19,22 @@ struct AudioDriverChoice : LedDisplayChoice {
 		Menu *menu = gScene->createMenu();
 		menu->addChild(construct<MenuLabel>(&MenuLabel::text, "Audio driver"));
 		for (int driver : audioWidget->audioIO->getDrivers()) {
-			AudioDriverItem *item = new AudioDriverItem();
+			AudioDriverItem *item = ChoiceMenuItem::create<AudioDriverItem>(this,
+				audioWidget->audioIO->getDriverName(driver),
+				CHECKMARK(driver == audioWidget->audioIO->driver)
+			);
 			item->audioIO = audioWidget->audioIO;
 			item->driver = driver;
-			item->text = audioWidget->audioIO->getDriverName(driver);
-			item->rightText = CHECKMARK(item->driver == audioWidget->audioIO->driver);
 			menu->addChild(item);
 		}
 	}
-	void step() override {
+	void onChange(EventChange &e) override {
 		text = audioWidget->audioIO->getDriverName(audioWidget->audioIO->driver);
 	}
 };
 
 
-struct AudioDeviceItem : MenuItem {
+struct AudioDeviceItem : ChoiceMenuItem {
 	AudioIO *audioIO;
 	int device;
 	int offset;
@@ -52,27 +53,29 @@ struct AudioDeviceChoice : LedDisplayChoice {
 		menu->addChild(construct<MenuLabel>(&MenuLabel::text, "Audio device"));
 		int deviceCount = audioWidget->audioIO->getDeviceCount();
 		{
-			AudioDeviceItem *item = new AudioDeviceItem();
+			AudioDeviceItem *item = ChoiceMenuItem::create<AudioDeviceItem>(this,
+				"(No device)",
+				CHECKMARK(-1 == audioWidget->audioIO->device)
+			);
 			item->audioIO = audioWidget->audioIO;
 			item->device = -1;
-			item->text = "(No device)";
-			item->rightText = CHECKMARK(item->device == audioWidget->audioIO->device);
 			menu->addChild(item);
 		}
 		for (int device = 0; device < deviceCount; device++) {
 			int channels = min(maxTotalChannels, audioWidget->audioIO->getDeviceChannels(device));
 			for (int offset = 0; offset < channels; offset += audioWidget->audioIO->maxChannels) {
-				AudioDeviceItem *item = new AudioDeviceItem();
+				AudioDeviceItem *item = ChoiceMenuItem::create<AudioDeviceItem>(this,
+					audioWidget->audioIO->getDeviceDetail(device, offset),
+					CHECKMARK(device == audioWidget->audioIO->device && offset == audioWidget->audioIO->offset)
+				);
 				item->audioIO = audioWidget->audioIO;
 				item->device = device;
 				item->offset = offset;
-				item->text = audioWidget->audioIO->getDeviceDetail(device, offset);
-				item->rightText = CHECKMARK(item->device == audioWidget->audioIO->device && item->offset == audioWidget->audioIO->offset);
 				menu->addChild(item);
 			}
 		}
 	}
-	void step() override {
+	void onChange(EventChange &e) override {
 		text = audioWidget->audioIO->getDeviceDetail(audioWidget->audioIO->device, audioWidget->audioIO->offset);
 		if (text.empty()) {
 			text = "(No device)";
@@ -85,7 +88,7 @@ struct AudioDeviceChoice : LedDisplayChoice {
 };
 
 
-struct AudioSampleRateItem : MenuItem {
+struct AudioSampleRateItem : ChoiceMenuItem {
 	AudioIO *audioIO;
 	int sampleRate;
 	void onAction(EventAction &e) override {
@@ -104,21 +107,22 @@ struct AudioSampleRateChoice : LedDisplayChoice {
 			menu->addChild(construct<MenuLabel>(&MenuLabel::text, "(Locked by device)"));
 		}
 		for (int sampleRate : sampleRates) {
-			AudioSampleRateItem *item = new AudioSampleRateItem();
+			AudioSampleRateItem *item = ChoiceMenuItem::create<AudioSampleRateItem>(this,
+				stringf("%d Hz", sampleRate),
+				CHECKMARK(sampleRate == audioWidget->audioIO->sampleRate)
+			);
 			item->audioIO = audioWidget->audioIO;
 			item->sampleRate = sampleRate;
-			item->text = stringf("%d Hz", sampleRate);
-			item->rightText = CHECKMARK(item->sampleRate == audioWidget->audioIO->sampleRate);
 			menu->addChild(item);
 		}
 	}
-	void step() override {
+	void onChange(EventChange &e) override {
 		text = stringf("%g kHz", audioWidget->audioIO->sampleRate / 1000.f);
 	}
 };
 
 
-struct AudioBlockSizeItem : MenuItem {
+struct AudioBlockSizeItem : ChoiceMenuItem {
 	AudioIO *audioIO;
 	int blockSize;
 	void onAction(EventAction &e) override {
@@ -136,22 +140,25 @@ struct AudioBlockSizeChoice : LedDisplayChoice {
 			menu->addChild(construct<MenuLabel>(&MenuLabel::text, "(Locked by device)"));
 		}
 		for (int blockSize : blockSizes) {
-			AudioBlockSizeItem *item = new AudioBlockSizeItem();
+			float latency = (float) blockSize / audioWidget->audioIO->sampleRate * 1000.0;
+			AudioBlockSizeItem *item = ChoiceMenuItem::create<AudioBlockSizeItem>(this,
+				stringf("%d (%.1f ms)", blockSize, latency),
+				CHECKMARK(blockSize == audioWidget->audioIO->blockSize)
+			);
 			item->audioIO = audioWidget->audioIO;
 			item->blockSize = blockSize;
-			float latency = (float) blockSize / audioWidget->audioIO->sampleRate * 1000.0;
-			item->text = stringf("%d (%.1f ms)", blockSize, latency);
-			item->rightText = CHECKMARK(item->blockSize == audioWidget->audioIO->blockSize);
 			menu->addChild(item);
 		}
 	}
-	void step() override {
+	void onChange(EventChange &e) override {
 		text = stringf("%d", audioWidget->audioIO->blockSize);
 	}
 };
 
 
 AudioWidget::AudioWidget() {
+	canSquash = true;
+
 	Vec pos = Vec();
 
 	AudioDriverChoice *driverChoice = Widget::create<AudioDriverChoice>(pos);
@@ -187,6 +194,13 @@ AudioWidget::AudioWidget() {
 	this->bufferSizeChoice = bufferSizeChoice;
 
 	box.size = mm2px(Vec(44, 28));	
+}
+
+void AudioWidget::onChange(EventChange &e) {
+	driverChoice->onChange(e);
+	deviceChoice->onChange(e);	
+	sampleRateChoice->onChange(e);
+	bufferSizeChoice->onChange(e);
 }
 
 void AudioWidget::onResize() {

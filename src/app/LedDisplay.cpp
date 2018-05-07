@@ -30,7 +30,7 @@ void LedDisplaySeparator::draw(NVGcontext *vg) {
 }
 
 
-LedDisplayChoice::LedDisplayChoice() {
+LedDisplayChoice::LedDisplayChoice() : text(this, std::string()) {
 	box.size = mm2px(Vec(0, 28.0 / 3));
 	font = Font::load(assetGlobal("res/fonts/ShareTechMono-Regular.ttf"));
 	color = nvgRGB(0xff, 0xd7, 0x14);

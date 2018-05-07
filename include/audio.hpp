@@ -57,6 +57,7 @@ struct AudioIO {
 	virtual void onCloseStream() {}
 	virtual void onOpenStream() {}
 	virtual void onChannelsChange() {}
+	virtual void onDeviceChange() {}
 	json_t *toJson();
 	void fromJson(json_t *rootJ);
 };

@@ -38,6 +38,7 @@ struct AudioInterfaceIO2 : AudioIO {
 	volatile bool bufReady = false;
 	bool active = false;
 	Module *module;
+	AudioWidget *widget;
 
 	~AudioInterfaceIO2() {
 		// Close stream here before destructing AudioInterfaceIO, so the mutexes are still valid when waiting to close.
@@ -51,14 +52,16 @@ struct AudioInterfaceIO2 : AudioIO {
 		engineStepMT(frames);
 	}
 
+	void onDeviceChange() override {
+		EventChange e;
+		widget->onChange(e);		
+	}
+
 	void onCloseStream() override {
 		inputBuffer.clear();
 		outputBuffer.clear();
 		active = false;
-		module->lights[0].value = 0; // Because step() won't be called
-	}
-
-	void onChannelsChange() override {
+		module->lights[0].value = 0;
 	}
 };
 
@@ -140,6 +143,7 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		AudioWidget *audioWidget = Widget::create<AudioWidget>(mm2px(Vec(3.2122073, 14.837339)));
 		audioWidget->box.size = mm2px(Vec(34.5, 28));
 		audioWidget->audioIO = &module->audioIO;
+		module->audioIO.widget = audioWidget;
 		addChild(audioWidget);
 	}
 };
