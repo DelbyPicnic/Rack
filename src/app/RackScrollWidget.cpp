@@ -20,9 +20,25 @@ void RackScrollWidget::step() {
 			offset.y -= speed;
 		if (pos.y >= viewport.pos.y + viewport.size.y - margin)
 			offset.y += speed;
+
+		updateForOffsetChange();
 	}
+	
 	ScrollWidget::step();
 }
 
+void RackScrollWidget::updateForOffsetChange() {
+	ZoomWidget *zoomWidget = static_cast<RackScene*>(gScene)->zoomWidget;
+	
+	// Resize to be a bit larger than the ScrollWidget viewport
+	gRackWidget->box.size = box.size
+		.minus(container->box.pos)
+		.plus(Vec(500, 500))
+		.div(zoomWidget->zoom);
+
+	zoomWidget->box.size = gRackWidget->box.size.mult(zoomWidget->zoom);
+
+	ScrollWidget::updateForOffsetChange();
+}
 
 } // namespace rack
