@@ -39,7 +39,7 @@ modular80 | cschol/modular80 | ? | modular80
 MrLumps | djpeterso23662/MrLumps | ? | MrLumps
 mscHack | mi-rack/mscHack | ~ | mscHack
 mtsch-plugins | mtsch/mtsch-vcvrack-plugins | ? | mtsch modules
-NauModular | naus3a/NauModular | ? | NauModular
+NauModular | naus3a/NauModular | ~ | NauModular
 Nohmad | joelrobichaud/Nohmad | ? | Nohmad
 NonLinearInstruments | NonLinearInstruments/NLNRI_VCVRackPlugins | ? | Nonlinear instruments
 Ohmer | DomiKamu/Ohmer-Modules | ? | Flagship of Ohmer Modules is KlokSpid (pronunciation of "clock speed"), a modern "CPU-controlled"-style clocking module, designed for any rack requiring BPM-based clock sources and/or clock modulators (clock multipliers and dividers).
