@@ -528,7 +528,7 @@ struct RackScene : Scene {
 	ZoomWidget *zoomWidget;
 
 	RackScene();
-	void step() override;
+	void onResize() override;
 	void draw(NVGcontext *vg) override;
 	void onHoverKey(EventHoverKey &e) override;
 	void onPathDrop(EventPathDrop &e) override;

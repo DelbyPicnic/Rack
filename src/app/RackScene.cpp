@@ -26,7 +26,7 @@ RackScene::RackScene() {
 	scrollWidget->box.pos.y = gToolbar->box.size.y;
 }
 
-void RackScene::step() {
+void RackScene::onResize() {
 	// Resize owned descendants
 	gToolbar->box.size.x = box.size.x;
 	scrollWidget->box.size = box.size.minus(scrollWidget->box.pos);
@@ -37,9 +37,9 @@ void RackScene::step() {
 		.plus(Vec(500, 500))
 		.div(zoomWidget->zoom);
 
-	Scene::step();
-
 	zoomWidget->box.size = gRackWidget->box.size.mult(zoomWidget->zoom);
+
+	Scene::onResize();	
 }
 
 void RackScene::draw(NVGcontext *vg) {
