@@ -8,6 +8,8 @@
 #include <algorithm>
 #include "osdialog.h"
 
+#include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 
 namespace rack {
 
@@ -31,14 +33,7 @@ struct ModuleContainer : Widget {
 
 
 RackWidget::RackWidget() {
-	rails = new FramebufferWidget();
-	rails->box.size = Vec();
-	rails->oversample = 1.0;
-	{
-		RackRail *rail = new RackRail();
-		rail->box.size = Vec();
-		rails->addChild(rail);
-	}
+	// rails = new RackRail();
 	// addChild(rails);
 
 	moduleContainer = new ModuleContainer();
@@ -53,6 +48,9 @@ RackWidget::~RackWidget() {
 	// and only then superclass will eventually destroy ModuleWidget instances
 	// that need the lights vector.
 	clearChildren();
+
+	delete railsTemplate;
+	railsTemplate = NULL;
 }
 
 void RackWidget::clear() {
@@ -374,9 +372,7 @@ bool RackWidget::requestModuleBox(ModuleWidget *m, Rect box) {
 			return false;
 		}
 	}
-	// if (!box.size.isEqual(m->box.size))
-	// 	if (m->staticPanel)
-	// 		m->staticPanel->dirty = true;
+
 	m->box = box;
 	return true;
 }
@@ -424,22 +420,35 @@ bool RackWidget::requestModuleBoxNearest(ModuleWidget *m, Rect box) {
 }
 
 void RackWidget::step() {
+	if (!railsTemplate) {
+		railsTemplate = new SVGWidget();
+		railsTemplate->setSVG(SVG::load(assetGlobal("res/RailDouble.svg")));
+		
+		// if (isNear(gPixelRatio, 1.0))
+		// 	oversample = 2.0;
+		Vec fbSize = railsTemplate->box.size.mult(gPixelRatio * oversample);
+		NVGcontext *vg = gVg;
+		
+		railsTemplate->fb = nvgluCreateFramebuffer(vg, fbSize.x, fbSize.y, NVG_IMAGE_REPEATX);
+		nvgluBindFramebuffer(railsTemplate->fb);
+		glViewport(0.0, 0.0, fbSize.x, fbSize.y);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+		nvgBeginFrame(vg, fbSize.x, fbSize.y, gPixelRatio * oversample);
+
+		nvgReset(vg);
+		nvgScale(vg, gPixelRatio * oversample, gPixelRatio * oversample);
+		railsTemplate->draw(vg);
+		nvgEndFrame(vg);
+		nvgluBindFramebuffer(NULL);
+	}
+
+
 	// Expand size to fit modules
 	Vec moduleSize = moduleContainer->getChildrenBoundingBox().getBottomRight();
 	// We assume that the size is reset by a parent before calling step(). Otherwise it will grow unbounded.
 	box.size = box.size.max(moduleSize);
-
-	// Adjust size and position of rails
-	Widget *rail = rails->children.front();
-	Rect bound = getViewport(Rect(Vec(), box.size));
-	if (!rails->box.contains(bound)) {
-		Vec cellMargin = Vec(20, 1);
-		rails->box.pos = bound.pos.div(RACK_GRID_SIZE).floor().minus(cellMargin).mult(RACK_GRID_SIZE);
-		rails->box.size = bound.size.plus(cellMargin.mult(RACK_GRID_SIZE).mult(2));
-		rails->dirty = true;
-
-		rail->box.size = rails->box.size;
-	}
 
 	// Autosave every 15 seconds
 	if (gGuiFrame % (60 * 15) == 0) {
@@ -451,12 +460,31 @@ void RackWidget::step() {
 }
 
 void RackWidget::draw(NVGcontext *vg) {
-	// rails->draw(vg);
+	// Rails
+	Rect bound = getViewport(Rect(Vec(), box.size));
+	Vec railsOrigin = bound.pos.div(RACK_GRID_SIZE).floor().mult(RACK_GRID_SIZE);
+	int railCount = (bound.size.y+bound.pos.y-railsOrigin.y) / RACK_GRID_HEIGHT;
+	if ((bound.pos.y-railsOrigin.y) > RACK_GRID_WIDTH)
+		railsOrigin.y += RACK_GRID_HEIGHT;
+
+	nvgSave(vg);
+	nvgTranslate(vg, railsOrigin.x, railsOrigin.y);
+	nvgTranslate(vg, 0, -RACK_GRID_WIDTH);
+
+	for (int i = 0; i <= railCount; i++) {
+		nvgBeginPath(vg);
+		nvgRect(vg, 0.0, 0.0, bound.size.x+RACK_GRID_WIDTH, RACK_GRID_WIDTH*2);
+		nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, RACK_GRID_WIDTH, RACK_GRID_WIDTH*2, 0.0, railsTemplate->fb->image, 1.0));
+		nvgFill(vg);
+		nvgTranslate(vg, 0, RACK_GRID_HEIGHT);
+	}
+	nvgRestore(vg);
 
 	float zoom = 1./gRackScene->zoomWidget->zoom;
 	Vec pos = parent->parent->box.pos.neg().mult(zoom);
 	Vec size = parent->parent->parent->box.size.mult(zoom);
 
+	// Static panels
 	for (Widget *child : moduleContainer->children) {
 		ModuleWidget *mw = dynamic_cast<ModuleWidget*>(child);
 		if (!mw->staticPanel)
@@ -472,6 +500,7 @@ void RackWidget::draw(NVGcontext *vg) {
 		nvgRestore(vg);
 	}
 
+	// Everything else
 	for (Widget *child : moduleContainer->children) {
 		if (child->box.pos.x-pos.x >= size.x || child->box.pos.y-pos.y >= size.y ||
 			child->box.pos.x+child->box.size.x < pos.x || child->box.pos.y+child->box.size.y < pos.y)
@@ -483,18 +512,11 @@ void RackWidget::draw(NVGcontext *vg) {
 		nvgRestore(vg);
 	}
 
+	// Lights
 	static int lightImage = 0;
 	static unsigned char lightData[256*4];
-	if (!lightImage) {
-		// for (int i = 0; i < 256; i++)
-		// {
-		// 	lightData[i*4+0] = 255;
-		// 	lightData[i*4+1] = 0;
-		// 	lightData[i*4+2] = 0;
-		// 	lightData[i*4+3] = 255;
-		// }
+	if (!lightImage)
 		lightImage = nvgCreateImageRGBA(vg, 256, 1, NVG_IMAGE_NEAREST|NVG_IMAGE_PREMULTIPLIED, lightData);
-	}
 
 	nvgBeginPath(vg);
 	nvgAllowMergeSubpaths(vg);
@@ -502,14 +524,9 @@ void RackWidget::draw(NVGcontext *vg) {
 	int i = 0;
 	for (LightWidget *light : lights) {
 		light->step();
-		// if (!child->visible)
-		// 	continue;
-		// light->draw(vg);
-		// wire->needsRender = false;
 
 		float radius = light->box.size.x / 2.0;
 
-		// nvgBeginPath(vg);
 		nvgCircle(vg, light->parent->box.pos.x+light->box.pos.x+radius, light->parent->box.pos.y+light->box.pos.y+radius, radius);
 		nvgSubpathTexPos(vg, i/256., 0.5f);
 		float a = light->color.a;
@@ -518,25 +535,10 @@ void RackWidget::draw(NVGcontext *vg) {
 		lightData[i*4+1] = (light->bgColor.g * bga + light->color.g * a) * 255.;
 		lightData[i*4+2] = (light->bgColor.b * bga + light->color.b * a) * 255.;
 		lightData[i*4+3] = (light->bgColor.a * bga + light->color.a) * 255.;
-// printf("%p %f %f\n", light, light->color.r, light->color.g);
 
-		// // Background
-		// if (color.a < 1.f)
-		// {
-		// 	nvgFillColor(vg, bgColor);
-		// 	nvgFill(vg);
-		// }
-
-		// Foreground
-		// if (color.a)
-		// {
-		// 	nvgFillColor(vg, color);
-		// 	nvgFill(vg);
-		// }		
 		i++;
 	}
 
-	// nvgFillColor(vg, nvgRGB(0x47, 0x18, 0xc9));
 	nvgUpdateImage(vg, lightImage, lightData);
 	nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 256, 1, 0.0, lightImage, 1.0));
 	nvgFill(vg);
@@ -562,7 +564,7 @@ void RackWidget::onMouseDown(EventMouseDown &e) {
 }
 
 void RackWidget::onZoom(EventZoom &e) {
-	rails->box.size = Vec();
+	// rails->box.size = Vec();
 	Widget::onZoom(e);
 }
 

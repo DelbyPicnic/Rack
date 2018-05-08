@@ -143,7 +143,7 @@ struct WireContainer : TransparentWidget {
 };
 
 struct RackWidget : OpaqueWidget {
-	FramebufferWidget *rails;
+	SVGWidget *railsTemplate;
 	// Only put ModuleWidgets in here
 	Widget *moduleContainer;
 	// Only put WireWidgets in here
@@ -189,6 +189,7 @@ struct RackWidget : OpaqueWidget {
 };
 
 struct RackRail : TransparentWidget {
+	void step() override;
 	void draw(NVGcontext *vg) override;
 };
 

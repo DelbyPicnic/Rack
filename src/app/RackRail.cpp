@@ -1,61 +1,55 @@
 #include "app.hpp"
+#include "asset.hpp"
+#include "window.hpp"
+
+#include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 
 
 namespace rack {
 
+static SVGWidget *sw;
+
+void RackRail::step() {
+	if (sw)
+		return;
+
+	sw = new SVGWidget();
+	sw->setSVG(SVG::load(assetGlobal("res/RailDouble.svg")));
+	
+	// if (isNear(gPixelRatio, 1.0))
+	// 	oversample = 2.0;
+	Vec fbSize = sw->box.size.mult(gPixelRatio * oversample);
+	NVGcontext *vg = gVg;
+	
+	sw->fb = nvgluCreateFramebuffer(vg, fbSize.x, fbSize.y, NVG_IMAGE_REPEATX);
+	nvgluBindFramebuffer(sw->fb);
+	glViewport(0.0, 0.0, fbSize.x, fbSize.y);
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	nvgBeginFrame(vg, fbSize.x, fbSize.y, gPixelRatio * oversample);
+
+	nvgReset(vg);
+	nvgScale(vg, gPixelRatio * oversample, gPixelRatio * oversample);
+	sw->draw(vg);
+	nvgEndFrame(vg);
+	nvgluBindFramebuffer(NULL);
+}
+
 void RackRail::draw(NVGcontext *vg) {
-	return;
 	const float railHeight = RACK_GRID_WIDTH;
+	nvgSave(vg);
+	nvgTranslate(vg, 0, -railHeight);
 
-	// Background color
-	nvgBeginPath(vg);
-	nvgRect(vg, 0.0, 0.0, box.size.x, box.size.y);
-	nvgFillColor(vg, nvgRGBf(0.2, 0.2, 0.2));
-	nvgFill(vg);
-
-	// Rails
-	nvgFillColor(vg, nvgRGBf(0.85, 0.85, 0.85));
-	nvgStrokeWidth(vg, 1.0);
-	nvgStrokeColor(vg, nvgRGBf(0.7, 0.7, 0.7));
-	float holeRadius = 3.5;
-	for (float railY = 0; railY < box.size.y; railY += RACK_GRID_HEIGHT) {
-		// Top rail
+	for (float railY = 0; railY < gRackWidget->box.size.y; railY += RACK_GRID_HEIGHT) {
 		nvgBeginPath(vg);
-		nvgRect(vg, 0, railY, box.size.x, railHeight);
-		for (float railX = 0; railX < box.size.x; railX += RACK_GRID_WIDTH) {
-			nvgCircle(vg, railX + RACK_GRID_WIDTH / 2, railY + railHeight / 2, holeRadius);
-			nvgPathWinding(vg, NVG_HOLE);
-		}
+		nvgRect(vg, 0.0, 0.0, gRackWidget->box.size.x, sw->box.size.y);
+		nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, sw->box.size.x, sw->box.size.y, 0.0, sw->fb->image, 1.0));
 		nvgFill(vg);
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, 0, railY + railHeight - 0.5);
-		nvgLineTo(vg, box.size.x, railY + railHeight - 0.5);
-		nvgStroke(vg);
-
-		// Bottom rail
-		nvgBeginPath(vg);
-		nvgRect(vg, 0, railY + RACK_GRID_HEIGHT - railHeight, box.size.x, railHeight);
-		for (float railX = 0; railX < box.size.x; railX += RACK_GRID_WIDTH) {
-			nvgCircle(vg, railX + RACK_GRID_WIDTH / 2, railY + RACK_GRID_HEIGHT - railHeight + railHeight / 2, holeRadius);
-			nvgPathWinding(vg, NVG_HOLE);
-		}
-		nvgFill(vg);
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, 0, railY + RACK_GRID_HEIGHT - 0.5);
-		nvgLineTo(vg, box.size.x, railY + RACK_GRID_HEIGHT - 0.5);
-		nvgStroke(vg);
+		nvgTranslate(vg, 0, RACK_GRID_HEIGHT);
 	}
-
-
-	// Useful for screenshots
-	if (0) {
-		nvgBeginPath(vg);
-		nvgRect(vg, 0.0, 0.0, box.size.x, box.size.y);
-		nvgFillColor(vg, nvgRGBf(1.0, 1.0, 1.0));
-		nvgFill(vg);
-	}
+	nvgRestore(vg);
 }
 
 

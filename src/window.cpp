@@ -324,7 +324,7 @@ void renderGui() {
 	gScene->draw(gVg);
 
 	glViewport(0, 0, width, height);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.2, 0.2, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	nvgEndFrame(gVg);
 	glfwSwapBuffers(gWindow);

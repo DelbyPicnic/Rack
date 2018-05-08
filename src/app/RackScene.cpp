@@ -31,14 +31,6 @@ void RackScene::onResize() {
 	gToolbar->box.size.x = box.size.x;
 	scrollWidget->box.size = box.size.minus(scrollWidget->box.pos);
 
-	// // Resize to be a bit larger than the ScrollWidget viewport
-	// gRackWidget->box.size = scrollWidget->box.size
-	// 	.minus(scrollWidget->container->box.pos)
-	// 	.plus(Vec(500, 500))
-	// 	.div(zoomWidget->zoom);
-
-	// zoomWidget->box.size = gRackWidget->box.size.mult(zoomWidget->zoom);
-
 	Scene::onResize();	
 }
 
