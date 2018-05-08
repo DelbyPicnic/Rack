@@ -53,15 +53,18 @@ struct AudioInterfaceIO2 : AudioIO {
 	}
 
 	void onDeviceChange() override {
-		EventChange e;
-		widget->onChange(e);		
+		if (widget) {
+			EventChange e;
+			widget->onChange(e);		
+		}
 	}
 
 	void onCloseStream() override {
 		inputBuffer.clear();
 		outputBuffer.clear();
 		active = false;
-		module->lights[0].value = 0;
+		if (module)
+			module->lights[0].value = 0;
 	}
 };
 
@@ -94,8 +97,11 @@ struct AudioInterface2 : Module {
 	DoubleRingBuffer<Frame<AUDIO_OUTPUTS>, 16> outputBuffer;
 
 	AudioInterface2() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
-		onSampleRateChange();
 		audioIO.module = this;
+	}
+
+	~AudioInterface2() {
+		audioIO.module = NULL;
 	}
 
 	void step() override;
@@ -144,7 +150,13 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		audioWidget->box.size = mm2px(Vec(34.5, 28));
 		audioWidget->audioIO = &module->audioIO;
 		module->audioIO.widget = audioWidget;
+		EventChange e;
+		audioWidget->onChange(e);
 		addChild(audioWidget);
+	}
+
+	~AudioInterfaceWidget2() {
+		static_cast<AudioInterface2*>(module)->audioIO.widget = NULL;
 	}
 };
 

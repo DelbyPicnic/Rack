@@ -1,7 +1,7 @@
 #include "audio.hpp"
 #include "util/common.hpp"
 #include "bridge.hpp"
-
+#include "engine.hpp"
 
 namespace rack {
 
@@ -178,6 +178,7 @@ void AudioIO::setSampleRate(int sampleRate) {
 	closeStream();
 	this->sampleRate = sampleRate;
 	openStream();
+	engineSetSampleRate(sampleRate);
 }
 
 std::vector<int> AudioIO::getBlockSizes() {
@@ -281,6 +282,7 @@ void AudioIO::openStream() {
 
 		// Update sample rate because this may have changed
 		this->sampleRate = rtAudio->getStreamSampleRate();
+		engineSetSampleRate(sampleRate);
 		onOpenStream();
 	}
 	else if (driver == BRIDGE_DRIVER) {

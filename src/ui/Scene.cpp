@@ -13,7 +13,7 @@ void Scene::setOverlay(Widget *w) {
 	if (w) {
 		addChild(w);
 		overlay = w;
-		overlay->box.pos = Vec();
+		overlay->box = Rect(Vec(0,0), box.size);
 	}
 }
 
@@ -29,14 +29,11 @@ Menu *Scene::createMenu() {
 	return menu;
 }
 
-void Scene::step() {
-	if (overlay) {
-		overlay->box.pos = Vec(0, 0);
+void Scene::onResize() {
+	if (overlay)
 		overlay->box.size = box.size;
-	}
 
-	Widget::step();
+	Widget::onResize();
 }
-
 
 } // namespace rack

@@ -63,6 +63,7 @@ ScrollWidget::ScrollWidget() {
 void ScrollWidget::scrollTo(Rect r) {
 	Rect bound = Rect::fromMinMax(r.getBottomRight().minus(box.size), r.pos);
 	offset = offset.clamp2(bound);
+	updateForOffsetChange();
 }
 
 void ScrollWidget::draw(NVGcontext *vg) {
@@ -71,9 +72,7 @@ void ScrollWidget::draw(NVGcontext *vg) {
 	nvgResetScissor(vg);
 }
 
-void ScrollWidget::step() {
-	Widget::step();
-
+void ScrollWidget::updateForOffsetChange() {
 	// Clamp scroll offset
 	Vec containerCorner = container->getChildrenBoundingBox().getBottomRight();
 	Rect containerBox = Rect(Vec(0, 0), containerCorner.minus(box.size));
@@ -98,17 +97,22 @@ void ScrollWidget::step() {
 	verticalScrollBar->offset = scrollbarOffset.y;
 	horizontalScrollBar->size = scrollbarSize.x;
 	verticalScrollBar->size = scrollbarSize.y;
+};
+
+void ScrollWidget::onResize() {
+	updateForOffsetChange();
 
 	// Resize scroll bars
 	Vec inner = Vec(box.size.x - verticalScrollBar->box.size.x, box.size.y - horizontalScrollBar->box.size.y);
 	horizontalScrollBar->box.pos.y = inner.y+1;
 	verticalScrollBar->box.pos.x = inner.x;
 	horizontalScrollBar->box.size.x = verticalScrollBar->visible ? inner.x : box.size.x;
-	verticalScrollBar->box.size.y = horizontalScrollBar->visible ? inner.y : box.size.y;
-}
+	verticalScrollBar->box.size.y = horizontalScrollBar->visible ? inner.y : box.size.y;	
+};
 
 void ScrollWidget::onMouseMove(EventMouseMove &e) {
 	// Scroll with arrow keys
+	//TODO: wtf is this doing here?
 	if (!gFocusedWidget) {
 		float arrowSpeed = 30.0;
 		if (windowIsShiftPressed() && windowIsModPressed())
@@ -120,15 +124,19 @@ void ScrollWidget::onMouseMove(EventMouseMove &e) {
 
 		if (glfwGetKey(gWindow, GLFW_KEY_LEFT) == GLFW_PRESS) {
 			offset.x -= arrowSpeed;
+			updateForOffsetChange();
 		}
 		if (glfwGetKey(gWindow, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 			offset.x += arrowSpeed;
+			updateForOffsetChange();
 		}
 		if (glfwGetKey(gWindow, GLFW_KEY_UP) == GLFW_PRESS) {
 			offset.y -= arrowSpeed;
+			updateForOffsetChange();
 		}
 		if (glfwGetKey(gWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			offset.y += arrowSpeed;
+			updateForOffsetChange();
 		}
 	}
 
@@ -137,6 +145,7 @@ void ScrollWidget::onMouseMove(EventMouseMove &e) {
 
 void ScrollWidget::onScroll(EventScroll &e) {
 	offset = offset.minus(e.scrollRel);
+	updateForOffsetChange();
 	e.consumed = true;
 }
 

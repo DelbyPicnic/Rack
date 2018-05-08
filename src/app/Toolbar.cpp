@@ -119,9 +119,9 @@ Toolbar::Toolbar() {
 	fileChoice->text = "File";
 	layout->addChild(fileChoice);
 
-	EngineSampleRateChoice *srChoice = new EngineSampleRateChoice();
-	srChoice->box.size.x = 100;
-	layout->addChild(srChoice);
+	// EngineSampleRateChoice *srChoice = new EngineSampleRateChoice();
+	// srChoice->box.size.x = 100;
+	// layout->addChild(srChoice);
 
 	wireOpacitySlider = new Slider();
 	wireOpacitySlider->box.size.x = 150;

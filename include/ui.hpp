@@ -203,11 +203,12 @@ struct ScrollWidget : OpaqueWidget {
 
 	ScrollWidget();
 	void scrollTo(Rect r);
+	virtual void updateForOffsetChange();
 	void draw(NVGcontext *vg) override;
-	void step() override;
 	void onMouseMove(EventMouseMove &e) override;
 	void onScroll(EventScroll &e) override;
 	void onHoverKey(EventHoverKey &e) override;
+	void onResize() override;
 };
 
 struct TextField : OpaqueWidget {
@@ -260,7 +261,7 @@ struct Scene : OpaqueWidget {
 	Widget *overlay = NULL;
 	void setOverlay(Widget *w);
 	Menu *createMenu();
-	void step() override;
+	void onResize() override;
 };
 
 

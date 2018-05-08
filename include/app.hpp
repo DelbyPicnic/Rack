@@ -521,14 +521,15 @@ struct PluginManagerWidget : VirtualWidget {
 
 struct RackScrollWidget : ScrollWidget {
 	void step() override;
+	void updateForOffsetChange() override;
 };
 
 struct RackScene : Scene {
-	ScrollWidget *scrollWidget;
+	RackScrollWidget *scrollWidget;
 	ZoomWidget *zoomWidget;
 
 	RackScene();
-	void step() override;
+	void onResize() override;
 	void draw(NVGcontext *vg) override;
 	void onHoverKey(EventHoverKey &e) override;
 	void onPathDrop(EventPathDrop &e) override;

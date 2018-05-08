@@ -45,7 +45,23 @@ Vec gMousePos;
 std::string lastWindowTitle;
 
 
-void windowSizeCallback(GLFWwindow* window, int width, int height) {
+void windowSizeCallback(GLFWwindow* window, int windowWidth, int windowHeight) {
+	// Get desired scaling
+	float pixelRatio;
+	glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
+	pixelRatio = roundf(pixelRatio);
+	if (pixelRatio != gPixelRatio) {
+		EventZoom eZoom;
+		gScene->onZoom(eZoom);
+		gPixelRatio = pixelRatio;
+	}
+
+	// Get framebuffer/window ratio
+	int width, height;
+	glfwGetFramebufferSize(gWindow, &width, &height);
+	gWindowRatio = (float)width / windowWidth;
+
+	gScene->box.size = Vec(width, height).div(gPixelRatio);
 }
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
@@ -435,6 +451,10 @@ void windowRun() {
 	assert(gWindow);
 	gGuiFrame = 0;
 
+	int windowWidth, windowHeight;
+	glfwGetWindowSize(gWindow, &windowWidth, &windowHeight);
+	windowSizeCallback(gWindow, windowWidth, windowHeight);
+
 	const double fps = 30.;
 	double wait = 1./fps;
 	while(!glfwWindowShouldClose(gWindow)) {
@@ -464,24 +484,7 @@ void windowRun() {
 			lastWindowTitle = windowTitle;
 		}*/
 
-		// Get desired scaling
-		float pixelRatio;
-		glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
-		pixelRatio = roundf(pixelRatio);
-		if (pixelRatio != gPixelRatio) {
-			EventZoom eZoom;
-			gScene->onZoom(eZoom);
-			gPixelRatio = pixelRatio;
-		}
 
-		// Get framebuffer/window ratio
-		int width, height;
-		glfwGetFramebufferSize(gWindow, &width, &height);
-		int windowWidth, windowHeight;
-		glfwGetWindowSize(gWindow, &windowWidth, &windowHeight);
-		gWindowRatio = (float)width / windowWidth;
-
-		gScene->box.size = Vec(width, height).div(gPixelRatio);
 
 		// Step scene
 		gScene->step();

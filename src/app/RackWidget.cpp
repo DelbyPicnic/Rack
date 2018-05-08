@@ -341,7 +341,7 @@ void RackWidget::addModule(ModuleWidget *m) {
 	m->dirty = true;
 
 	//TODO: this is temporary until we handle individual dimension chages that resizable modules do in fromJson()
-	m->onResize();
+	//m->onResize();
 
 	m->create();
 }
