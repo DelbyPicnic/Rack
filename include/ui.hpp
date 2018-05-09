@@ -28,7 +28,7 @@ struct SequentialLayout : VirtualWidget {
 	Alignment alignment = LEFT_ALIGNMENT;
 	/** Space between adjacent elements */
 	float spacing = 0.0;
-	void step() override;
+	void onResize() override;
 };
 
 ////////////////////
@@ -51,12 +51,12 @@ struct Label : VirtualWidget {
 };
 
 struct List : OpaqueWidget {
-	void step() override;
+	void onResize() override;
 };
 
 /** Deletes itself from parent when clicked */
 struct MenuOverlay : OpaqueWidget {
-	void step() override;
+	void onResize() override;
 	void onMouseDown(EventMouseDown &e) override;
 	void onHoverKey(EventHoverKey &e) override;
 };

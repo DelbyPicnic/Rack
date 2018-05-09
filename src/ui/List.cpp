@@ -3,10 +3,8 @@
 
 namespace rack {
 
-
-void List::step() {
-	Widget::step();
-
+//TODO: no need to do all of this on resize
+void List::onResize() {
 	// Set positions of children
 	box.size.y = 0.0;
 	for (Widget *child : children) {
@@ -18,6 +16,8 @@ void List::step() {
 		// Resize width of child
 		child->box.size.x = box.size.x;
 	}
+
+	Widget::onResize();	
 }
 
 

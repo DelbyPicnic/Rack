@@ -36,6 +36,8 @@ struct ScrollBar : OpaqueWidget {
 			scrollWidget->offset.x += e.mouseRel.x;
 		else
 			scrollWidget->offset.y += e.mouseRel.y;
+
+		scrollWidget->updateForOffsetChange();
 	}
 
 	void onDragEnd(EventDragEnd &e) override {

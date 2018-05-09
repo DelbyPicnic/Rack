@@ -4,9 +4,7 @@
 namespace rack {
 
 
-void SequentialLayout::step() {
-	Widget::step();
-
+void SequentialLayout::onResize() {
 	float offset = 0.0;
 	for (Widget *child : children) {
 		if (!child->visible)
@@ -33,6 +31,8 @@ void SequentialLayout::step() {
 			continue;
 		(orientation == HORIZONTAL_ORIENTATION ? child->box.pos.x : child->box.pos.y) += offset;
 	}
+
+	Widget::onResize();	
 }
 
 

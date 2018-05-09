@@ -5,13 +5,13 @@
 namespace rack {
 
 
-void MenuOverlay::step() {
-	Widget::step();
-
+void MenuOverlay::onResize() {
 	// Fit all children in the box
 	for (Widget *child : children) {
 		child->box = child->box.nudge(box.zeroPos());
 	}
+
+	Widget::onResize();
 }
 
 void MenuOverlay::onMouseDown(EventMouseDown &e) {

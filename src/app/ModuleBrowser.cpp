@@ -129,10 +129,11 @@ struct ModelItem : BrowserListItem {
 		addChild(pluginLabel);
 	}
 
-	void step() override {
-		BrowserListItem::step();
+	void onResize() override {
 		if (pluginLabel)
 			pluginLabel->box.size.x = box.size.x - BND_SCROLLBAR_WIDTH;
+
+		BrowserListItem::onResize();
 	}
 
 	void onAction(EventAction &e) override {
@@ -316,9 +317,6 @@ struct ModuleBrowser : OpaqueWidget {
 				}
 			}
 		}
-
-		// Trigger search update
-		clearSearch();
 	}
 
 	void draw(NVGcontext *vg) override {
@@ -345,6 +343,7 @@ struct ModuleBrowser : OpaqueWidget {
 		std::string search = searchField->text;
 		moduleList->clearChildren();
 		moduleList->selected = 0;
+		moduleScroll->offset = Vec(0,0);
 		bool filterPage = !(sAuthorFilter.empty() && sTagFilter == NO_TAG);
 
 		if (!filterPage) {
@@ -419,15 +418,21 @@ struct ModuleBrowser : OpaqueWidget {
 				}
 			}
 		}
+
+		moduleList->onResize();
+		repositionSelf();
+		moduleScroll->updateForOffsetChange();
 	}
 
-	void step() override {
+	void repositionSelf() {
 		box.pos = parent->box.size.minus(box.size).div(2).round();
 		box.pos.y = 60;
 		box.size.y = parent->box.size.y - 2 * box.pos.y;
 		moduleScroll->box.size.y = min(box.size.y - moduleScroll->box.pos.y, moduleList->box.size.y);
 		box.size.y = min(box.size.y, moduleScroll->box.getBottomRight().y);
+	}
 
+	void step() override {
 		gFocusedWidget = searchField;
 		Widget::step();
 	}
@@ -530,13 +535,26 @@ void SearchModuleField::onKey(EventKey &e) {
 	}
 }
 
+struct ModuleBrowserOverlay : MenuOverlay {
+	ModuleBrowser *moduleBrowser;
+
+	void onResize() override {
+		moduleBrowser->repositionSelf();
+
+		MenuOverlay::onResize();
+	}
+};
+
 // Global functions
 
 void appModuleBrowserCreate() {
-	MenuOverlay *overlay = new MenuOverlay();
+	ModuleBrowserOverlay *overlay = new ModuleBrowserOverlay();
 
-	ModuleBrowser *moduleBrowser = new ModuleBrowser();
-	overlay->addChild(moduleBrowser);
+	overlay->moduleBrowser = new ModuleBrowser();
+	overlay->addChild(overlay->moduleBrowser);
+
+	// Trigger search update
+	overlay->moduleBrowser->clearSearch();
 
 	gScene->setOverlay(overlay);
 }
