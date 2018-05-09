@@ -185,12 +185,6 @@ struct RackWidget : OpaqueWidget {
 
 	void onMouseMove(EventMouseMove &e) override;
 	void onMouseDown(EventMouseDown &e) override;
-	void onZoom(EventZoom &e) override;
-};
-
-struct RackRail : TransparentWidget {
-	void step() override;
-	void draw(NVGcontext *vg) override;
 };
 
 // Panel showing a solid colour and/or an image

@@ -18,11 +18,12 @@ Rect ZoomWidget::getViewport(Rect r) {
 }
 
 void ZoomWidget::setZoom(float zoom) {
+	this->zoom = zoom;
+
 	if (zoom != this->zoom) {
 		EventZoom e;
 		onZoom(e);
 	}
-	this->zoom = zoom;
 }
 
 void ZoomWidget::draw(NVGcontext *vg) {

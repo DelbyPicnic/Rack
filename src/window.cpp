@@ -430,6 +430,10 @@ void windowInit() {
 	// bndSetIconImage(loadImage(assetGlobal("res/icons.png")));
 
 	windowSetTheme(nvgRGB(0x33, 0x33, 0x33), nvgRGB(0xf0, 0xf0, 0xf0));
+
+	float pixelRatio;
+	glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
+	gPixelRatio = roundf(pixelRatio);
 }
 
 void windowDestroy() {

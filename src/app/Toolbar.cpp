@@ -144,6 +144,7 @@ Toolbar::Toolbar() {
 		void onAction(EventAction &e) override {
 			Slider::onAction(e);
 			gRackScene->zoomWidget->setZoom(roundf(value) / 100.0);
+			gRackScene->scrollWidget->updateForOffsetChange();
 		}
 	};
 	zoomSlider = new ZoomSlider();

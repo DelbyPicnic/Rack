@@ -33,14 +33,34 @@ struct ModuleContainer : Widget {
 
 
 RackWidget::RackWidget() {
-	// rails = new RackRail();
-	// addChild(rails);
-
 	moduleContainer = new ModuleContainer();
 	addChild(moduleContainer);
 
 	wireContainer = new WireContainer();
 	addChild(wireContainer);
+
+	railsTemplate = new SVGWidget();
+	railsTemplate->setSVG(SVG::load(assetGlobal("res/RailDouble.svg")));
+	
+	// This is identical to Widget's cachine code but we need to set NVG_IMAGE_REPEATX
+	// if (isNear(gPixelRatio, 1.0))
+	// 	oversample = 2.0;
+	Vec fbSize = railsTemplate->box.size.mult(gPixelRatio * oversample);
+	NVGcontext *vg = gVg;
+	
+	railsTemplate->fb = nvgluCreateFramebuffer(vg, fbSize.x, fbSize.y, NVG_IMAGE_REPEATX);
+	nvgluBindFramebuffer(railsTemplate->fb);
+	glViewport(0.0, 0.0, fbSize.x, fbSize.y);
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	nvgBeginFrame(vg, fbSize.x, fbSize.y, gPixelRatio * oversample);
+
+	nvgReset(vg);
+	nvgScale(vg, gPixelRatio * oversample, gPixelRatio * oversample);
+	railsTemplate->draw(vg);
+	nvgEndFrame(vg);
+	nvgluBindFramebuffer(NULL);	
 }
 
 RackWidget::~RackWidget() {
@@ -420,31 +440,6 @@ bool RackWidget::requestModuleBoxNearest(ModuleWidget *m, Rect box) {
 }
 
 void RackWidget::step() {
-	if (!railsTemplate) {
-		railsTemplate = new SVGWidget();
-		railsTemplate->setSVG(SVG::load(assetGlobal("res/RailDouble.svg")));
-		
-		// if (isNear(gPixelRatio, 1.0))
-		// 	oversample = 2.0;
-		Vec fbSize = railsTemplate->box.size.mult(gPixelRatio * oversample);
-		NVGcontext *vg = gVg;
-		
-		railsTemplate->fb = nvgluCreateFramebuffer(vg, fbSize.x, fbSize.y, NVG_IMAGE_REPEATX);
-		nvgluBindFramebuffer(railsTemplate->fb);
-		glViewport(0.0, 0.0, fbSize.x, fbSize.y);
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		nvgBeginFrame(vg, fbSize.x, fbSize.y, gPixelRatio * oversample);
-
-		nvgReset(vg);
-		nvgScale(vg, gPixelRatio * oversample, gPixelRatio * oversample);
-		railsTemplate->draw(vg);
-		nvgEndFrame(vg);
-		nvgluBindFramebuffer(NULL);
-	}
-
-
 	// Expand size to fit modules
 	Vec moduleSize = moduleContainer->getChildrenBoundingBox().getBottomRight();
 	// We assume that the size is reset by a parent before calling step(). Otherwise it will grow unbounded.
@@ -561,11 +556,6 @@ void RackWidget::onMouseDown(EventMouseDown &e) {
 	}
 	e.consumed = true;
 	e.target = this;
-}
-
-void RackWidget::onZoom(EventZoom &e) {
-	// rails->box.size = Vec();
-	Widget::onZoom(e);
 }
 
 

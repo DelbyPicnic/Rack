@@ -12,31 +12,33 @@ void RackScrollWidget::step() {
 	if (gRackWidget->wireContainer->activeWire) {
 		float margin = 20.0;
 		float speed = 15.0;
+		
 		if (pos.x <= viewport.pos.x + margin)
 			offset.x -= speed;
-		if (pos.x >= viewport.pos.x + viewport.size.x - margin)
+		else if (pos.x >= viewport.pos.x + viewport.size.x - margin)
 			offset.x += speed;
-		if (pos.y <= viewport.pos.y + margin)
+		else if (pos.y <= viewport.pos.y + margin)
 			offset.y -= speed;
-		if (pos.y >= viewport.pos.y + viewport.size.y - margin)
+		else if (pos.y >= viewport.pos.y + viewport.size.y - margin)
 			offset.y += speed;
+		else 
+			goto skip;
 
 		updateForOffsetChange();
+		skip:;
 	}
 	
 	ScrollWidget::step();
 }
 
 void RackScrollWidget::updateForOffsetChange() {
-	ZoomWidget *zoomWidget = static_cast<RackScene*>(gScene)->zoomWidget;
-	
 	// Resize to be a bit larger than the ScrollWidget viewport
 	gRackWidget->box.size = box.size
 		.minus(container->box.pos)
 		.plus(Vec(500, 500))
-		.div(zoomWidget->zoom);
+		.div(gRackScene->zoomWidget->zoom);
 
-	zoomWidget->box.size = gRackWidget->box.size.mult(zoomWidget->zoom);
+	gRackScene->zoomWidget->box.size = gRackWidget->box.size.mult(gRackScene->zoomWidget->zoom);
 
 	ScrollWidget::updateForOffsetChange();
 }
