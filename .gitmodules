@@ -18,7 +18,7 @@ url=https://github.com/mi-rack/glfw.git
 	url = https://github.com/thestk/rtaudio.git
 [submodule "dep/optimized-routines"]
 	path = dep/optimized-routines
-	url = https://github.com/ARM-software/optimized-routines
+url=https://github.com/mi-rack/optimized-routines
 [submodule "dep/math-neon"]
 	path = dep/math-neon
 	url = https://github.com/andrepuschmann/math-neon
