@@ -31,7 +31,7 @@ ifeq ($(ARCH), lin)
 		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
 
 ifneq (,$(findstring arm,$(CPU)))
-	LDFLAGS += -lGLESv2 dep/optimized-routines/lib/libmathlib_static.a
+	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a
 else
 	LDFLAGS += -lGL
 endif

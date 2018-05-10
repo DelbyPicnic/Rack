@@ -6,7 +6,7 @@ DEP_FLAGS += -g -O3
 
 ifneq (,$(findstring arm,$(CPU)))
 	DEP_FLAGS += $(ARM_CPU_FLAGS)
-	DEP_FLAGS += -I$(RACK_DIR)/dep/optimized-routines/build/include -I$(RACK_DIR)/dep/math-neon/src
+	DEP_FLAGS += -I$(RACK_DIR)/dep/math-neon/src
 else
 	DEP_FLAGS += -march=nocona
 endif

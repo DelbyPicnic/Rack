@@ -18,7 +18,7 @@ FLAGS += -Wall -Wextra -Wno-unused-parameter
 
 ifneq (,$(findstring arm,$(CPU)))
 	FLAGS += $(ARM_CPU_FLAGS) -ffast-math -fno-finite-math-only
-	FLAGS += -I$(RACK_DIR)/dep/optimized-routines/include -I$(RACK_DIR)/dep/math-neon/src
+	FLAGS += -I$(RACK_DIR)/dep/math-neon/src
 else
 	FLAGS += -march=nocona -ffast-math -fno-finite-math-only
 endif
