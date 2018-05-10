@@ -15,7 +15,7 @@ ifeq ($(ARCH), lin)
 	rtmidi = lib/librtmidi.so
 	rtaudio = lib/librtaudio.so
 	openssl = lib/libssl.so
-	mathlib = optimized-routines/lib/libmathlib_static.a
+	mathlib = lib/libmathlib_static.a
 endif
 
 ifeq ($(ARCH), mac)
@@ -131,7 +131,7 @@ $(rtmidi):
 
 $(mathlib):
 	cd optimized-routines && $(CMAKE) .
-	$(MAKE) -C optimized-routines
+	$(MAKE) -C optimized-routines install
 
 ifeq ($(ARCH),mac)
 RTAUDIO_FLAGS += -DAUDIO_OSX_CORE=ON
