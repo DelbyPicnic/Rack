@@ -70,7 +70,7 @@ PREREQS = cmake autoconf automake pkg-config libtool
 ifeq ($(ARCH), lin)
 	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound-dev
 ifneq (,$(findstring arm,$(CPU)))
-	PREREQS += libmpfr-dev libmpc-dev libgles2-mesa-dev
+	PREREQS += libgles2-mesa-dev
 else
 	PREREQS += libgl1-mesa-dev
 endif
