@@ -39,6 +39,7 @@ all: $(TARGET)
 include $(RACK_DIR)/compile.mk
 
 ifdef DEPS
+	DEP_FLAGS += -fPIC
 	include $(RACK_DIR)/dep.mk
 endif
 
