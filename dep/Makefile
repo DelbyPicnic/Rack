@@ -15,7 +15,9 @@ ifeq ($(ARCH), lin)
 	rtmidi = lib/librtmidi.so
 	rtaudio = lib/librtaudio.so
 	openssl = lib/libssl.so
+ifneq (,$(findstring arm,$(CPU)))
 	mathlib = lib/libmathlib_static.a
+endif
 endif
 
 ifeq ($(ARCH), mac)
