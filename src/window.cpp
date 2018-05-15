@@ -166,6 +166,7 @@ void mouseButtonStickyCallback(GLFWwindow *window, int button, int action, int m
 }
 
 void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+	//TODO: remove rounding but that causes some problems with scrollbars on Mac at least
 	Vec mousePos = Vec(xpos, ypos).div(gPixelRatio / gWindowRatio).round();
 	Vec mouseRel = mousePos.minus(gMousePos);
 

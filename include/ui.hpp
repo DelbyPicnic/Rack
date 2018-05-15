@@ -200,6 +200,7 @@ struct ScrollWidget : OpaqueWidget {
 	ScrollBar *horizontalScrollBar;
 	ScrollBar *verticalScrollBar;
 	Vec offset;
+	Vec viewportSize;
 
 	ScrollWidget();
 	void scrollTo(Rect r);

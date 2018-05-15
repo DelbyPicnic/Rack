@@ -32,10 +32,11 @@ struct ScrollBar : OpaqueWidget {
 	void onDragMove(EventDragMove &e) override {
 		ScrollWidget *scrollWidget = dynamic_cast<ScrollWidget*>(parent);
 		assert(scrollWidget);
+
 		if (orientation == HORIZONTAL)
-			scrollWidget->offset.x += e.mouseRel.x;
+			scrollWidget->offset.x += e.mouseRel.x/(box.size.x*(1-size))*(scrollWidget->viewportSize.x-scrollWidget->box.size.x);
 		else
-			scrollWidget->offset.y += e.mouseRel.y;
+			scrollWidget->offset.y += e.mouseRel.y/(box.size.y*(1-size))*(scrollWidget->viewportSize.y-scrollWidget->box.size.y);
 
 		scrollWidget->updateForOffsetChange();
 	}
@@ -89,7 +90,7 @@ void ScrollWidget::updateForOffsetChange() {
 	container->box.pos = offset.neg().round();
 
 	// Update scrollbar offsets and sizes
-	Vec viewportSize = container->getChildrenBoundingBox().getBottomRight();
+	viewportSize = container->getChildrenBoundingBox().getBottomRight();
 	Vec scrollbarOffset = offset.div(viewportSize.minus(box.size));
 	Vec scrollbarSize = box.size.div(viewportSize);
 
