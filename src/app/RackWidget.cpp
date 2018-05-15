@@ -362,6 +362,9 @@ void RackWidget::addModule(ModuleWidget *m) {
 	//m->onResize();
 
 	m->create();
+
+	if (m->module)
+		engineAddModule(m->module);
 }
 
 void RackWidget::deleteModule(ModuleWidget *m) {

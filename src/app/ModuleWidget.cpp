@@ -8,9 +8,6 @@ namespace rack {
 
 
 ModuleWidget::ModuleWidget(Module *module) {
-	if (module) {
-		engineAddModule(module);
-	}
 	this->module = module;
 }
 
