@@ -46,21 +46,28 @@ endif
 clean:
 	rm -rfv build $(TARGET) dist
 
-deb: all
+DEB_VERSION = $(VERSION)-$(shell date +%s)
+DEB_ARCH = $(shell dpkg --print-architecture)
+DEB_SLUG ?= $(SLUG)
+DEB = $(RACK_DIR)/dist/miRack-plugin-$(DEB_SLUG)_$(DEB_VERSION)_$(DEB_ARCH).deb
+deb: $(DEB)
+
+$(DEB): $(TARGET) $(RACK_DIR)/rel_version.txt debian/control-plugin
 	rm -rf dist/work
 	mkdir -p dist/work
 
-	mkdir -p dist/work/opt/miRack/plugins/$(SLUG)
-	cp -R $(TARGET) $(DISTRIBUTABLES) dist/work/opt/miRack/plugins/$(SLUG)
-	$(STRIP) -S dist/work/opt/miRack/plugins/$(SLUG)/$(TARGET)
+	mkdir -p dist/work/opt/miRack/plugins/$(DEB_SLUG)
+	cp -R $(TARGET) $(DISTRIBUTABLES) dist/work/opt/miRack/plugins/$(DEB_SLUG)
+	$(STRIP) -S dist/work/opt/miRack/plugins/$(DEB_SLUG)/$(TARGET)
 
 	mkdir -p dist/work/DEBIAN
-	cp -r $(RACK_DIR)/debian/control-plugin dist/work/debian/control
-	sed -i "" s/__SLUG/$(SLUG)/ dist/work/DEBIAN/control
-	sed -i "" s/__ARCH/$(shell dpkg --print-architecture)/ dist/work/DEBIAN/control
-	sed -i "" s/__VER/$(VERSION)/ dist/work/DEBIAN/control
+	cp -r $(RACK_DIR)/debian/control-plugin dist/work/DEBIAN/control
+	sed -i s/__SLUG/$(DEB_SLUG)/ dist/work/DEBIAN/control
+	sed -i s/__ARCH/$(shell dpkg --print-architecture)/ dist/work/DEBIAN/control
+	sed -i s/__RACKVER/$(shell shtool version -d short $(RACK_DIR)/rel_version.txt)/ dist/work/DEBIAN/control
+	sed -i s/__VER/$(DEB_VERSION)/ dist/work/DEBIAN/control
 
-	dpkg-deb --build dist/work $(RACK_DIR)/dist/miRack-plugin-$(SLUG).deb
+	dpkg-deb --build dist/work $(DEB)
 
 dist: all
 	rm -rf dist

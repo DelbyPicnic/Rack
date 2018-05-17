@@ -1,5 +1,10 @@
 RACK_DIR ?= .
-VERSION ?= 99-master
+
+ifdef RELEASE
+	VERSION ?= $(shell shtool version -d short rel_version.txt)
+else
+	VERSION ?= $(shell shtool version -d short rel_version.txt)-dev
+endif
 
 FLAGS += \
 	-Iinclude \
@@ -153,7 +158,11 @@ ifeq ($(ARCH), win)
 	windres $^ -O coff -o $@
 endif
 
-deb: all
+DEB_ARCH = $(shell dpkg --print-architecture)
+DEB = dist/miRack_$(VERSION)_$(DEB_ARCH).deb
+deb: $(DEB)
+
+$(DEB): $(TARGET) $(RACK_DIR)/rel_version.txt debian/control
 ifndef RELEASE
 	echo Must enable RELEASE for dist target
 	exit 1
@@ -167,11 +176,11 @@ endif
 	$(STRIP) -S dist/work/opt/miRack/Rack
 
 	mkdir -p dist/work/DEBIAN
-	cp -r debian/control-plugin dist/work/debian/control
-	sed -i "" s/__ARCH/$(shell dpkg --print-architecture)/ dist/work/DEBIAN/control
-	sed -i "" s/__VER/$(VERSION)/ dist/work/DEBIAN/control
+	cp -r debian/control dist/work/DEBIAN/control
+	sed -i s/__ARCH/$(DEB_ARCH)/ dist/work/DEBIAN/control
+	sed -i s/__VER/$(VERSION)/ dist/work/DEBIAN/control
 
-	dpkg-deb --build dist/work dist/miRack.deb
+	dpkg-deb --build dist/work $(DEB)
 
 # This target is not intended for public use
 dist: all

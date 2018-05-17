@@ -3,6 +3,6 @@ Version: __VER
 Section: base
 Priority: optional
 Architecture: __ARCH
-Depends: mirack (>>0)
+Depends: mirack (=__RACKVER)
 Maintainer: Vitaly Pronkin <vit@mifki.com>
 Description: Plugin.
