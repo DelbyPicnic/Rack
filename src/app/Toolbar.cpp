@@ -163,10 +163,10 @@ Toolbar::Toolbar() {
 	layout->addChild(cpuUsageButton);
 */
 
-#if defined(RELEASE)
+/*#if defined(RELEASE)
 	Widget *pluginManager = new PluginManagerWidget();
 	layout->addChild(pluginManager);
-#endif
+#endif*/
 }
 
 void Toolbar::draw(NVGcontext *vg) {
