@@ -11,14 +11,14 @@ static auto startTime = std::chrono::high_resolution_clock::now();
 
 
 void loggerInit() {
-#ifdef RELEASE
-	std::string logFilename = assetLocal("log.txt");
+#ifdef ARCH_WIN
+	std::string logFilename = assetHidden("log.txt");
 	logFile = fopen(logFilename.c_str(), "w");
 #endif
 }
 
 void loggerDestroy() {
-#ifdef RELEASE
+#ifdef ARCH_WIN
 	fclose(logFile);
 #endif
 }
