@@ -21,13 +21,22 @@ int main(int argc, char* argv[]) {
 	info("Rack %s", gApplicationVersion.c_str());
 
 	{
+#if ARCH_LIN && RELEASE
+	    char *path = realpath("/proc/self/exe", NULL);
+	    if (path) {
+	        *(strrchr(path, '/')+1) = 0;
+			chdir(path);
+			free(path);
+	    }
+#endif
 		char *cwd = getcwd(NULL, 0);
 		info("Current working directory: %s", cwd);
 		free(cwd);
-		std::string globalDir = assetGlobal("");
-		std::string localDir = assetLocal("");
-		info("Global directory: %s", globalDir.c_str());
-		info("Local directory: %s", localDir.c_str());
+
+		info("Global directory: %s", assetGlobal("").c_str());
+		info("Local directory: %s", assetLocal("").c_str());
+		info("Settings directory: %s", assetHidden("").c_str());
+		info("Plugins directory: %s", pluginPath().c_str());		
 	}
 
 	pluginInit();
@@ -35,19 +44,19 @@ int main(int argc, char* argv[]) {
 	// bridgeInit();
 	windowInit();
 	appInit();
-	settingsLoad(assetLocal("settings.json"));
+	settingsLoad(assetHidden("settings.json"));
 	std::string oldLastPath = gRackWidget->lastPath;
 
 	// To prevent launch crashes, if Rack crashes between now and 15 seconds from now, the "skipAutosaveOnLaunch" property will remain in settings.json, so that in the next launch, the broken autosave will not be loaded.
 	bool oldSkipAutosaveOnLaunch = skipAutosaveOnLaunch;
 	skipAutosaveOnLaunch = true;
-	settingsSave(assetLocal("settings.json"));
+	settingsSave(assetHidden("settings.json"));
 	skipAutosaveOnLaunch = false;
 	if (oldSkipAutosaveOnLaunch && osdialog_message(OSDIALOG_INFO, OSDIALOG_YES_NO, "Rack has recovered from a crash, possibly caused by a faulty module in your patch. Would you like to clear your patch and start over?")) {
 		// Do nothing. Empty patch is already loaded.
 	}
 	else {
-		gRackWidget->loadPatch(assetLocal("autosave.vcv"));
+		gRackWidget->loadPatch(assetHidden("autosave.vcv"));
 	}
 	gRackWidget->lastPath = oldLastPath;
 
@@ -55,8 +64,8 @@ int main(int argc, char* argv[]) {
 	windowRun();
 	engineStop();
 
-	gRackWidget->savePatch(assetLocal("autosave.vcv"));
-	settingsSave(assetLocal("settings.json"));
+	gRackWidget->savePatch(assetHidden("autosave.vcv"));
+	settingsSave(assetHidden("settings.json"));
 	appDestroy();
 	windowDestroy();
 	// bridgeDestroy();

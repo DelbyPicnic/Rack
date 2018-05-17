@@ -22,11 +22,11 @@
 
 namespace rack {
 
-
+// Resources folder if packaged as an app on Mac, current (executable) folder otherwise
 std::string assetGlobal(std::string filename) {
 	std::string dir;
-#if RELEASE
-#if ARCH_MAC
+
+#if ARCH_MAC && RELEASE
 	CFBundleRef bundle = CFBundleGetMainBundle();
 	assert(bundle);
 	CFURLRef resourcesUrl = CFBundleCopyResourcesDirectoryURL(bundle);
@@ -35,35 +35,29 @@ std::string assetGlobal(std::string filename) {
 	assert(success);
 	CFRelease(resourcesUrl);
 	dir = buf;
-#endif
-#if ARCH_WIN
-	// Must launch Rack with the "Start In" directory as the global directory
+
+#else
 	dir = ".";
 #endif
-#if ARCH_LIN
-	// TODO For now, users should launch Rack from their terminal in the global directory
-	dir = ".";
-#endif
-#else // RELEASE
-	dir = ".";
-#endif // RELEASE
+
 	return dir + "/" + filename;
 }
 
-
+// User Documents folder always
 std::string assetLocal(std::string filename) {
 	std::string dir;
-#if RELEASE
+
 #if ARCH_MAC
-	// Get home directory
+	// Use home directory
 	struct passwd *pw = getpwuid(getuid());
 	assert(pw);
 	dir = pw->pw_dir;
-	dir += "/Documents/Rack";
+	dir += "/Documents";
 	mkdir(dir.c_str(), 0755);
 #endif
+
 #if ARCH_WIN
-	// Get "My Documents" folder
+	// Use My Documents folder
 	char buf[MAX_PATH];
 	HRESULT result = SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, buf);
 	assert(result == S_OK);
@@ -71,6 +65,7 @@ std::string assetLocal(std::string filename) {
 	dir += "/Rack";
 	CreateDirectory(dir.c_str(), NULL);
 #endif
+
 #if ARCH_LIN
 	const char *home = getenv("HOME");
 	if (!home) {
@@ -79,12 +74,56 @@ std::string assetLocal(std::string filename) {
 		home = pw->pw_dir;
 	}
 	dir = home;
-	dir += "/.Rack";
+
+	// If the distro already has Documents folder, use it, otherwise just use home folder
+	if (systemIsDirectory(dir+"/Documents"))
+		dir += "/Documents";
+#endif
+
+	return dir + "/" + filename;
+}
+
+// Platform-specific folder if RELEASE, current folder otherwise
+std::string assetHidden(std::string filename) {
+	std::string dir;
+
+#if RELEASE
+#if ARCH_MAC
+	// Use Application Support folder
+	struct passwd *pw = getpwuid(getuid());
+	assert(pw);
+	dir = pw->pw_dir;
+	dir += "/Library/Application Support/miRack";
 	mkdir(dir.c_str(), 0755);
 #endif
-#else // RELEASE
+	
+#if ARCH_WIN
+	// Use Application Data folder
+	char buf[MAX_PATH];
+	HRESULT result = SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf);
+	assert(result == S_OK);
+	dir = buf;
+	dir += "/miRack";
+	CreateDirectory(dir.c_str(), NULL);
+#endif
+
+#if ARCH_LIN
+	// Use a hidden directory
+	const char *home = getenv("HOME");
+	if (!home) {
+		struct passwd *pw = getpwuid(getuid());
+		assert(pw);
+		home = pw->pw_dir;
+	}
+	dir = home;
+	dir += "/.miRack";
+	mkdir(dir.c_str(), 0755);
+#endif
+
+#else
 	dir = ".";
-#endif // RELEASE
+#endif
+
 	return dir + "/" + filename;
 }
 

@@ -109,6 +109,7 @@ std::string pluginGetDownloadName();
 std::string pluginGetLoginStatus();
 Plugin *pluginGetPlugin(std::string pluginSlug);
 Model *pluginGetModel(std::string pluginSlug, std::string modelSlug);
+std::string pluginPath();
 
 
 extern std::list<Plugin*> gPlugins;

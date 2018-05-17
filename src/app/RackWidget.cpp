@@ -85,7 +85,7 @@ void RackWidget::reset() {
 	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Clear your patch and start over?")) {
 		clear();
 		// Fails silently if file does not exist
-		loadPatch(assetLocal("template.vcv"));
+		loadPatch(assetHidden("template.vcv"));
 		lastPath = "";
 	}
 }
