@@ -460,7 +460,11 @@ void windowRun() {
 	glfwGetWindowSize(gWindow, &windowWidth, &windowHeight);
 	windowSizeCallback(gWindow, windowWidth, windowHeight);
 
+#if (defined(__arm__) || defined(__aarch64__))
 	const double fps = 30.;
+#else
+	const double fps = 60.;
+#endif
 	double wait = 1./fps;
 	while(!glfwWindowShouldClose(gWindow)) {
 		gGuiFrame++;

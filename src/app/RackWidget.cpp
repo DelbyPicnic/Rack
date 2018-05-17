@@ -448,10 +448,10 @@ void RackWidget::step() {
 	// We assume that the size is reset by a parent before calling step(). Otherwise it will grow unbounded.
 	box.size = box.size.max(moduleSize);
 
-	// Autosave every 15 seconds
-	if (gGuiFrame % (60 * 15) == 0) {
-		savePatch(assetLocal("autosave.vcv"));
-		settingsSave(assetLocal("settings.json"));
+	// Autosave every minute or so
+	if (gGuiFrame % (30 * 60) == 0) {
+		savePatch(assetHidden("autosave.vcv"));
+		settingsSave(assetHidden("settings.json"));
 	}
 
 	Widget::step();
