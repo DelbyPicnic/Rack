@@ -1,0 +1,8 @@
+Package: miRack-plugin-__SLUG
+Version: __VER
+Section: base
+Priority: optional
+Architecture: __ARCH
+Depends: mirack (>>0)
+Maintainer: Vitaly Pronkin <vit@mifki.com>
+Description: Plugin.

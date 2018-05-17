@@ -46,6 +46,22 @@ endif
 clean:
 	rm -rfv build $(TARGET) dist
 
+deb: all
+	rm -rf dist/work
+	mkdir -p dist/work
+
+	mkdir -p dist/work/opt/miRack/plugins/$(SLUG)
+	cp -R $(TARGET) $(DISTRIBUTABLES) dist/work/opt/miRack/plugins/$(SLUG)
+	$(STRIP) -S dist/work/opt/miRack/plugins/$(SLUG)/$(TARGET)
+
+	mkdir -p dist/work/DEBIAN
+	cp -r $(RACK_DIR)/debian/control-plugin dist/work/debian/control
+	sed -i "" s/__SLUG/$(SLUG)/ dist/work/DEBIAN/control
+	sed -i "" s/__ARCH/$(shell dpkg --print-architecture)/ dist/work/DEBIAN/control
+	sed -i "" s/__VER/$(VERSION)/ dist/work/DEBIAN/control
+
+	dpkg-deb --build dist/work $(RACK_DIR)/dist/miRack-plugin-$(SLUG).deb
+
 dist: all
 	rm -rf dist
 	mkdir -p dist/$(SLUG)

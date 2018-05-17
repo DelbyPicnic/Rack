@@ -7,28 +7,28 @@ RACK_DIR ?= ..
 include $(RACK_DIR)/arch.mk
 
 ifeq ($(ARCH), lin)
-	glfw = lib/libglfw.so
-	jansson = lib/libjansson.so
-	libspeexdsp = lib/libspeexdsp.so
-	libcurl = lib/libcurl.so
-	libzip = lib/libzip.so
-	rtmidi = lib/librtmidi.so
-	rtaudio = lib/librtaudio.so
-	openssl = lib/libssl.so
+	glfw = lib/libglfw3.a
+	jansson = lib/libjansson.a
+	libspeexdsp = lib/libspeexdsp.a
+	libcurl = lib/libcurl.a
+	libzip = lib/libzip.a
+	rtmidi = lib/librtmidi.a
+	rtaudio = lib/librtaudio.a
+	openssl = lib/libssl.a
 ifneq (,$(findstring arm,$(CPU)))
 	mathlib = lib/libmathlib_static.a
 endif
 endif
 
 ifeq ($(ARCH), mac)
-	glfw = lib/libglfw.dylib
-	jansson = lib/libjansson.dylib
-	libspeexdsp = lib/libspeexdsp.dylib
-	libcurl = lib/libcurl.dylib
-	libzip = lib/libzip.dylib
-	rtmidi = lib/librtmidi.dylib
-	rtaudio = lib/librtaudio.dylib
-	openssl = lib/libssl.dylib
+	glfw = lib/libglfw3.a
+	jansson = lib/libjansson.a
+	libspeexdsp = lib/libspeexdsp.a
+	libcurl = lib/libcurl.a
+	libzip = lib/libzip.a
+	rtmidi = lib/librtmidi.a
+	rtaudio = lib/librtaudio.a
+	openssl = lib/libssl.a
 endif
 
 ifeq ($(ARCH), win)
@@ -59,7 +59,6 @@ $(glew):
 
 $(glfw):
 	cd glfw && $(CMAKE) . \
-		-DBUILD_SHARED_LIBS=ON \
 		-DGLFW_COCOA_CHDIR_RESOURCES=OFF -DGLFW_COCOA_MENUBAR=ON -DGLFW_COCOA_RETINA_FRAMEBUFFER=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF
 	$(MAKE) -C glfw
 	$(MAKE) -C glfw install
@@ -83,11 +82,6 @@ $(openssl):
 	cd openssl-1.1.0h && CC="$(CC) $(CFLAGS)" ./config --prefix="$(realpath $(DEP_LOCAL))"
 	$(MAKE) -C openssl-1.1.0h
 	$(MAKE) -C openssl-1.1.0h install_sw
-ifeq ($(ARCH),mac)
-	otool -L $@
-	install_name_tool -change $(PWD)/lib/libcrypto.1.1.dylib @loader_path/libcrypto.1.1.dylib $@
-	otool -L $@
-endif
 
 $(libcurl): $(openssl)
 	$(WGET) "https://curl.haxx.se/download/curl-7.59.0.tar.gz"
@@ -98,12 +92,6 @@ $(libcurl): $(openssl)
 		--without-ca-bundle --with-ca-fallback --with-ssl="$(realpath $(DEP_LOCAL))"
 	$(MAKE) -C curl-7.59.0
 	$(MAKE) -C curl-7.59.0 install
-ifeq ($(ARCH),mac)
-	otool -L $@
-	install_name_tool -change $(PWD)/lib/libcrypto.1.1.dylib @loader_path/libcrypto.1.1.dylib $@
-	install_name_tool -change $(PWD)/lib/libssl.1.1.dylib @loader_path/libssl.1.1.dylib $@
-	otool -L $@
-endif
 
 $(libzip): $(zlib)
 	$(WGET) "https://nih.at/libzip/libzip-1.2.0.tar.gz"
@@ -159,6 +147,7 @@ $(rtaudio):
 	cd rtaudio/build && $(CMAKE) $(RTAUDIO_FLAGS) ..
 	$(MAKE) -C rtaudio/build
 	$(MAKE) -C rtaudio/build install
+	cp rtaudio/build/librtaudio_static.a lib/librtaudio.a
 
 clean:
 	git clean -ffdx
