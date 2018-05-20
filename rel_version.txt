@@ -1,6 +1,6 @@
 
-  rel_version.txt -- Version Information for miRack (syntax: Text)
+  rel_version.txt -- Version Information for unknown (syntax: Text)
   [automatically generated and maintained by GNU shtool]
 
-  This is miRack, Version 0.6.10 (17-May-2018)
+  This is unknown, Version 0.6.11 (20-May-2018)
 

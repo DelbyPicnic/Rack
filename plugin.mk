@@ -55,9 +55,9 @@ DEB = $(RACK_DIR)/dist/miRack-plugin-$(DEB_SLUG)_$(DEB_VERSION)_$(DEB_ARCH).deb
 MF = $(RACK_DIR)/catalog/manifests/$(SLUG).json
 NAME = $(strip $(shell jq .name $(MF)))
 URL = $(strip $(shell jq .pluginUrl//.manualUrl//.sourceUrl $(MF)))
-deb: .deb-built $(TARGET) $(RACK_DIR)/rel_version.txt $(RACK_DIR)/debian/control-plugin.m4
+deb: .deb-built 
 
-.deb-built:
+.deb-built: $(TARGET) $(RACK_DIR)/rel_version.txt $(RACK_DIR)/debian/control-plugin.m4
 	rm -rf dist/work
 	mkdir -p dist/work
 
@@ -68,7 +68,7 @@ deb: .deb-built $(TARGET) $(RACK_DIR)/rel_version.txt $(RACK_DIR)/debian/control
 	mkdir -p dist/work/DEBIAN
 	m4 -DSLUG=$(DEB_SLUG) -DARCH=$(DEB_ARCH) -DRACKVER=$(shell shtool version -d short $(RACK_DIR)/rel_version.txt) -DVER=$(DEB_VERSION) -DDESCR=$(DESCR) -DNAME=$(NAME) -DURL=$(URL) $(RACK_DIR)/debian/control-plugin.m4 > dist/work/DEBIAN/control
 
-	dpkg-deb --build dist/work $(DEB)
+	fakeroot -- bash -c "chown -R root:root dist/work/* && dpkg-deb --build dist/work $(DEB)"
 	touch .deb-built
 
 dist: all

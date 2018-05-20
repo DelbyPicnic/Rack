@@ -178,7 +178,7 @@ endif
 	mkdir -p dist/work/DEBIAN
 	m4 -DARCH=$(DEB_ARCH) -DVER=$(VERSION) debian/control.m4 > dist/work/DEBIAN/control
 
-	dpkg-deb --build dist/work $(DEB)
+	fakeroot -- bash -c "chown -R root:root dist/work/* && dpkg-deb --build dist/work $(DEB)"
 
 # This target is not intended for public use
 dist: all
