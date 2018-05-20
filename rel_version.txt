@@ -1,0 +1,6 @@
+
+  rel_version.txt -- Version Information for miRack (syntax: Text)
+  [automatically generated and maintained by GNU shtool]
+
+  This is miRack, Version 0.6.10 (17-May-2018)
+

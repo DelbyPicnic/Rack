@@ -1,5 +1,10 @@
 RACK_DIR ?= .
-VERSION = master
+
+ifdef RELEASE
+	VERSION ?= $(shell shtool version -d short rel_version.txt)
+else
+	VERSION ?= $(shell shtool version -d short rel_version.txt)-dev
+endif
 
 FLAGS += \
 	-Iinclude \
@@ -26,9 +31,9 @@ ifeq ($(ARCH), lin)
 	SOURCES += dep/osdialog/osdialog_gtk2.c
 	CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
 	LDFLAGS += -rdynamic \
-		-lpthread -ldl \
+		-lpthread -ldl -lz -lasound -lX11 \
 		$(shell pkg-config --libs gtk+-2.0) \
-		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
+		-Ldep/lib -Wl,-Bstatic -lglfw3 -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
 
 ifneq (,$(findstring arm,$(CPU)))
 	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a
@@ -42,9 +47,10 @@ endif
 ifeq ($(ARCH), mac)
 	SOURCES += dep/osdialog/osdialog_mac.m
 	CXXFLAGS += -stdlib=libc++
-	LDFLAGS += -stdlib=libc++ -lpthread -ldl \
-		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo \
-		-Ldep/lib -lglfw -ljansson -lspeexdsp -lcurl -lzip -lrtaudio -lrtmidi -lcrypto -lssl
+	LDFLAGS += -stdlib=libc++ \
+		-lpthread -ldl -lz \
+		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -framework CoreAudio -framework CoreMIDI \
+		dep/lib/libglfw3.a dep/lib/libjansson.a dep/lib/libspeexdsp.a dep/lib/libzip.a dep/lib/librtaudio.a dep/lib/librtmidi.a dep/lib/libcrypto.a dep/lib/libssl.a dep/lib/libcurl.a
 	TARGET := Rack
 	BUNDLE := dist/$(TARGET).app
 endif
@@ -66,9 +72,9 @@ all: $(TARGET)
 	@echo Rack built. Now type \"make run\".
 	@echo ---
 
-PREREQS = cmake autoconf automake pkg-config libtool
+PREREQS = cmake autoconf automake pkg-config libtool shtool jq
 ifeq ($(ARCH), lin)
-	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound-dev
+	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound2-dev zlib1g-dev
 ifneq (,$(findstring arm,$(CPU)))
 	PREREQS += libgles2-mesa-dev
 else
@@ -152,12 +158,35 @@ ifeq ($(ARCH), win)
 	windres $^ -O coff -o $@
 endif
 
+DEB_ARCH = $(shell dpkg --print-architecture)
+DEB = dist/miRack_$(VERSION)_$(DEB_ARCH).deb
+deb: $(DEB)
+
+$(DEB): $(TARGET) $(RACK_DIR)/rel_version.txt debian/control.m4
+ifndef RELEASE
+	echo Must enable RELEASE for dist target
+	exit 1
+endif
+
+	rm -rf dist/work
+	mkdir -p dist/work
+
+	mkdir -p dist/work/opt/miRack
+	cp -R Rack LICENSE* res dist/work/opt/miRack/
+	$(STRIP) -S dist/work/opt/miRack/Rack
+
+	mkdir -p dist/work/DEBIAN
+	m4 -DARCH=$(DEB_ARCH) -DVER=$(VERSION) debian/control.m4 > dist/work/DEBIAN/control
+
+	dpkg-deb --build dist/work $(DEB)
 
 # This target is not intended for public use
 dist: all
 ifndef RELEASE
-	exit 1 # Must enable RELEASE for dist target
+	echo Must enable RELEASE for dist target
+	exit 1
 endif
+
 	rm -rf dist
 	# Rack distribution
 	$(MAKE) -C plugins/Fundamental dist
@@ -173,30 +202,6 @@ ifeq ($(ARCH), mac)
 	cp $(TARGET) $(BUNDLE)/Contents/MacOS/
 	$(STRIP) -S $(BUNDLE)/Contents/MacOS/$(TARGET)
 	cp icon.icns $(BUNDLE)/Contents/Resources/
-
-	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
-
-	cp dep/lib/libglfw.3.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libjansson.4.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libspeexdsp.1.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libcurl.4.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libzip.5.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/librtaudio.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/librtmidi.4.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libcrypto.1.1.dylib $(BUNDLE)/Contents/MacOS/
-	cp dep/lib/libssl.1.1.dylib $(BUNDLE)/Contents/MacOS/
-
-	install_name_tool -change lib/libglfw.3.dylib @executable_path/libglfw.3.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libjansson.4.dylib @executable_path/libjansson.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libspeexdsp.1.dylib @executable_path/libspeexdsp.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libcurl.4.dylib @executable_path/libcurl.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libzip.5.dylib @executable_path/libzip.5.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change librtaudio.dylib @executable_path/librtaudio.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/librtmidi.4.dylib @executable_path/librtmidi.4.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libcrypto.1.1.dylib @executable_path/libcrypto.1.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-	install_name_tool -change $(PWD)/dep/lib/libssl.1.1.dylib @executable_path/libssl.1.1.dylib $(BUNDLE)/Contents/MacOS/$(TARGET)
-
-	otool -L $(BUNDLE)/Contents/MacOS/$(TARGET)
 
 	cp plugins/Fundamental/dist/Fundamental-*.zip $(BUNDLE)/Contents/Resources/Fundamental.zip
 	#cp -R Bridge/au/dist/VCV-Bridge.component dist/
@@ -239,17 +244,7 @@ endif
 ifeq ($(ARCH), lin)
 	mkdir -p dist/Rack
 	cp -R LICENSE* res dist/Rack/
-	cp $(TARGET) Rack.sh dist/Rack/
 	$(STRIP) -s dist/Rack/$(TARGET)
-	cp dep/lib/libspeexdsp.so dist/Rack/
-	cp dep/lib/libjansson.so.4 dist/Rack/
-	cp dep/lib/libglfw.so.3 dist/Rack/
-	cp dep/lib/libcurl.so.4 dist/Rack/
-	cp dep/lib/libzip.so.5 dist/Rack/
-	cp dep/lib/librtaudio.so dist/Rack/
-	cp dep/lib/librtmidi.so.4 dist/Rack/
-	cp dep/lib/libssl.so.1.1 dist/Rack/
-	cp dep/lib/libcrypto.so.1.1 dist/Rack/
 	cp plugins/Fundamental/dist/Fundamental-*.zip dist/Rack/Fundamental.zip
 	# Make ZIP
 	cd dist && zip -5 -r Rack-$(VERSION)-$(ARCH).zip Rack

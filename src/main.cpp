@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 	info("Rack %s", gApplicationVersion.c_str());
 
 	{
-#if ARCH_LIN && RELEASE
+#if ARCH_LIN
 	    char *path = realpath("/proc/self/exe", NULL);
 	    if (path) {
 	        *(strrchr(path, '/')+1) = 0;
