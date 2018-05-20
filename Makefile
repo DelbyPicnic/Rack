@@ -72,7 +72,7 @@ all: $(TARGET)
 	@echo Rack built. Now type \"make run\".
 	@echo ---
 
-PREREQS = cmake autoconf automake pkg-config libtool
+PREREQS = cmake autoconf automake pkg-config libtool shtool jq
 ifeq ($(ARCH), lin)
 	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound2-dev zlib1g-dev
 ifneq (,$(findstring arm,$(CPU)))
@@ -162,7 +162,7 @@ DEB_ARCH = $(shell dpkg --print-architecture)
 DEB = dist/miRack_$(VERSION)_$(DEB_ARCH).deb
 deb: $(DEB)
 
-$(DEB): $(TARGET) $(RACK_DIR)/rel_version.txt debian/control
+$(DEB): $(TARGET) $(RACK_DIR)/rel_version.txt debian/control.m4
 ifndef RELEASE
 	echo Must enable RELEASE for dist target
 	exit 1
@@ -176,9 +176,7 @@ endif
 	$(STRIP) -S dist/work/opt/miRack/Rack
 
 	mkdir -p dist/work/DEBIAN
-	cp -r debian/control dist/work/DEBIAN/control
-	sed -i s/__ARCH/$(DEB_ARCH)/ dist/work/DEBIAN/control
-	sed -i s/__VER/$(VERSION)/ dist/work/DEBIAN/control
+	m4 -DARCH=$(DEB_ARCH) -DVER=$(VERSION) debian/control.m4 > dist/work/DEBIAN/control
 
 	dpkg-deb --build dist/work $(DEB)
 
