@@ -11,6 +11,7 @@
 #include "keyboard.hpp"
 #include "gamepad.hpp"
 #include "osdialog.h"
+#include "util/color.hpp"
 
 #include <unistd.h>
 

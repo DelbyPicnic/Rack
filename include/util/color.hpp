@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "util/math.hpp"
+#include "util/common.hpp"
 #include "nanovg.h"
 
 
@@ -58,6 +58,9 @@ inline NVGcolor colorAlpha(NVGcolor a, float alpha) {
 	a.a *= alpha;
 	return a;
 }
+
+NVGcolor colorFromHexString(std::string s);
+std::string colorToHexString(NVGcolor c);
 
 
 } // namespace rack
