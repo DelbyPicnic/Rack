@@ -12,5 +12,8 @@ void settingsLoad(std::string filename);
 
 extern bool skipAutosaveOnLaunch;
 
+extern bool largerHitBoxes;
+extern bool lockModules;
+
 
 } // namespace rack

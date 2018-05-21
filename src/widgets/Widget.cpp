@@ -1,6 +1,7 @@
 #include "widgets.hpp"
 #include "app.hpp"
 #include "window.hpp"
+#include "settings.hpp"
 #include <algorithm>
 
 #include "nanovg_gl.h"
@@ -269,6 +270,7 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 	nvgRestore(vg);
 }
 
+
 #define RECURSE_EVENT_POSITION(_method) { \
 	Vec pos = e.pos; \
 	for (auto it = children.rbegin(); it != children.rend(); it++) { \
@@ -285,9 +287,41 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 	e.pos = pos; \
 }
 
+// For simplification we assume that components with non-zero hitMargins will consume the event
+#define RECURSE_EVENT_POSITION_WITH_MARGINS(_method) { \
+	Vec pos = e.pos; \
+	for (auto it = children.rbegin(); it != children.rend(); it++) { \
+		Widget *child = *it; \
+		if (!child->visible) \
+			continue; \
+		if (child->box.contains(pos)) { \
+			e.pos = pos.minus(child->box.pos); \
+			child->_method(e); \
+			if (e.consumed) \
+				break; \
+		} \
+	} \
+	if (largerHitBoxes && !e.consumed) { \
+		Widget* target = NULL; \
+		for (auto it = children.rbegin(); it != children.rend(); it++) { \
+			Widget *child = *it; \
+			if (!child->visible) \
+				continue; \
+			if (child->getHitBox().contains(pos)) { \
+				if (!target || child->box.getCenter().minus(pos).norm() < target->box.getCenter().minus(pos).norm()) \
+					target = child; \
+			} \
+		} \
+		if (target) { \
+			e.pos = pos.minus(target->box.pos); \
+			target->_method(e); \
+		} \
+	} \
+	e.pos = pos; \
+}
 
 void Widget::onMouseDown(EventMouseDown &e) {
-	RECURSE_EVENT_POSITION(onMouseDown);
+	RECURSE_EVENT_POSITION_WITH_MARGINS(onMouseDown);
 }
 
 void Widget::onMouseUp(EventMouseUp &e) {
@@ -310,6 +344,7 @@ void Widget::onPathDrop(EventPathDrop &e) {
 	RECURSE_EVENT_POSITION(onPathDrop);
 }
 
+
 void Widget::onZoom(EventZoom &e) {
 	for (auto it = children.rbegin(); it != children.rend(); it++) {
 		Widget *child = *it;
@@ -320,6 +355,21 @@ void Widget::onZoom(EventZoom &e) {
 void Widget::onResize() {
 	if (canCache)
 		dirty = true;
+}
+
+Rect Widget::getHitBox() {
+	if (!canGrowHitBox)
+		return box;
+
+	float min = 32.0f / gRackScene->zoomWidget->zoom;
+
+	Vec grow;
+	if (box.size.x < min)
+		grow.x = (min - box.size.x) * 0.5;
+	if (box.size.y < min)
+		grow.y = (min - box.size.y) * 0.5;
+
+	return box.grow(grow);
 }
 
 } // namespace rack

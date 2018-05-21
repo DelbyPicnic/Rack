@@ -2,7 +2,7 @@
 #include "engine.hpp"
 #include "plugin.hpp"
 #include "window.hpp"
-
+#include "settings.hpp"
 
 namespace rack {
 
@@ -329,6 +329,9 @@ void ModuleWidget::onDragEnd(EventDragEnd &e) {
 }
 
 void ModuleWidget::onDragMove(EventDragMove &e) {
+	if (lockModules)
+		return;
+
 	Rect newBox = box;
 	newBox.pos = gRackWidget->lastMousePos.minus(dragPos);
 	gRackWidget->requestModuleBoxNearest(this, newBox);

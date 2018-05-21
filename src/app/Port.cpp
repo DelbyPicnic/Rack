@@ -19,6 +19,7 @@ struct PlugLight : MultiLightWidget {
 
 Port::Port() {
 	plugLight = new PlugLight();
+	canGrowHitBox = true;
 }
 
 Port::~Port() {
