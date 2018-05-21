@@ -33,6 +33,9 @@
 namespace rack {
 
 
+//TODO: where should this go?
+const Vec Vec::zero = Vec(0, 0);
+
 GLFWwindow *gWindow = NULL;
 NVGcontext *gVg = NULL;
 std::shared_ptr<Font> gGuiFont;

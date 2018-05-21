@@ -11,6 +11,9 @@ namespace rack {
 
 bool skipAutosaveOnLaunch = false;
 
+bool largerHitBoxes = false;
+bool lockModules = false;
+
 
 static json_t *settingsToJson() {
 	// root
@@ -66,6 +69,14 @@ static json_t *settingsToJson() {
 
 	// moduleBrowser
 	json_object_set_new(rootJ, "moduleBrowser", appModuleBrowserToJson());
+
+	// largerHitBoxes
+	if (largerHitBoxes)
+		json_object_set_new(rootJ, "largerHitBoxes", json_true());
+
+	// lockModules
+	if (lockModules)
+		json_object_set_new(rootJ, "lockModules", json_true());
 
 	return rootJ;
 }
@@ -135,6 +146,16 @@ static void settingsFromJson(json_t *rootJ) {
 	json_t * moduleBrowserJ = json_object_get(rootJ, "moduleBrowser");
 	if (moduleBrowserJ)
 		appModuleBrowserFromJson(moduleBrowserJ);
+
+	// largerHitBoxes
+	json_t *largerHitBoxesJ = json_object_get(rootJ, "largerHitBoxes");
+	if (largerHitBoxesJ)
+		largerHitBoxes = json_boolean_value(largerHitBoxesJ);
+
+	// lockModules
+	json_t *lockModulesJ = json_object_get(rootJ, "lockModules");
+	if (lockModulesJ)
+		lockModules = json_boolean_value(lockModulesJ);
 }
 
 

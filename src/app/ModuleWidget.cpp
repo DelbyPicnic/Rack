@@ -2,10 +2,13 @@
 #include "engine.hpp"
 #include "plugin.hpp"
 #include "window.hpp"
-
+#include "settings.hpp"
 
 namespace rack {
 
+
+static double dragStartTime;
+static bool cancelDrag;
 
 ModuleWidget::ModuleWidget(Module *module) {
 	this->module = module;
@@ -323,12 +326,27 @@ void ModuleWidget::onHoverKey(EventHoverKey &e) {
 
 void ModuleWidget::onDragStart(EventDragStart &e) {
 	dragPos = gRackWidget->lastMousePos.minus(box.pos);
+
+	dragStartTime = glfwGetTime();
+	cancelDrag = false;
 }
 
 void ModuleWidget::onDragEnd(EventDragEnd &e) {
 }
 
 void ModuleWidget::onDragMove(EventDragMove &e) {
+	if (cancelDrag)
+		return;
+
+	if (lockModules) {
+	 	if (glfwGetTime() - dragStartTime < 1) {
+	 		if (e.mouseRel.norm() >= 3)
+	 			cancelDrag = true;
+
+			return;
+	 	}
+	}
+
 	Rect newBox = box;
 	newBox.pos = gRackWidget->lastMousePos.minus(dragPos);
 	gRackWidget->requestModuleBoxNearest(this, newBox);

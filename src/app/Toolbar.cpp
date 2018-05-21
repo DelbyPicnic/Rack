@@ -1,7 +1,7 @@
 #include "app.hpp"
 #include "window.hpp"
 #include "engine.hpp"
-
+#include "settings.hpp"
 
 namespace rack {
 
@@ -64,6 +64,30 @@ struct FileChoice : ChoiceButton {
 	}
 };
 
+struct LargerHitBoxesItem : MenuItem {
+	void onAction(EventAction &e) override {
+		largerHitBoxes = !largerHitBoxes;
+		//TODO: save settings
+	}
+};
+
+struct LockModulesItem : MenuItem {
+	void onAction(EventAction &e) override {
+		lockModules = !lockModules;
+		//TODO: save settings		
+	}
+};
+
+struct OptionsChoice : ChoiceButton {
+	void onAction(EventAction &e) override {
+		Menu *menu = gScene->createMenu();
+		menu->box.pos = getAbsoluteOffset(Vec(0, box.size.y));
+		menu->box.size.x = box.size.x;
+
+		menu->addChild(MenuItem::create<LargerHitBoxesItem>("Larger Hit Boxes", CHECKMARK(largerHitBoxes)));
+		menu->addChild(MenuItem::create<LockModulesItem>("Lock Modules", CHECKMARK(lockModules)));
+	}
+};
 
 struct EnginePauseItem : MenuItem {
 	void onAction(EventAction &e) override {
@@ -118,6 +142,11 @@ Toolbar::Toolbar() {
 	fileChoice->box.size.x = 100;
 	fileChoice->text = "File";
 	layout->addChild(fileChoice);
+
+	ChoiceButton *optionsChoice = new OptionsChoice();
+	optionsChoice->box.size.x = 100;
+	optionsChoice->text = "Options";
+	layout->addChild(optionsChoice);
 
 	// EngineSampleRateChoice *srChoice = new EngineSampleRateChoice();
 	// srChoice->box.size.x = 100;

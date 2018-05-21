@@ -189,6 +189,7 @@ struct Widget {
 	bool visible = true;
 	bool canSquash = false;
 	bool canCache = false;
+	bool canGrowHitBox = false;
 
 	NVGLUframebuffer *fb = NULL;
 	Vec fbSize;
@@ -248,6 +249,8 @@ struct Widget {
 	virtual void draw(NVGcontext *vg);
 	void drawCachedOrFresh(NVGcontext *vg);
 	void ensureCached(NVGcontext *vg);
+
+	Rect getHitBox();
 
 	// Events
 

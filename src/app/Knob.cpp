@@ -12,6 +12,7 @@ namespace rack {
 
 Knob::Knob() {
 	smooth = true;
+	canGrowHitBox = true;
 }
 
 void Knob::onDragStart(EventDragStart &e) {
