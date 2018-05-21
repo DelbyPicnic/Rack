@@ -11,29 +11,29 @@ miRack is a work in progress. Some features are broken or deliberately turned of
 
 ## Comparison to VCVRack
 
-* Reworked and greatly optimised user interface rendering.
+* Reworked and greatly optimised user interface rendering, layout and event handling.
 
 * Multithreaded audio/signal processing.
 
-* Individual plugins are being forked and optimised if it is neccessary.
+* Individual plugins are being forked and optimised if it is necessary.
 
-* Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valud output device.** This is likely to be improved in future but is not a high priority task at the moment.
+* Only stereo audio output is supported. VCVRack Bridge is not supported. **A patch will not run unless there's an Audio Out module with a valid output device.** This is likely to be improved in future but is not a high priority task at the moment.
 
-* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configure to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling. When loading existing patches, make sure that engine and audio output sample rates match.
+* Engine sample rate must match the audio output sample rate (and will change automatically when changing the output sample rate). Some modules have been configured to work most efficiently when the sample rate is set to **48000 Hz**, which should be used to avoid CPU-intensive resampling. When loading existing patches, make sure that engine and audio output sample rates match.
 
 * Some visual effects are turned off or simplified. This may change in future, but in general due to constrained CPU resources, audio processing and UI performance is the main priority.
 
 ## Platforms
 
-Currently the development is done using ASUS Tinker Board, with Raspberry Pi 3 being the second main supported platform. There's a lot of similar ARM-based boards that should work too. On desktop, the development is done on macOS, and I guess Linux should be supported as well but it's not being tested.
+Currently, the development is done using ASUS Tinker Board, with Raspberry Pi 3 being the second main supported platform. There's a lot of similar ARM-based boards that should work too. On the desktop, the development is done on macOS, and I guess Linux should be supported as well but it's not being tested.
 
-OpenGL ES will be used on ARM boards for for rendering, OpenGL will be used on desktop.
+OpenGL ES will be used on ARM boards for rendering, OpenGL will be used on desktops.
 
 ### Performance
 
-ARM-based hardware is not able to run complex patches that are possible on desktop. Some modules may perform better and some worse. Only a few of the plugins have been checked for possible optimisations and optimised so far. See below and ensure to install an optimised version if it's available.
+ARM-based hardware is not able to run complex patches that are possible on a desktop. Some modules may perform better and some worse. Only a few of the plugins have been checked for possible optimisations and optimised so far. See below and ensure to install an optimised version if it's available.
 
-Currently, Rack will spawn 3 audio processing threads (because Raspberry Pi and Tinker Board have 4 CPU cores) and will attempt to assing higher priority to them (requires the user to have appropriate permissions). More details on configuring system for better performance and to ensure uninterrupted audio will be added later.
+Currently, Rack will spawn 3 audio processing threads (because Raspberry Pi and Tinker Board have 4 CPU cores) and will attempt to assing higher priority to them (requires the user to have appropriate permissions). More details on configuring operating system for better performance and to ensure uninterrupted audio will be added later.
 
 Please note that Tinker Board that I'm currently using for development is about twice faster than Raspberry Pi 3. Also, make sure your board has proper active cooling. Without it, all these boards get quite hot under heavy load and that will cause CPU frequency to reduce very quickly.
 
@@ -41,7 +41,7 @@ Please note that Tinker Board that I'm currently using for development is about 
 
 When configuring Audio Out module, choose "hw:rockchip,miniarm-codec,0" for HDMI output, and "hw:USB Audio OnBoard,2" for 3.5mm jack output.
 
-Due to some issues with Xorg, the framerate is less than the hardware can achive. Support for running without an X server is in development.
+Due to some issues with Xorg, the framerate is less than the hardware can achieve. Support for running without an X server is in development.
 
 ### Raspberry Pi Notes
 
@@ -57,7 +57,11 @@ VCVRack plugins are source-compatible with miRack. There may be issues with indi
 
 Some plugins have been forked to include optimisations and tweaks. See (VCVRack plugin list](https://vcvrack.com/plugins.html) and Installing Plugins section below.
 
-## Building & Running
+## Installation Using Package Manager
+
+On Debian-based systems (TinkerOS, Raspbian and most other) running on ARM boards, APT package manager can be used to install and update miRack and plugins. This is the preferred method as it ensures that all installed plugins are updated when it is required to maintain compatibility with the main Rack application. Please see [here](https://github.com/mi-rack/Rack/releases/tag/deb) for repository configuration and installation instructions.
+
+## Building from Sources
 
 When cloning this repository, use `--recursive` option, or do `git submodule update --init --recursive`.
 
@@ -65,7 +69,7 @@ Assuming you have the basic tools (GCC and make on Linux, Xcode and [Homebrew](h
 
 Build dependencies with `make dep`, and then build Rack with `make`.
 
-Install Fundamental module pack with `make +Fundamental` to have several basic modules to begin with.
+Install Fundamental module pack with `make +Fundamental` to have several basic modules to start with.
 
 To run Rack, execute `make run`.
 
@@ -83,7 +87,7 @@ Also, since miRack is under active development, plugins need to be rebuilt when 
 
 ### Manual
 
-Clone a plugin respository into a folder inside `plugins` folder. Use `--recursive` option, or do `git submodule update --init --recursive` afterwards.
+Clone a plugin repository into a folder inside `plugins` folder. Use `--recursive` option, or do `git submodule update --init --recursive` afterwards.
 
 To build, execute `make -C plugins/PLUGIN_FOLDER`. No installation is required.
 
