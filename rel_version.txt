@@ -2,5 +2,5 @@
   rel_version.txt -- Version Information for unknown (syntax: Text)
   [automatically generated and maintained by GNU shtool]
 
-  This is unknown, Version 0.6.11 (20-May-2018)
+  This is unknown, Version 0.6.12 (21-May-2018)
 
