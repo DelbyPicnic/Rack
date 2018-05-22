@@ -94,40 +94,48 @@ WireWidget *WireContainer::getTopWire(Port *port) {
 }
 
 void WireContainer::draw(NVGcontext *vg) {
-	//Widget::draw(vg);
-// return;
-		nvgSave(vg);
-		float opacity = gToolbar->wireOpacitySlider->value / 100.0;
-		nvgGlobalAlpha(vg, powf(opacity, 1.5));
-		// nvgLineJoin(vg, NVG_ROUND);
+	//Wires
+	nvgSave(vg);
+	float opacity = gToolbar->wireOpacitySlider->value / 100.0;
+	nvgGlobalAlpha(vg, powf(opacity, 1.5));
 
-		nvgBeginPath(vg);
+	nvgBeginPath(vg);
+	// No need as strokes are always merged now
+	//nvgAllowMergeSubpaths(vg);
 	for (Widget *child : children) {
-		// if (!child->visible)
-		// 	continue;
+		if (activeWire == child)
+			continue;
 		nvgSave(vg);
 		nvgTranslate(vg, child->box.pos.x, child->box.pos.y);
 		child->draw(vg);
 		nvgRestore(vg);
 	}
 
+	nvgStrokeColor(vg, nvgRGB(0xc9, 0x18, 0x47));
+	nvgStrokeWidth(vg, 4);
+	nvgStroke(vg);
+	nvgRestore(vg);
+
+	if (activeWire) {
+		nvgSave(vg);
+		nvgGlobalAlpha(vg, 1);
+		nvgBeginPath(vg);
+		nvgTranslate(vg, activeWire->box.pos.x, activeWire->box.pos.y);
+		activeWire->draw(vg);
 		nvgStrokeColor(vg, nvgRGB(0xc9, 0x18, 0x47));
 		nvgStrokeWidth(vg, 4);
 		nvgStroke(vg);
-	nvgRestore(vg);
+		nvgRestore(vg);
+	}
 
-// return;
 	// Wire plugs
 	nvgBeginPath(vg);
 	nvgAllowMergeSubpaths(vg);
 
 	for (Widget *child : children) {
-		// if (!child->visible)
-		// 	continue;
 		WireWidget *wire = dynamic_cast<WireWidget*>(child);
 		assert(wire);
 		wire->drawPlugs(vg);
-		// wire->needsRender = false;
 	}
 
 	nvgFillColor(vg, nvgRGB(0xc9, 0x18, 0x47));
