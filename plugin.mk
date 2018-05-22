@@ -48,6 +48,7 @@ endif
 clean:
 	rm -rfv build $(TARGET) dist
 
+ifeq ($(ARCH), lin)
 DEB_VERSION = $(VERSION)-$(shell date +%s)
 DEB_ARCH = $(shell dpkg --print-architecture)
 DEB_SLUG = $(shell echo $(SLUG) | sed s/[^a-zA-Z0-9-]/-/)
@@ -70,6 +71,7 @@ deb: .deb-built
 
 	fakeroot -- bash -c "chown -R root:root dist/work/* && dpkg-deb --build dist/work $(DEB)"
 	touch .deb-built
+endif
 
 dist: all
 	rm -rf dist

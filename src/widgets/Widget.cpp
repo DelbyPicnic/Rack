@@ -259,8 +259,7 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 	nvgBeginPath(vg);
 	nvgRect(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y);
 
-	nvgFillPaint(vg, nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0));
-	nvgFill(vg);
+	nvgTextureQuads(vg, fb->image);
 
 	// For debugging the bounding box of the framebuffer
 	// nvgStrokeWidth(vg, 2.0);

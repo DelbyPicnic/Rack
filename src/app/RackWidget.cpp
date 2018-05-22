@@ -516,9 +516,10 @@ void RackWidget::draw(NVGcontext *vg) {
 	if (!lightImage)
 		lightImage = nvgCreateImageRGBA(vg, 256, 1, NVG_IMAGE_NEAREST|NVG_IMAGE_PREMULTIPLIED, lightData);
 
+	nvgSave(vg);
+	nvgShapeAntiAlias(vg, 0);
 	nvgBeginPath(vg);
 	nvgAllowMergeSubpaths(vg);
-
 	int i = 0;
 	for (LightWidget *light : lights) {
 		light->step();
@@ -539,7 +540,10 @@ void RackWidget::draw(NVGcontext *vg) {
 
 	nvgUpdateImage(vg, lightImage, lightData);
 	nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 256, 1, 0.0, lightImage, 1.0));
+	//nvgGlobalAlpha(vg, 1);
+	//nvgFillColor(vg, nvgRGBAf(1,0,0,1));
 	nvgFill(vg);
+	nvgRestore(vg);
 
 	wireContainer->draw(vg);
 }

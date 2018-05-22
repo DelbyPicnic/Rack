@@ -6,12 +6,13 @@
 
 namespace rack {
 
-static void drawPlug(NVGcontext *vg, Vec pos, NVGcolor color) {
+static void drawPlug(NVGcontext *vg, Vec pos, NVGcolor color, SVGWidget *plug) {
 	NVGcolor colorOutline = nvgLerpRGBA(color, nvgRGBf(0.0, 0.0, 0.0), 0.5);
+	nvgRect(vg, pos.x-19*0.5, pos.y-19*0.5, 19, 19);
 
 	// Plug solid
 	// nvgBeginPath(vg);
-	nvgCircle(vg, pos.x, pos.y, 9);
+	//nvgCircle(vg, pos.x, pos.y, 9);
 	// nvgFillColor(vg, color);
 	// nvgFill(vg);
 
@@ -175,13 +176,13 @@ void WireWidget::draw(NVGcontext *vg) {
 	drawWire(vg, outputPos, inputPos, color, tension, opacity);
 }
 
-void WireWidget::drawPlugs(NVGcontext *vg) {
+void WireWidget::drawPlugs(NVGcontext *vg, SVGWidget *plug) {
 	// TODO Figure out a way to draw plugs first and wires last, and cut the plug portion of the wire off.
 	Vec outputPos = getOutputPos();
 	Vec inputPos = getInputPos();
 
-	drawPlug(vg, outputPos, color);
-	drawPlug(vg, inputPos, color);
+	drawPlug(vg, outputPos, color, plug);
+	drawPlug(vg, inputPos, color, plug);
 
 	// Draw plug light
 	// TODO

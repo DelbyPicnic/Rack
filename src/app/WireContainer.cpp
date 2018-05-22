@@ -1,7 +1,19 @@
 #include "app.hpp"
+#include "window.hpp"
+#include "asset.hpp"
+
+#include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 
 namespace rack {
 
+static SVGWidget *plug = NULL;
+
+WireContainer::WireContainer() {
+	plug = new SVGWidget();
+	plug->setSVG(SVG::load(assetGlobal("res/Plug.svg")));
+	plug->ensureCached(gVg);
+}
 
 void WireContainer::setActiveWire(WireWidget *w) {
 	if (activeWire) {
@@ -111,8 +123,11 @@ void WireContainer::draw(NVGcontext *vg) {
 		nvgRestore(vg);
 	}
 
+	nvgStrokeColor(vg, nvgRGB(0x50, 0x0a, 0x1c));
+	nvgStrokeWidth(vg, 5);
+	nvgStroke(vg);
 	nvgStrokeColor(vg, nvgRGB(0xc9, 0x18, 0x47));
-	nvgStrokeWidth(vg, 4);
+	nvgStrokeWidth(vg, 3);
 	nvgStroke(vg);
 	nvgRestore(vg);
 
@@ -122,24 +137,30 @@ void WireContainer::draw(NVGcontext *vg) {
 		nvgBeginPath(vg);
 		nvgTranslate(vg, activeWire->box.pos.x, activeWire->box.pos.y);
 		activeWire->draw(vg);
+		nvgStrokeColor(vg, nvgRGB(0x50, 0x0a, 0x1c));
+		nvgStrokeWidth(vg, 5);
+		nvgStroke(vg);
 		nvgStrokeColor(vg, nvgRGB(0xc9, 0x18, 0x47));
-		nvgStrokeWidth(vg, 4);
+		nvgStrokeWidth(vg, 3);
 		nvgStroke(vg);
 		nvgRestore(vg);
 	}
 
 	// Wire plugs
 	nvgBeginPath(vg);
-	nvgAllowMergeSubpaths(vg);
+	// nvgAllowMergeSubpaths(vg);
+	// nvgShapeAntiAlias(vg, 0);
 
 	for (Widget *child : children) {
 		WireWidget *wire = dynamic_cast<WireWidget*>(child);
 		assert(wire);
-		wire->drawPlugs(vg);
+		wire->drawPlugs(vg, plug);
 	}
 
-	nvgFillColor(vg, nvgRGB(0xc9, 0x18, 0x47));
-	nvgFill(vg);
+	// nvgFillColor(vg, nvgRGB(0xc9, 0x18, 0x47));
+	// nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 19, 19, 0.0, plug->fb->image, 1.0));
+	nvgTextureQuads(vg, plug->fb->image);
+	// nvgFill(vg);
 }
 
 

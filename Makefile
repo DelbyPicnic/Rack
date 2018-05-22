@@ -158,6 +158,7 @@ ifeq ($(ARCH), win)
 	windres $^ -O coff -o $@
 endif
 
+ifeq ($(ARCH), lin)
 DEB_ARCH = $(shell dpkg --print-architecture)
 DEB = dist/miRack_$(VERSION)_$(DEB_ARCH).deb
 deb: $(DEB)
@@ -179,6 +180,7 @@ endif
 	m4 -DARCH=$(DEB_ARCH) -DVER=$(VERSION) debian/control.m4 > dist/work/DEBIAN/control
 
 	fakeroot -- bash -c "chown -R root:root dist/work/* && dpkg-deb --build dist/work $(DEB)"
+endif
 
 # This target is not intended for public use
 dist: all
