@@ -255,11 +255,13 @@ void Widget::drawCachedOrFresh(NVGcontext *vg) {
 
 	// Draw framebuffer image, using world coordinates
 	nvgSave(vg);
-	// printf("presenting framebuffer %f %f %f %f %d %p\n", fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, fb->image, vg);
+	// printf("presenting framebuffer %f %f   %f %f   %f %f   %d %p\n", box.size.x, box.size.y, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, fb->image, vg);
 	nvgBeginPath(vg);
 	nvgRect(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y);
 
-	nvgTextureQuads(vg, fb->image);
+	nvgTextureQuads(vg, fb->image, 1);
+	// nvgFillPaint(vg, nvgImagePattern(vg, fbBox.pos.x, fbBox.pos.y, fbBox.size.x, fbBox.size.y, 0.0, fb->image, 1.0));
+	// nvgFill(vg);
 
 	// For debugging the bounding box of the framebuffer
 	// nvgStrokeWidth(vg, 2.0);

@@ -7,12 +7,13 @@
 
 namespace rack {
 
-static SVGWidget *plug = NULL;
-
 WireContainer::WireContainer() {
-	plug = new SVGWidget();
-	plug->setSVG(SVG::load(assetGlobal("res/Plug.svg")));
-	plug->ensureCached(gVg);
+	plug = new SVG(assetGlobal("res/Plug.svg"));
+	assert(plug->image);
+}
+
+WireContainer::~WireContainer() {
+	delete plug;
 }
 
 void WireContainer::setActiveWire(WireWidget *w) {
@@ -148,19 +149,12 @@ void WireContainer::draw(NVGcontext *vg) {
 
 	// Wire plugs
 	nvgBeginPath(vg);
-	// nvgAllowMergeSubpaths(vg);
-	// nvgShapeAntiAlias(vg, 0);
-
 	for (Widget *child : children) {
 		WireWidget *wire = dynamic_cast<WireWidget*>(child);
 		assert(wire);
-		wire->drawPlugs(vg, plug);
+		wire->drawPlugs(vg);
 	}
-
-	// nvgFillColor(vg, nvgRGB(0xc9, 0x18, 0x47));
-	// nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 19, 19, 0.0, plug->fb->image, 1.0));
-	nvgTextureQuads(vg, plug->fb->image);
-	// nvgFill(vg);
+	nvgTextureQuads(vg, plug->image, 0);
 }
 
 

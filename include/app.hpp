@@ -126,12 +126,14 @@ struct WireWidget : OpaqueWidget {
 	json_t *toJson();
 	void fromJson(json_t *rootJ);
 	void draw(NVGcontext *vg) override;
-	void drawPlugs(NVGcontext *vg, SVGWidget *plug);
+	void drawPlugs(NVGcontext *vg);
 };
 
 struct WireContainer : TransparentWidget {
 	WireWidget *activeWire = NULL;
+	SVG *plug = NULL;
 	WireContainer();
+	~WireContainer();
 	/** Takes ownership of `w` and adds it as a child if it isn't already */
 	void setActiveWire(WireWidget *w);
 	/** "Drops" the wire onto the port, making an engine connection if successful */

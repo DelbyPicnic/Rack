@@ -24,6 +24,9 @@
 #define NANOSVG_ALL_COLOR_KEYWORDS
 #include "nanosvg.h"
 
+#define NANOSVGRAST_IMPLEMENTATION
+#include "nanosvgrast.h"
+
 #ifdef ARCH_MAC
 	// For CGAssociateMouseAndMouseCursorPosition
 	#include <ApplicationServices/ApplicationServices.h>
@@ -684,9 +687,16 @@ std::shared_ptr<Image> Image::load(const std::string &filename) {
 ////////////////////
 
 SVG::SVG(const std::string &filename) {
-	handle = nsvgParseFromFile(filename.c_str(), "px", SVG_DPI);
+	NSVGimage *handle = nsvgParseFromFile(filename.c_str(), "px", SVG_DPI);
 	if (handle) {
 		info("Loaded SVG %s", filename.c_str());
+		size = Vec(handle->width, handle->height);
+		int w = ceil(handle->width)*2;
+		int h = ceil(handle->height)*2;
+		unsigned char *data = (unsigned char*)malloc(w*h*4);
+		nsvgRasterize(nsvgCreateRasterizer(), handle, 0,0,2, data, w, h, w*4);
+		image = nvgCreateImageRGBA(gVg, w, h, 0, data);
+		nsvgDelete(handle);
 	}
 	else {
 		warn("Failed to load SVG %s", filename.c_str());
@@ -694,7 +704,7 @@ SVG::SVG(const std::string &filename) {
 }
 
 SVG::~SVG() {
-	nsvgDelete(handle);
+	nvgDeleteImage(gVg, image);
 }
 
 std::shared_ptr<SVG> SVG::load(const std::string &filename) {
