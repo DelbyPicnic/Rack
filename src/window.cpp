@@ -379,7 +379,7 @@ void windowInit() {
 	int w = 800, h = 600;
 #endif	
 
-	lastWindowTitle = "";
+	lastWindowTitle = gApplicationName + " " + gApplicationVersion;
 	gWindow = glfwCreateWindow(w, h, lastWindowTitle.c_str(), monitor, NULL);
 	if (!gWindow) {
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Cannot open window with OpenGL 2.0 renderer. Does your graphics card support OpenGL 2.0 or greater? If so, make sure you have the latest graphics drivers installed.");
