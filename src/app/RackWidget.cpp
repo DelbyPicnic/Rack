@@ -511,10 +511,11 @@ void RackWidget::draw(NVGcontext *vg) {
 	}
 
 	// Lights
+	//XXX: this is temporary, need to properly (re)allocate texture of correct size, or just rendered another way
 	static int lightImage = 0;
-	static unsigned char lightData[256*4];
+	static unsigned char lightData[1024*4];
 	if (!lightImage)
-		lightImage = nvgCreateImageRGBA(vg, 256, 1, NVG_IMAGE_NEAREST|NVG_IMAGE_PREMULTIPLIED, lightData);
+		lightImage = nvgCreateImageRGBA(vg, 1024, 1, NVG_IMAGE_NEAREST|NVG_IMAGE_PREMULTIPLIED, lightData);
 
 	nvgSave(vg);
 	nvgShapeAntiAlias(vg, 0);
@@ -527,7 +528,7 @@ void RackWidget::draw(NVGcontext *vg) {
 		float radius = light->box.size.x / 2.0;
 
 		nvgCircle(vg, light->parent->box.pos.x+light->box.pos.x+radius, light->parent->box.pos.y+light->box.pos.y+radius, radius);
-		nvgSubpathTexPos(vg, i/256., 0.5f);
+		nvgSubpathTexPos(vg, i/1024., 0.5f);
 		float a = light->color.a;
 		float bga = 1. - light->color.a;
 		lightData[i*4+0] = (light->bgColor.r * bga + light->color.r * a) * 255.;
@@ -539,7 +540,7 @@ void RackWidget::draw(NVGcontext *vg) {
 	}
 
 	nvgUpdateImage(vg, lightImage, lightData);
-	nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 256, 1, 0.0, lightImage, 1.0));
+	nvgFillPaint(vg, nvgImagePattern(vg, 0, 0, 1024, 1, 0.0, lightImage, 1.0));
 	//nvgGlobalAlpha(vg, 1);
 	//nvgFillColor(vg, nvgRGBAf(1,0,0,1));
 	nvgFill(vg);
