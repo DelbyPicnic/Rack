@@ -185,6 +185,17 @@ Toolbar::Toolbar() {
 	zoomSlider->setDefaultValue(100.0);
 	layout->addChild(zoomSlider);
 
+	struct AddModuleButton : Button {
+		void onAction(EventAction &e) override {
+			appModuleBrowserCreate();
+		}
+	};
+
+	auto addModuleButton = new AddModuleButton();
+	addModuleButton->text = "Add Module";
+	addModuleButton->box.size.x = 100;
+	layout->addChild(addModuleButton);
+
 /*
 	cpuUsageButton = new RadioButton();
 	cpuUsageButton->box.size.x = 100;
