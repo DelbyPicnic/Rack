@@ -340,7 +340,7 @@ void ModuleWidget::onDragMove(EventDragMove &e) {
 
 	if (lockModules) {
 	 	if (glfwGetTime() - dragStartTime < 1) {
-	 		if (e.mouseRel.norm() >= 3)
+	 		if (e.mouseRel.norm() >= 10)
 	 			cancelDrag = true;
 
 			return;

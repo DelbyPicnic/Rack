@@ -7,6 +7,61 @@
 
 namespace rack {
 
+struct CalibrationWidget : OpaqueWidget {
+	std::vector<Vec> pts;
+	std::vector<Vec> touchpts;
+
+	void draw(NVGcontext *vg) override {
+		nvgSave(vg);
+
+		nvgBeginPath(vg);
+		nvgAllowMergeSubpaths(vg);
+
+		for (auto p : pts)
+			nvgRect(vg, p.x-5, p.y-5, 10, 10);
+
+		nvgFillColor(vg, nvgRGBf(1,0,0));
+		nvgFill(vg);
+
+
+		nvgBeginPath(vg);
+		nvgAllowMergeSubpaths(vg);
+
+		for (auto p : touchpts)
+			nvgRect(vg, p.x-5, p.y-5, 10, 10);
+
+		nvgFillColor(vg, nvgRGBf(0,1,0));
+		nvgFill(vg);
+
+		nvgRestore(vg);
+	};
+
+	void onMouseDown(EventMouseDown &e) override {
+		touchpts.push_back(e.pos);
+		e.consumed = true;
+	};
+
+	void onResize() override {
+		pts.resize(0);
+		touchpts.resize(0);
+
+		int firstx = 16, lastx = box.size.x - 16;
+		int firsty = 16, lasty = box.size.y - 16;
+		int dx = box.size.x / 5;
+		int dy = box.size.y / 5;
+
+		for (int x = firstx; x < box.size.x; x+=dx) {
+			for (int y = firstx; y < box.size.y; y+=dy)
+				pts.push_back(Vec(x, y));
+			pts.push_back(Vec(x, lasty));
+		}
+		for (int y = firstx; y < box.size.y; y+=dy)
+			pts.push_back(Vec(lastx, y));
+		pts.push_back(Vec(lastx, lasty));
+	};
+};
+CalibrationWidget *cw;
+
 
 RackScene::RackScene() {
 	scrollWidget = new RackScrollWidget();
@@ -24,14 +79,18 @@ RackScene::RackScene() {
 	gToolbar = new Toolbar();
 	addChild(gToolbar);
 	scrollWidget->box.pos.y = gToolbar->box.size.y;
+
+	cw = new CalibrationWidget();
+	// addChild(cw);
 }
 
 void RackScene::onResize() {
 	// Resize owned descendants
 	gToolbar->box.size.x = box.size.x;
 	scrollWidget->box.size = box.size.minus(scrollWidget->box.pos);
+	cw->box = box;
 
-	Scene::onResize();	
+	Scene::onResize();
 }
 
 void RackScene::draw(NVGcontext *vg) {

@@ -330,7 +330,11 @@ void Widget::onMouseUp(EventMouseUp &e) {
 }
 
 void Widget::onMouseMove(EventMouseMove &e) {
-	RECURSE_EVENT_POSITION(onMouseMove);
+	if (gDraggedWidget) {
+		RECURSE_EVENT_POSITION_WITH_MARGINS(onMouseMove);
+	} else {
+		RECURSE_EVENT_POSITION(onMouseMove);
+	}
 }
 
 void Widget::onHoverKey(EventHoverKey &e) {

@@ -80,11 +80,9 @@ struct BrowserListItem : OpaqueWidget {
 
 	void onDragStart(EventDragStart &e) override;
 
-	void onDragDrop(EventDragDrop &e) override {
-		if (e.origin != this)
-			return;
-		doAction();
-	}
+	void onDragMove(EventDragMove &e) override;
+
+	void onDragDrop(EventDragDrop &e) override;
 
 	void doAction() {
 		EventAction eAction;
@@ -198,7 +196,45 @@ struct ClearFilterItem : BrowserListItem {
 struct BrowserList : List {
 	int selected = 0;
 
+	// Kinetic scrolling
+	//TODO: this functionality should me moved to ScrollWidet
+	float velocity = 0;
+	float amplitude = 0;
+	double lastTime = 0;
+	float target = 0;
+	bool decelerating = false;
+	bool tracking = false;
+	float startOffset = 0;
+	float lastOffset = 0;	
+
 	void step() override {
+		if (tracking) {
+			ScrollWidget *scroll = getAncestorOfType<ScrollWidget>();
+			
+			double time = glfwGetTime();
+			velocity = 0.2*velocity + 0.8 * (scroll->offset.y-lastOffset) / (time-lastTime);
+
+			//TODO: this should be implemented with a delay instead as on iOS
+			if (fabsf((scroll->offset.y-startOffset)) > 5)
+				selected = -1;
+
+			lastTime = time;
+			lastOffset = scroll->offset.y;
+		}
+		else if (decelerating) {
+			float delta = -amplitude * expf(-(glfwGetTime()-lastTime) / 0.325);
+			if (fabsf(delta) > 0.5) {
+				ScrollWidget *scroll = getAncestorOfType<ScrollWidget>();
+				EventDragMove e;
+				double time = glfwGetTime();
+				e.mouseRel = Vec(0, delta);
+				scroll->offset.y = target + delta;
+				scroll->updateForOffsetChange();
+
+			} else
+				decelerating = false;
+		}
+
 		incrementSelection(0);
 		// Find and select item
 		int i = 0;
@@ -214,7 +250,7 @@ struct BrowserList : List {
 
 	void incrementSelection(int delta) {
 		selected += delta;
-		selected = clamp(selected, 0, countItems() - 1);
+		selected = clamp(selected, -1, countItems() - 1);
 	}
 
 	int countItems() {
@@ -484,16 +520,54 @@ void FavoriteRadioButton::onAction(EventAction &e) {
 
 void BrowserListItem::onDragStart(EventDragStart &e) {
 	BrowserList *list = dynamic_cast<BrowserList*>(parent);
-	if (list) {
-		list->selectItem(this);
+	ScrollWidget *scroll = list->getAncestorOfType<ScrollWidget>();
+
+	list->tracking = true;
+	list->velocity = 0;
+	list->lastTime = glfwGetTime();
+	list->lastOffset = list->startOffset = scroll->offset.y;
+
+	if (list->decelerating) {
+		list->decelerating = false;
+		return;
 	}
+
+	list->selectItem(this);
 }
+
+void BrowserListItem::onDragMove(EventDragMove &e) {	
+	BrowserList *list = dynamic_cast<BrowserList*>(parent);
+	ScrollWidget *scroll = list->getAncestorOfType<ScrollWidget>();
+	scroll->offset.y -= e.mouseRel.y;
+	scroll->updateForOffsetChange();
+}
+
+void BrowserListItem::onDragDrop(EventDragDrop &e) {
+	BrowserList *list = dynamic_cast<BrowserList*>(parent);
+	list->tracking = false;
+
+	if (fabsf(list->velocity) > 10) {
+		ScrollWidget *scroll = list->getAncestorOfType<ScrollWidget>();
+
+		list->amplitude = 0.8*list->velocity;
+		list->target = scroll->offset.y + list->amplitude;
+		list->lastTime = glfwGetTime();
+		list->decelerating = true;
+	}
+
+	if (e.origin != this || !selected)
+		return;
+	doAction();
+}
+
 
 void SearchModuleField::onTextChange() {
 	moduleBrowser->refreshSearch();
 }
 
 void SearchModuleField::onKey(EventKey &e) {
+	moduleBrowser->moduleList->decelerating = false;
+
 	switch (e.key) {
 		case GLFW_KEY_ESCAPE: {
 			gScene->setOverlay(NULL);
