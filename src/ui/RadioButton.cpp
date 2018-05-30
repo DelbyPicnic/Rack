@@ -3,6 +3,11 @@
 
 namespace rack {
 
+RadioButton::RadioButton() {
+	box.size.y = BND_WIDGET_HEIGHT;
+	canGrowHitBox = true;
+}
+
 void RadioButton::draw(NVGcontext *vg) {
 	bndRadioButton(vg, 0.0, 0.0, box.size.x, box.size.y, BND_CORNER_NONE, value == 0.0 ? state : BND_ACTIVE, -1, label.c_str());
 }

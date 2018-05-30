@@ -3,6 +3,11 @@
 
 namespace rack {
 
+Button::Button() {
+	box.size.y = BND_WIDGET_HEIGHT;
+	canGrowHitBox = true;
+}
+
 void Button::draw(NVGcontext *vg) {
 	bndToolButton(vg, 0.0, 0.0, box.size.x, box.size.y, BND_CORNER_NONE, state, -1, text.c_str());
 }

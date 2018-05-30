@@ -15,6 +15,10 @@ ifdef RELEASE
 	FLAGS += -DRELEASE
 endif
 
+ifdef TOUCH
+	FLAGS += -DTOUCH
+endif
+
 include arch.mk
 
 STRIP ?= strip

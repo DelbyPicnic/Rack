@@ -28,6 +28,7 @@ struct SequentialLayout : VirtualWidget {
 	Alignment alignment = LEFT_ALIGNMENT;
 	/** Space between adjacent elements */
 	float spacing = 0.0;
+	Vec padding = Vec(0, 0);
 	void onResize() override;
 };
 
@@ -110,6 +111,7 @@ struct MenuLabel : MenuEntry {
 struct MenuItem : MenuEntry {
 	std::string text;
 	std::string rightText;
+	MenuItem();
 	void draw(NVGcontext *vg) override;
 	void step() override;
 	virtual Menu *createChildMenu() {return NULL;}
@@ -153,9 +155,7 @@ struct Button : OpaqueWidget {
 	std::string text;
 	BNDwidgetState state = BND_DEFAULT;
 
-	Button() {
-		box.size.y = BND_WIDGET_HEIGHT;
-	}
+	Button();
 	void draw(NVGcontext *vg) override;
 	void onMouseEnter(EventMouseEnter &e) override;
 	void onMouseLeave(EventMouseLeave &e) override;
@@ -171,9 +171,7 @@ struct ChoiceButton : Button {
 struct RadioButton : OpaqueWidget, QuantityWidget {
 	BNDwidgetState state = BND_DEFAULT;
 
-	RadioButton() {
-		box.size.y = BND_WIDGET_HEIGHT;
-	}
+	RadioButton();
 	void draw(NVGcontext *vg) override;
 	void onMouseEnter(EventMouseEnter &e) override;
 	void onMouseLeave(EventMouseLeave &e) override;
@@ -183,9 +181,7 @@ struct RadioButton : OpaqueWidget, QuantityWidget {
 struct Slider : OpaqueWidget, QuantityWidget {
 	BNDwidgetState state = BND_DEFAULT;
 
-	Slider() {
-		box.size.y = BND_WIDGET_HEIGHT;
-	}
+	Slider();
 	void draw(NVGcontext *vg) override;
 	void onDragStart(EventDragStart &e) override;
 	void onDragMove(EventDragMove &e) override;

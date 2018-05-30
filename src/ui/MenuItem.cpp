@@ -5,8 +5,18 @@
 namespace rack {
 
 
+//TODO: get rid of this
+#ifdef TOUCH
+#define BND_LABEL_FONT_SIZE 15
+#else
 #define BND_LABEL_FONT_SIZE 13
+#endif
 
+MenuItem::MenuItem() {
+#ifdef TOUCH
+	box.size.y += 8*2;	
+#endif
+}
 
 void MenuItem::draw(NVGcontext *vg) {
 	// Get state
@@ -16,11 +26,19 @@ void MenuItem::draw(NVGcontext *vg) {
 		state = BND_ACTIVE;
 	}
 
-	bndMenuItem(vg, 0.0, 0.0, box.size.x, box.size.y, state, -1, text.c_str());
+	bndMenuItem(vg, 0.0, 0.0, box.size.x, box.size.y, state, -1, NULL);
+
+#ifdef TOUCH
+	float y = 5;
+#else
+	float y = 0;
+#endif
+
+	bndIconLabelValue(vg, 0, y, box.size.x, box.size.y, -1, bndGetTheme()->regularTheme.textColor, BND_LEFT, BND_LABEL_FONT_SIZE, text.c_str(), NULL);
 
 	float x = box.size.x - bndLabelWidth(vg, -1, rightText.c_str());
 	NVGcolor rightColor = (state == BND_DEFAULT) ? bndGetTheme()->menuTheme.textColor : bndGetTheme()->menuTheme.textSelectedColor;
-	bndIconLabelValue(vg, x, 0.0, box.size.x, box.size.y, -1, rightColor, BND_LEFT, BND_LABEL_FONT_SIZE, rightText.c_str(), NULL);
+	bndIconLabelValue(vg, x, y, box.size.x, box.size.y, -1, rightColor, BND_LEFT, BND_LABEL_FONT_SIZE, rightText.c_str(), NULL);
 }
 
 void MenuItem::step() {

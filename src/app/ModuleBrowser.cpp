@@ -5,7 +5,11 @@
 #include <algorithm>
 
 
+#ifdef TOUCH
+static const float itemMargin = 2.0 + 8.0;
+#else
 static const float itemMargin = 2.0;
+#endif
 
 
 namespace rack {
@@ -51,12 +55,20 @@ struct FavoriteRadioButton : RadioButton {
 
 struct SeparatorItem : OpaqueWidget {
 	SeparatorItem() {
+#ifdef TOUCH
+		box.size.y = BND_WIDGET_HEIGHT + 2*itemMargin;
+#else
 		box.size.y = 2*BND_WIDGET_HEIGHT + 2*itemMargin;
+#endif
 	}
 
 	void setText(std::string text) {
 		clearChildren();
+#ifdef TOUCH
+		Label *label = Widget::create<Label>(Vec(0, itemMargin+2));
+#else
 		Label *label = Widget::create<Label>(Vec(0, 12 + itemMargin));
+#endif
 		label->text = text;
 		label->fontSize = 20;
 		label->color.a *= 0.5;
@@ -74,7 +86,7 @@ struct BrowserListItem : OpaqueWidget {
 
 	void draw(NVGcontext *vg) override {
 		BNDwidgetState state = selected ? BND_HOVER : BND_DEFAULT;
-		bndMenuItem(vg, 0.0, 0.0, box.size.x, box.size.y, state, -1, "");
+		bndMenuItem(vg, 0.0, 0.0, box.size.x, box.size.y, state, -1, NULL);
 		Widget::draw(vg);
 	}
 
@@ -83,6 +95,8 @@ struct BrowserListItem : OpaqueWidget {
 	void onDragMove(EventDragMove &e) override;
 
 	void onDragDrop(EventDragDrop &e) override;
+
+	void onDragEnd(EventDragEnd &e) override;
 
 	void doAction() {
 		EventAction eAction;
@@ -106,7 +120,7 @@ struct ModelItem : BrowserListItem {
 		this->model = model;
 
 		FavoriteRadioButton *favoriteButton = Widget::create<FavoriteRadioButton>(Vec(8, itemMargin));
-		favoriteButton->box.size.x = 20;
+		favoriteButton->box.size.x = BND_WIDGET_HEIGHT;
 		favoriteButton->label = "★";
 		addChild(favoriteButton);
 
@@ -201,10 +215,11 @@ struct BrowserList : List {
 	float velocity = 0;
 	float amplitude = 0;
 	double lastTime = 0;
+	double startTime = 0;
 	float target = 0;
 	bool decelerating = false;
 	bool tracking = false;
-	float startOffset = 0;
+	float startMousePos = 0;
 	float lastOffset = 0;	
 
 	void step() override {
@@ -214,44 +229,48 @@ struct BrowserList : List {
 			double time = glfwGetTime();
 			velocity = 0.2*velocity + 0.8 * (scroll->offset.y-lastOffset) / (time-lastTime);
 
-			//TODO: this should be implemented with a delay instead as on iOS
-			if (fabsf((scroll->offset.y-startOffset)) > 5)
+			if (fabsf((gMousePos.y-startMousePos)) > 5)
 				selected = -1;
 
 			lastTime = time;
 			lastOffset = scroll->offset.y;
-		}
-		else if (decelerating) {
-			float delta = -amplitude * expf(-(glfwGetTime()-lastTime) / 0.325);
-			if (fabsf(delta) > 0.5) {
-				ScrollWidget *scroll = getAncestorOfType<ScrollWidget>();
-				EventDragMove e;
-				double time = glfwGetTime();
-				e.mouseRel = Vec(0, delta);
-				scroll->offset.y = target + delta;
-				scroll->updateForOffsetChange();
+		
+		} else if (decelerating) {
+			double time = glfwGetTime();
+			ScrollWidget *scroll = getAncestorOfType<ScrollWidget>();
+			float k = 1 - pow((glfwGetTime()-startTime)*1.5, 3);
+			if (k >= 0) {
+				velocity = amplitude * k;
+				float delta = velocity * (glfwGetTime()-lastTime);
+				lastTime = time;
 
+				scroll->offset.y += delta;
+				scroll->updateForOffsetChange();
 			} else
 				decelerating = false;
 		}
 
-		incrementSelection(0);
 		// Find and select item
-		int i = 0;
-		for (Widget *child : children) {
-			BrowserListItem *item = dynamic_cast<BrowserListItem*>(child);
-			if (item) {
-				item->selected = (i == selected);
-				i++;
+		updateSelected();
+	}
+
+	void updateSelected() {
+		if (1||!tracking || glfwGetTime() - startTime > 0.010) {
+			int i = 0;
+			for (Widget *child : children) {
+				BrowserListItem *item = dynamic_cast<BrowserListItem*>(child);
+				if (item) {
+					item->selected = (i == selected);
+					i++;
+				}
 			}
 		}
-		List::step();
 	}
 
 	void incrementSelection(int delta) {
 		selected += delta;
-		selected = clamp(selected, -1, countItems() - 1);
-	}
+		selected = eucmod(selected, countItems());
+  	}
 
 	int countItems() {
 		int n = 0;
@@ -328,14 +347,18 @@ struct ModuleBrowser : OpaqueWidget {
 		searchField	= new SearchModuleField();
 		searchField->box.size.x = box.size.x;
 		searchField->moduleBrowser = this;
+#ifndef TOUCH
 		addChild(searchField);
+#endif
 
 		moduleList = new BrowserList();
 		moduleList->box.size = Vec(box.size.x, 0.0);
 
 		// Module Scroll
 		moduleScroll = new ScrollWidget();
+#ifndef TOUCH
 		moduleScroll->box.pos.y = searchField->box.size.y;
+#endif
 		moduleScroll->box.size.x = box.size.x;
 		moduleScroll->container->addChild(moduleList);
 		addChild(moduleScroll);
@@ -353,6 +376,10 @@ struct ModuleBrowser : OpaqueWidget {
 				}
 			}
 		}
+	}
+
+	~ModuleBrowser() {
+		gFocusedWidget = NULL;
 	}
 
 	void draw(NVGcontext *vg) override {
@@ -378,7 +405,9 @@ struct ModuleBrowser : OpaqueWidget {
 	void refreshSearch() {
 		std::string search = searchField->text;
 		moduleList->clearChildren();
-		moduleList->selected = 0;
+#ifdef TOUCH
+		moduleList->selected = -1;
+#endif
 		moduleScroll->offset = Vec(0,0);
 		bool filterPage = !(sAuthorFilter.empty() && sTagFilter == NO_TAG);
 
@@ -524,8 +553,9 @@ void BrowserListItem::onDragStart(EventDragStart &e) {
 
 	list->tracking = true;
 	list->velocity = 0;
-	list->lastTime = glfwGetTime();
-	list->lastOffset = list->startOffset = scroll->offset.y;
+	list->lastTime = list->startTime = glfwGetTime();
+	list->lastOffset = scroll->offset.y;
+	list->startMousePos = gMousePos.y;
 
 	if (list->decelerating) {
 		list->decelerating = false;
@@ -543,23 +573,26 @@ void BrowserListItem::onDragMove(EventDragMove &e) {
 }
 
 void BrowserListItem::onDragDrop(EventDragDrop &e) {
-	BrowserList *list = dynamic_cast<BrowserList*>(parent);
-	list->tracking = false;
-
-	if (fabsf(list->velocity) > 10) {
-		ScrollWidget *scroll = list->getAncestorOfType<ScrollWidget>();
-
-		list->amplitude = 0.8*list->velocity;
-		list->target = scroll->offset.y + list->amplitude;
-		list->lastTime = glfwGetTime();
-		list->decelerating = true;
-	}
-
 	if (e.origin != this || !selected)
 		return;
+
 	doAction();
 }
 
+void BrowserListItem::onDragEnd(EventDragEnd &e) {
+	BrowserList *list = dynamic_cast<BrowserList*>(parent);
+	list->tracking = false;
+	list->updateSelected();
+
+	if (fabsf(list->velocity) > 50) {
+		ScrollWidget *scroll = list->getAncestorOfType<ScrollWidget>();
+
+		list->amplitude = list->velocity;
+		list->target = scroll->offset.y + list->amplitude;
+		list->startTime = glfwGetTime();
+		list->decelerating = true;
+	}
+}
 
 void SearchModuleField::onTextChange() {
 	moduleBrowser->refreshSearch();

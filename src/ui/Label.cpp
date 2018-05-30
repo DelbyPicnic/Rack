@@ -6,7 +6,11 @@ namespace rack {
 
 Label::Label() {
 	box.size.y = BND_WIDGET_HEIGHT;
+#ifdef TOUCH
+	fontSize = 15;
+#else
 	fontSize = 13;
+#endif
 	color = bndGetTheme()->regularTheme.textColor;
 }
 
