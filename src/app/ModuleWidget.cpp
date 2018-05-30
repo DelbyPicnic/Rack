@@ -339,7 +339,7 @@ void ModuleWidget::onDragMove(EventDragMove &e) {
 		return;
 
 	if (lockModules) {
-	 	if (glfwGetTime() - dragStartTime < 1) {
+	 	if (glfwGetTime() - dragStartTime < 0.25) {
 	 		if (e.mouseRel.norm() >= 10)
 	 			cancelDrag = true;
 
@@ -410,7 +410,7 @@ Menu *ModuleWidget::createContextMenu() {
 	menu->addChild(randomizeItem);
 
 	DisconnectMenuItem *disconnectItem = new DisconnectMenuItem();
-	disconnectItem->text = "Disconnect cables";
+	disconnectItem->text = "Disconnect Cables";
 	disconnectItem->rightText = WINDOW_MOD_KEY_NAME "+U";
 	disconnectItem->moduleWidget = this;
 	menu->addChild(disconnectItem);

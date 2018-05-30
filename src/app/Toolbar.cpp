@@ -55,10 +55,10 @@ struct FileChoice : ChoiceButton {
 		menu->box.size.x = box.size.x;
 
 		menu->addChild(MenuItem::create<NewItem>("New", WINDOW_MOD_KEY_NAME "+N"));
-		menu->addChild(MenuItem::create<DisconnectItem>("Disconnect cables"));
+		menu->addChild(MenuItem::create<DisconnectItem>("Disconnect Cables"));
 		menu->addChild(MenuItem::create<OpenItem>("Open", WINDOW_MOD_KEY_NAME "+O"));
 		menu->addChild(MenuItem::create<SaveItem>("Save", WINDOW_MOD_KEY_NAME "+S"));
-		menu->addChild(MenuItem::create<SaveAsItem>("Save as", WINDOW_MOD_KEY_NAME "+Shift+S"));
+		menu->addChild(MenuItem::create<SaveAsItem>("Save As", WINDOW_MOD_KEY_NAME "+Shift+S"));
 		menu->addChild(MenuItem::create<RevertItem>("Revert"));
 		menu->addChild(MenuItem::create<QuitItem>("Quit", WINDOW_MOD_KEY_NAME "+Q"));
 	}
@@ -134,7 +134,7 @@ Toolbar::Toolbar() {
 	box.size.y = BND_WIDGET_HEIGHT + 2*5;
 
 	SequentialLayout *layout = new SequentialLayout();
-	layout->box.pos = Vec(5, 5);
+	layout->padding = Vec(5, 5);
 	layout->spacing = 5;
 	addChild(layout);
 
