@@ -3,6 +3,8 @@
 #include <string>
 
 
+#define KNOB_SENSITIVITY 0.0015
+
 namespace rack {
 
 
@@ -14,6 +16,7 @@ extern bool skipAutosaveOnLaunch;
 
 extern bool largerHitBoxes;
 extern bool lockModules;
+extern float knobSensitivity;
 
 
 } // namespace rack

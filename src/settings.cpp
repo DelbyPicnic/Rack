@@ -13,6 +13,7 @@ bool skipAutosaveOnLaunch = false;
 
 bool largerHitBoxes = false;
 bool lockModules = false;
+float knobSensitivity = KNOB_SENSITIVITY;
 
 
 static json_t *settingsToJson() {
@@ -77,6 +78,9 @@ static json_t *settingsToJson() {
 	// lockModules
 	if (lockModules)
 		json_object_set_new(rootJ, "lockModules", json_true());
+
+	// knobSensitivity
+	json_object_set_new(rootJ, "knobSensitivity", json_real(knobSensitivity));
 
 	return rootJ;
 }
@@ -156,6 +160,13 @@ static void settingsFromJson(json_t *rootJ) {
 	json_t *lockModulesJ = json_object_get(rootJ, "lockModules");
 	if (lockModulesJ)
 		lockModules = json_boolean_value(lockModulesJ);
+
+	// knobSensitivity
+	json_t *knobSensitivityJ = json_object_get(rootJ, "knobSensitivity");
+	if (knobSensitivityJ)
+		knobSensitivity = json_number_value(knobSensitivityJ);
+	else
+		knobSensitivity = KNOB_SENSITIVITY;
 }
 
 

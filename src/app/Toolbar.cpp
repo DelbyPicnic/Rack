@@ -78,6 +78,13 @@ struct LockModulesItem : MenuItem {
 	}
 };
 
+struct SensitiveKnobsItem : MenuItem {
+	void onAction(EventAction &e) override {
+		knobSensitivity = (isNear(knobSensitivity, KNOB_SENSITIVITY) ? KNOB_SENSITIVITY * 2 : KNOB_SENSITIVITY);
+		//TODO: save settings		
+	}
+};
+
 struct OptionsChoice : ChoiceButton {
 	void onAction(EventAction &e) override {
 		Menu *menu = gScene->createMenu();
@@ -86,6 +93,7 @@ struct OptionsChoice : ChoiceButton {
 
 		menu->addChild(MenuItem::create<LargerHitBoxesItem>("Larger Hit Boxes", CHECKMARK(largerHitBoxes)));
 		menu->addChild(MenuItem::create<LockModulesItem>("Lock Modules", CHECKMARK(lockModules)));
+		menu->addChild(MenuItem::create<SensitiveKnobsItem>("Sensitive Knobs", CHECKMARK(!isNear(knobSensitivity, KNOB_SENSITIVITY))));
 	}
 };
 

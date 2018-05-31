@@ -1,13 +1,12 @@
 #include "app.hpp"
 #include "window.hpp"
 #include "engine.hpp"
+#include "settings.hpp"
 // For GLFW_KEY_LEFT_CONTROL, etc.
 #include <GLFW/glfw3.h>
 
 
 namespace rack {
-
-#define KNOB_SENSITIVITY 0.0015
 
 
 Knob::Knob() {
@@ -29,7 +28,7 @@ void Knob::onDragMove(EventDragMove &e) {
 	else {
 		range = 1.0 - (-1.0);
 	}
-	float delta = KNOB_SENSITIVITY * -e.mouseRel.y * speed * range;
+	float delta = knobSensitivity * -e.mouseRel.y * speed * range;
 
 	// Drag slower if Mod is held
 	if (windowIsModPressed())

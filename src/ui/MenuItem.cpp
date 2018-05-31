@@ -29,7 +29,7 @@ void MenuItem::draw(NVGcontext *vg) {
 	bndMenuItem(vg, 0.0, 0.0, box.size.x, box.size.y, state, -1, NULL);
 
 #ifdef TOUCH
-	float y = 5;
+	float y = 8;
 #else
 	float y = 0;
 #endif
