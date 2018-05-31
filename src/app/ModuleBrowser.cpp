@@ -211,7 +211,7 @@ struct BrowserList : List {
 	int selected = 0;
 
 	// Kinetic scrolling
-	//TODO: this functionality should me moved to ScrollWidet
+	//TODO: this functionality should me moved to ScrollWidget
 	float velocity = 0;
 	float amplitude = 0;
 	double lastTime = 0;

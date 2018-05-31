@@ -66,7 +66,7 @@ void Port::onMouseDown(EventMouseDown &e) {
 void Port::onDragStart(EventDragStart &e) {
 	// Try to grab wire on top of stack
 	WireWidget *wire = gRackWidget->wireContainer->getTopWire(this);
-	if (type == OUTPUT && windowIsModPressed()) {
+	if (type == OUTPUT && (windowIsModPressed() || windowIsShiftPressed())) {
 		wire = NULL;
 	}
 
