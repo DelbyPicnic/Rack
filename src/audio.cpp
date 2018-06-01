@@ -3,11 +3,22 @@
 #include "bridge.hpp"
 #include "engine.hpp"
 
+#include <AL/al.h>
+#include <AL/alc.h>
+#include "tinythread.h"
+
+#define OPENAL_DRIVER -999
+
+ALCdevice *alDevice;
+ALCcontext *alContext = NULL;
+ALuint alSource;
+ALuint alBuffers[10];
+
 namespace rack {
 
 
 AudioIO::AudioIO() {
-	setDriver(RtAudio::UNSPECIFIED);
+	setDriver(OPENAL_DRIVER);
 }
 
 AudioIO::~AudioIO() {
@@ -15,11 +26,12 @@ AudioIO::~AudioIO() {
 }
 
 std::vector<int> AudioIO::getDrivers() {
-	std::vector<RtAudio::Api> apis;
-	RtAudio::getCompiledApi(apis);
+	// std::vector<RtAudio::Api> apis;
+	// RtAudio::getCompiledApi(apis);
 	std::vector<int> drivers;
-	for (RtAudio::Api api : apis)
-		drivers.push_back((int) api);
+	// for (RtAudio::Api api : apis)
+	// 	drivers.push_back((int) api);
+	drivers.push_back(OPENAL_DRIVER);
 	// Add fake Bridge driver
 	// drivers.push_back(BRIDGE_DRIVER);
 	return drivers;
@@ -38,6 +50,7 @@ std::string AudioIO::getDriverName(int driver) {
 		case RtAudio::WINDOWS_DS: return "DirectSound";
 		case RtAudio::RTAUDIO_DUMMY: return "Dummy Audio";
 		case BRIDGE_DRIVER: return "Bridge";
+		case OPENAL_DRIVER: return "OpenAL";
 		default: return "Unknown";
 	}
 }
@@ -58,6 +71,9 @@ void AudioIO::setDriver(int driver) {
 		rtAudio = new RtAudio((RtAudio::Api) driver);
 		this->driver = (int) rtAudio->getCurrentApi();
 	}
+	else if (driver == OPENAL_DRIVER) {
+		this->driver = OPENAL_DRIVER;
+	}
 	else if (driver == BRIDGE_DRIVER) {
 		this->driver = BRIDGE_DRIVER;
 	}
@@ -66,6 +82,9 @@ void AudioIO::setDriver(int driver) {
 int AudioIO::getDeviceCount() {
 	if (rtAudio) {
 		return rtAudio->getDeviceCount();
+	}
+	else if (driver == OPENAL_DRIVER) {
+		return 1;
 	}
 	else if (driver == BRIDGE_DRIVER) {
 		return BRIDGE_NUM_PORTS;
@@ -105,6 +124,9 @@ int AudioIO::getDeviceChannels(int device) {
 		if (getDeviceInfo(device, &deviceInfo))
 			return max((int) deviceInfo.inputChannels, (int) deviceInfo.outputChannels);
 	}
+	else if (driver == OPENAL_DRIVER) {
+		return 2;
+	}
 	else if (driver == BRIDGE_DRIVER) {
 		return max(BRIDGE_OUTPUTS, BRIDGE_INPUTS);
 	}
@@ -119,6 +141,9 @@ std::string AudioIO::getDeviceName(int device) {
 		RtAudio::DeviceInfo deviceInfo;
 		if (getDeviceInfo(device, &deviceInfo))
 			return deviceInfo.name;
+	}
+	else if (driver == OPENAL_DRIVER) {
+		return "Default";
 	}
 	else if (driver == BRIDGE_DRIVER) {
 		return stringf("%d", device + 1);
@@ -143,6 +168,9 @@ std::string AudioIO::getDeviceDetail(int device, int offset) {
 			deviceDetail += ")";
 			return deviceDetail;
 		}
+	}
+	else if (driver == OPENAL_DRIVER) {
+		return "Default";
 	}
 	else if (driver == BRIDGE_DRIVER) {
 		return stringf("Port %d", device + 1);
@@ -169,6 +197,11 @@ std::vector<int> AudioIO::getSampleRates() {
 			warn("Failed to query RtAudio device: %s", e.what());
 		}
 	}
+
+	if (driver == OPENAL_DRIVER) {
+		return {};
+	}
+
 	return {};
 }
 
@@ -182,8 +215,8 @@ void AudioIO::setSampleRate(int sampleRate) {
 }
 
 std::vector<int> AudioIO::getBlockSizes() {
-	if (rtAudio) {
-		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
+	if (rtAudio || driver == OPENAL_DRIVER) {
+		return {/*64, 128, 256, 512,*/ 1024, 2048, 4096};
 	}
 	return {};
 }
@@ -208,6 +241,64 @@ static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrame
 	assert(audioIO);
 	audioIO->processStream((const float *) inputBuffer, (float *) outputBuffer, nFrames);
 	return 0;
+}
+
+float buf[44100*10*2];
+
+static void processAudio2(void *self) {
+    info("OpenAL thread started");
+
+	AudioIO *audio = (AudioIO*)self;
+
+	ALenum format = 0x10011;//AL_FORMAT_STEREO_FLOAT32;
+
+	// alBufferData(alBuffers[0], format, buf, 1024*2*sizeof(float), audio->sampleRate);
+	// alBufferData(alBuffers[1], format, buf, 1024*2*sizeof(float), audio->sampleRate);
+ //    alSourceQueueBuffers(alSource, 2, &alBuffers[0]);
+	// alSourcePlay(alSource);
+
+    while(1) {
+    	ALuint buffer = 0;
+    	ALint buffersProcessed = 0;
+		alGetSourcei(alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
+		info("%d",buffersProcessed);
+		while(buffersProcessed--) {
+			alSourceUnqueueBuffers(alSource, 1, &buffer);
+			audio->processStream(NULL, buf, audio->blockSize);
+			alBufferData(alBuffers[0], format, buf, audio->blockSize*2*sizeof(float), audio->sampleRate);
+		    alSourceQueueBuffers(alSource, 1, &buffer);
+		}
+
+		ALint state;
+		alGetSourcei(alSource, AL_SOURCE_STATE, &state);
+		info("state %d",state);
+		if (state != AL_PLAYING)
+			alSourcePlay(alSource);
+
+		tthread::this_thread::sleep_for(tthread::chrono::milliseconds(20));
+	}
+}
+
+void AudioIO::processAudio() {
+	if (!alContext)
+		return;
+
+	ALenum format = 0x10011; //AL_FORMAT_STEREO_FLOAT32;
+
+	ALuint buffer = 0;
+	ALint buffersProcessed = 0;
+	alGetSourcei(alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
+	while(buffersProcessed--) {
+		alSourceUnqueueBuffers(alSource, 1, &buffer);
+		processStream(NULL, buf, blockSize);
+		alBufferData(buffer, format, buf, blockSize*2*sizeof(float), sampleRate);
+	    alSourceQueueBuffers(alSource, 1, &buffer);
+	}
+
+	ALint state;
+	alGetSourcei(alSource, AL_SOURCE_STATE, &state);
+	if (state != AL_PLAYING)
+		alSourcePlay(alSource);
 }
 
 void AudioIO::openStream() {
@@ -285,7 +376,47 @@ void AudioIO::openStream() {
 		engineSetSampleRate(sampleRate);
 		onOpenStream();
 	}
-	else if (driver == BRIDGE_DRIVER) {
+	else if (driver == OPENAL_DRIVER) {
+		info("OPENAL OPENAL");
+		alDevice = alcOpenDevice(NULL);
+		if (!alDevice)
+			fatal("Can't open OpenAL device");
+
+		alContext = alcCreateContext(alDevice, NULL);
+		if (!alcMakeContextCurrent(alContext))
+			fatal("Can't init OpenAL context");
+
+		alListener3f(AL_POSITION, 0, 0, 1.0f);
+    	alListener3f(AL_VELOCITY, 0, 0, 0);
+
+    	ALfloat listenerOri[] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
+		alListenerfv(AL_ORIENTATION, listenerOri);
+
+		alGenSources((ALuint)1, &alSource);
+
+		alSourcef(alSource, AL_PITCH, 1);
+		alSourcef(alSource, AL_GAIN, 1);
+		alSource3f(alSource, AL_POSITION, 0, 0, 0);
+		alSource3f(alSource, AL_VELOCITY, 0, 0, 0);
+		alSourcei(alSource, AL_LOOPING, AL_FALSE);
+
+		alGenBuffers(2, alBuffers);
+
+
+		ALenum format = 0x10011;//AL_FORMAT_STEREO_FLOAT32;
+
+		alBufferData(alBuffers[0], format, buf, blockSize*2*sizeof(float), sampleRate);
+		alBufferData(alBuffers[1], format, buf, blockSize*2*sizeof(float), sampleRate);
+		alBufferData(alBuffers[2], format, buf, blockSize*2*sizeof(float), sampleRate);
+		alBufferData(alBuffers[3], format, buf, blockSize*2*sizeof(float), sampleRate);
+	    alSourceQueueBuffers(alSource, 4, &alBuffers[0]);
+		alSourcePlay(alSource);
+		ALint state;
+		alGetSourcei(alSource, AL_SOURCE_STATE, &state);
+		info("state %d",state);
+
+		// (new tthread::thread((void(*)(void*))processAudio2, (void*)this))->detach();
+	} else if (driver == BRIDGE_DRIVER) {
 		setChannels(BRIDGE_OUTPUTS, BRIDGE_INPUTS);
 		bridgeAudioSubscribe(device, this);
 	}
@@ -314,6 +445,8 @@ void AudioIO::closeStream() {
 			}
 		}
 		deviceInfo = RtAudio::DeviceInfo();
+	}
+	else if (driver == OPENAL_DRIVER) {
 	}
 	else if (driver == BRIDGE_DRIVER) {
 		bridgeAudioUnsubscribe(device, this);

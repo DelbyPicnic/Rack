@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <zip.h>
+// #include <zip.h>
 #include <jansson.h>
 
 #if ARCH_WIN
@@ -134,7 +134,7 @@ static bool loadPlugin(std::string path) {
 }
 
 static bool syncPlugin(json_t *pluginJ, bool dryRun) {
-	json_t *slugJ = json_object_get(pluginJ, "slug");
+/*	json_t *slugJ = json_object_get(pluginJ, "slug");
 	if (!slugJ)
 		return false;
 	std::string slug = json_string_value(slugJ);
@@ -224,7 +224,7 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 	}
 
 	downloadName = "";
-	return true;
+	return true;*/
 }
 
 static void loadPlugins(std::string path) {
@@ -247,7 +247,7 @@ static void loadPlugins(std::string path) {
 }
 
 /** Returns 0 if successful */
-static int extractZipHandle(zip_t *za, const char *dir) {
+/*static int extractZipHandle(zip_t *za, const char *dir) {
 	int err;
 	for (int i = 0; i < zip_get_num_entries(za, 0); i++) {
 		zip_stat_t zs;
@@ -297,11 +297,11 @@ static int extractZipHandle(zip_t *za, const char *dir) {
 		}
 	}
 	return 0;
-}
+}*/
 
 /** Returns 0 if successful */
 static int extractZip(const char *filename, const char *path) {
-	int err;
+/*	int err;
 	zip_t *za = zip_open(filename, 0, &err);
 	if (!za) {
 		warn("Could not open zip %s: error %d", filename, err);
@@ -312,11 +312,12 @@ static int extractZip(const char *filename, const char *path) {
 	});
 
 	err = extractZipHandle(za, path);
-	return err;
+	return err;*/
+	return 0;
 }
 
 static void extractPackages(std::string path) {
-	std::string message;
+/*	std::string message;
 
 	for (std::string packagePath : systemListEntries(path)) {
 		if (stringExtension(packagePath) != "zip")
@@ -335,7 +336,7 @@ static void extractPackages(std::string path) {
 	}
 	if (!message.empty()) {
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
-	}
+	}*/
 }
 
 ////////////////////
@@ -362,6 +363,16 @@ void pluginInit() {
 	Plugin *corePlugin = new Plugin();
 	init(corePlugin);
 	gPlugins.push_back(corePlugin);
+
+	Plugin *fPlugin = new Plugin();
+	fPlugin->path = "plugins/Fundamental";
+	init2(fPlugin);
+	gPlugins.push_back(fPlugin);
+
+	Plugin *aPlugin = new Plugin();
+	aPlugin->path = "plugins/AudibleInstruments";
+	init3(aPlugin);
+	gPlugins.push_back(aPlugin);
 
 	// Get local plugins directory
 	std::string localPlugins = pluginPath();
@@ -485,7 +496,7 @@ bool pluginSync(bool dryRun) {
 }
 
 void pluginLogIn(std::string email, std::string password) {
-	json_t *reqJ = json_object();
+/*	json_t *reqJ = json_object();
 	json_object_set(reqJ, "email", json_string(email.c_str()));
 	json_object_set(reqJ, "password", json_string(password.c_str()));
 	json_t *resJ = requestJson(METHOD_POST, gApiHost + "/token", reqJ);
@@ -506,7 +517,7 @@ void pluginLogIn(std::string email, std::string password) {
 			}
 		}
 		json_decref(resJ);
-	}
+	}*/
 }
 
 void pluginLogOut() {

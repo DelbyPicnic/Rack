@@ -61,17 +61,17 @@ int main(int argc, char* argv[]) {
 	gRackWidget->lastPath = oldLastPath;
 
 	engineStart();
-	windowRun();
-	engineStop();
+	// windowRun();
+	// engineStop();
 
-	gRackWidget->savePatch(assetHidden("autosave.vcv"));
-	settingsSave(assetHidden("settings.json"));
-	appDestroy();
-	windowDestroy();
-	// bridgeDestroy();
-	engineDestroy();
-	pluginDestroy();
-	loggerDestroy();
+	// gRackWidget->savePatch(assetHidden("autosave.vcv"));
+	// settingsSave(assetHidden("settings.json"));
+	// appDestroy();
+	// windowDestroy();
+	// // bridgeDestroy();
+	// engineDestroy();
+	// pluginDestroy();
+	// loggerDestroy();
 
 	return 0;
 }

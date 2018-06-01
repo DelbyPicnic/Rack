@@ -5,6 +5,7 @@
 #include <map>
 #include <queue>
 #include <thread>
+#include <emscripten/emscripten.h>
 
 #include "osdialog.h"
 
@@ -32,6 +33,13 @@
 	#include <ApplicationServices/ApplicationServices.h>
 #endif
 
+extern "C" {
+GLFWAPI void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float* yscale) {
+	*xscale = EM_ASM_INT({
+        return window.devicePixelRatio;
+    });
+}
+}
 
 namespace rack {
 
@@ -49,7 +57,6 @@ int gGuiFrame;
 Vec gMousePos;
 
 std::string lastWindowTitle;
-
 
 void windowSizeCallback(GLFWwindow* window, int windowWidth, int windowHeight) {
 	// Get desired scaling
@@ -367,21 +374,28 @@ void windowInit() {
 	glfwWindowHint(GLFW_DEPTH_BITS, 0);
 	glfwWindowHint(GLFW_ALPHA_BITS, 0);
 
-#if (defined(__arm__) || defined(__aarch64__))
-	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+// #if (defined(__arm__) || defined(__aarch64__))
+// 	glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
 
-	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	int w = mode->width, h = mode->height;
-#else
-	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+// 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+// 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+// 	int w = mode->width, h = mode->height;
+// #else
+	// glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+
+	float pixelRatio;
+	glfwGetWindowContentScale(NULL, &pixelRatio, NULL);
+	gPixelRatio = roundf(pixelRatio);
+
+
 	GLFWmonitor *monitor = NULL;
-	int w = 800, h = 600;
-#endif	
+	int w = 1400*gPixelRatio, h = 600*gPixelRatio;
+// #endif	
 
 	lastWindowTitle = gApplicationName + " " + gApplicationVersion;
 	gWindow = glfwCreateWindow(w, h, lastWindowTitle.c_str(), monitor, NULL);
 	if (!gWindow) {
+		fatal("OPENGL");
 		osdialog_message(OSDIALOG_ERROR, OSDIALOG_OK, "Cannot open window with OpenGL 2.0 renderer. Does your graphics card support OpenGL 2.0 or greater? If so, make sure you have the latest graphics drivers installed.");
 		exit(1);
 	}
@@ -390,11 +404,11 @@ void windowInit() {
     info("GL_VERSION  : %s", glGetString(GL_VERSION) );
     info("GL_RENDERER : %s", glGetString(GL_RENDERER) );
 
-#if (defined(__arm__) || defined(__aarch64__))
-	glfwSwapInterval(0);
-#else
+// #if (defined(__arm__) || defined(__aarch64__))
+// 	glfwSwapInterval(0);
+// #else
 	glfwSwapInterval(1);
-#endif
+// #endif
 
 	glfwSetWindowSizeCallback(gWindow, windowSizeCallback);
 	glfwSetMouseButtonCallback(gWindow, mouseButtonStickyCallback);
@@ -438,9 +452,11 @@ void windowInit() {
 
 	windowSetTheme(nvgRGB(0x33, 0x33, 0x33), nvgRGB(0xf0, 0xf0, 0xf0));
 
-	float pixelRatio;
-	glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
-	gPixelRatio = roundf(pixelRatio);
+	// float pixelRatio;
+	// glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
+	// gPixelRatio = roundf(pixelRatio);
+
+	emscripten_set_main_loop(windowRun, 0, 0);
 }
 
 void windowDestroy() {
@@ -472,11 +488,11 @@ void windowRun() {
 	const double fps = 60.;
 #endif
 	double wait = 1./fps;
-	while(!glfwWindowShouldClose(gWindow)) {
+	// while(!glfwWindowShouldClose(gWindow)) {
 		gGuiFrame++;
 
 		// Poll events
-		glfwWaitEventsTimeout(wait);
+		glfwPollEvents();
 		double startTime = glfwGetTime();
 		{
 			double xpos, ypos;
@@ -505,8 +521,8 @@ void windowRun() {
 		gScene->step();
 
 		// Render
-		bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
-		if (visible)
+		// bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
+		// if (visible)
 			renderGui();
 
 		/*static int frame = 0;
@@ -520,7 +536,7 @@ void windowRun() {
 		}*/
 
 		wait = std::max(0., 1./fps - (glfwGetTime()-startTime));
-	}
+	// }
 }
 
 void windowClose() {
@@ -688,7 +704,7 @@ std::shared_ptr<Image> Image::load(const std::string &filename) {
 
 SVG::SVG(const std::string &filename) {
 	image = 0;
-	
+	info("loading %s\n",filename.c_str());
 	NSVGimage *handle = nsvgParseFromFile(filename.c_str(), "px", SVG_DPI);
 	if (handle) {
 		info("Loaded SVG %s", filename.c_str());

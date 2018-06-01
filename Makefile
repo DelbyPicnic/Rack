@@ -33,19 +33,19 @@ endif
 
 ifeq ($(ARCH), lin)
 	SOURCES += dep/osdialog/osdialog_gtk2.c
-	CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
+	CFLAGS += $(shell pkg-config --cflags gtk+-2.0) -s USE_PTHREADS=0
 	LDFLAGS += -rdynamic \
 		-lpthread -ldl -lz -lasound -lX11 \
 		$(shell pkg-config --libs gtk+-2.0) \
-		-Ldep/lib -Wl,-Bstatic -lglfw3 -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
+		-Ldep/lib -Wl,-Bstatic -lglfw3 -lopenal -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
 
 ifneq (,$(findstring arm,$(CPU)))
-	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a
+	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a 
 else
 	LDFLAGS += -lGL
 endif
 
-	TARGET := Rack
+	TARGET := Rack.bc
 endif
 
 ifeq ($(ARCH), mac)
@@ -54,7 +54,7 @@ ifeq ($(ARCH), mac)
 	LDFLAGS += -stdlib=libc++ \
 		-lpthread -ldl -lz \
 		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -framework CoreAudio -framework CoreMIDI \
-		dep/lib/libglfw3.a dep/lib/libjansson.a dep/lib/libspeexdsp.a dep/lib/libzip.a dep/lib/librtaudio.a dep/lib/librtmidi.a dep/lib/libcrypto.a dep/lib/libssl.a dep/lib/libcurl.a
+		dep/lib/libglfw3.a dep/lib/libjansson.a dep/lib/libspeexdsp.a dep/lib/libzip.a dep/lib/librtaudio.a dep/lib/librtmidi.a
 	TARGET := Rack
 	BUNDLE := dist/$(TARGET).app
 endif
@@ -72,6 +72,7 @@ endif
 
 
 all: $(TARGET)
+	emcc Rack.bc plugins/Fundamental/plugin.so plugins/AudibleInstruments/plugin.so dep/jansson-2.10/src/.libs/libjansson.a dep/speexdsp/libspeexdsp/.libs/libspeexdsp.a -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 --preload-file res --preload-file autosave.vcv --preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --emrun -o Rack.js
 	@echo ---
 	@echo Rack built. Now type \"make run\".
 	@echo ---

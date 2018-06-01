@@ -1,4 +1,4 @@
-#include "util/common.hpp"
+/*#include "util/common.hpp"
 #include "util/request.hpp"
 #include <curl/curl.h>
 #include <openssl/sha.h>
@@ -187,3 +187,4 @@ std::string requestSHA256File(std::string filename) {
 
 
 } // namespace rack
+*/

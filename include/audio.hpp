@@ -20,7 +20,7 @@ struct AudioIO {
 	int offset = 0;
 	int maxChannels = 8;
 	int sampleRate = 48000;
-	int blockSize = 512;
+	int blockSize = 1024;
 	int numOutputs = 0;
 	int numInputs = 0;
 	RtAudio *rtAudio = NULL;
@@ -52,6 +52,8 @@ struct AudioIO {
 	/** Must close the stream before opening */
 	void openStream();
 	void closeStream();
+
+	void processAudio();
 
 	virtual void processStream(const float *input, float *output, int frames) {}
 	virtual void onCloseStream() {}

@@ -142,13 +142,13 @@ void do_work(int qq)
 void engineInit() {
     engineSetSampleRate(48000.0);
 
-    numWorkers = 3;
-    for (int i = 0; i < numWorkers; i++)
-    {
-        ptoks[i] = new moodycamel::ProducerToken(q);
-        (new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
-    }
-    info("Started %d DSP threads", numWorkers);
+    // numWorkers = 3;
+    // for (int i = 0; i < numWorkers; i++)
+    // {
+    //     ptoks[i] = new moodycamel::ProducerToken(q);
+    //     (new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
+    // }
+    // info("Started %d DSP threads", numWorkers);
 }
 
 void engineDestroy() {
