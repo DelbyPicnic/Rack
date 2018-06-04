@@ -44,6 +44,9 @@ ifeq ($(ARCH), win)
 	FLAGS += -DARCH_WIN
 	FLAGS += -D_USE_MATH_DEFINES
 endif
+ifeq ($(ARCH), web)
+	FLAGS += -DARCH_WEB
+endif
 
 CFLAGS += $(FLAGS)
 CXXFLAGS += $(FLAGS)

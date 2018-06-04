@@ -23,7 +23,11 @@ DEP_CXXFLAGS += $(DEP_FLAGS)
 WGET := curl -OL
 UNTAR := tar xf
 UNZIP := unzip
-CONFIGURE := ./configure --prefix="$(realpath $(DEP_LOCAL))"
+ifeq ($(ARCH), web)
+	CONFIGURE := emconfigure ./configure --prefix="$(realpath $(DEP_LOCAL))"
+else
+	CONFIGURE := ./configure --prefix="$(realpath $(DEP_LOCAL))"
+endif
 ifeq ($(ARCH), win)
 	CMAKE := cmake -G 'MSYS Makefiles' -DCMAKE_INSTALL_PREFIX="$(realpath $(DEP_LOCAL))"
 else

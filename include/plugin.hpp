@@ -128,9 +128,3 @@ You must implement this in your plugin
 */
 extern "C"
 void init(rack::Plugin *plugin);
-
-extern "C"
-void init2(rack::Plugin *plugin);
-
-extern "C"
-void init3(rack::Plugin *plugin);

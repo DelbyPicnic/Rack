@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
-#if !(defined(__arm__) || defined(__aarch64__))
+#if !(defined(__arm__) || defined(__aarch64__) || defined(ARCH_WEB))
 #include <pmmintrin.h>
 #include <xmmintrin.h>
 #endif
@@ -313,7 +313,7 @@ void engineStart() {
     // running = true;
     // thread = std::thread(engineRun);
 
-#if !(defined(__arm__) || defined(__aarch64__))
+#if !(defined(__arm__) || defined(__aarch64__) || defined(ARCH_WEB))
     // Set CPU to flush-to-zero (FTZ) and denormals-are-zero (DAZ) mode
     // https://software.intel.com/en-us/node/682949
     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);

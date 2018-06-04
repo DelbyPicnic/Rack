@@ -5,13 +5,14 @@
 #include <vector>
 #include <jansson.h>
 
+#ifndef ARCH_WEB
 #pragma GCC diagnostic push
 #ifndef __clang__
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #endif
 #include "rtmidi/RtMidi.h"
 #pragma GCC diagnostic pop
-
+#endif
 
 namespace rack {
 
@@ -45,7 +46,9 @@ struct MidiIO {
 	Zero indexed.
 	*/
 	int channel = -1;
+#ifndef ARCH_WEB
 	RtMidi *rtMidi = NULL;
+#endif
 	/** Cached */
 	std::string deviceName;
 
@@ -65,7 +68,9 @@ struct MidiIO {
 
 
 struct MidiInput : MidiIO {
+#ifndef ARCH_WEB
 	RtMidiIn *rtMidiIn = NULL;
+#endif
 	MidiInput();
 	~MidiInput();
 	void setDriver(int driver) override;
@@ -84,7 +89,9 @@ struct MidiInputQueue : MidiInput {
 
 
 struct MidiOutput : MidiIO {
+#ifndef ARCH_WEB
 	RtMidiOut *rtMidiOut = NULL;
+#endif
 	MidiOutput();
 	~MidiOutput();
 	void setDriver(int driver) override;

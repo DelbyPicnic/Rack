@@ -1,6 +1,8 @@
 #include "midi.hpp"
 #include "bridge.hpp"
-
+#ifdef ARCH_WEB
+#include <emscripten.h>
+#endif
 
 namespace rack {
 
@@ -10,19 +12,23 @@ namespace rack {
 ////////////////////
 
 std::vector<int> MidiIO::getDrivers() {
+	std::vector<int> drivers;
+
+#ifndef ARCH_WEB
 	std::vector<RtMidi::Api> rtApis;
 	RtMidi::getCompiledApi(rtApis);
 
-	std::vector<int> drivers;
 	for (RtMidi::Api api : rtApis) {
 		drivers.push_back((int) api);
 	}
 	// Add fake Bridge driver
 	// drivers.push_back(BRIDGE_DRIVER);
+#endif
 	return drivers;
 }
 
 std::string MidiIO::getDriverName(int driver) {
+#ifndef ARCH_WEB
 	switch (driver) {
 		case RtMidi::UNSPECIFIED: return "Unspecified";
 		case RtMidi::MACOSX_CORE: return "Core MIDI";
@@ -33,9 +39,15 @@ std::string MidiIO::getDriverName(int driver) {
 		case BRIDGE_DRIVER: return "Bridge";
 		default: return "Unknown";
 	}
+#else
+	return EM_ASM_INT({
+        return Module.midiAccess != null;
+    }) ? "Web MIDI" : "Not supported";
+#endif
 }
 
 int MidiIO::getDeviceCount() {
+#ifndef ARCH_WEB
 	if (rtMidi) {
 		return rtMidi->getPortCount();
 	}
@@ -43,12 +55,18 @@ int MidiIO::getDeviceCount() {
 		return BRIDGE_NUM_PORTS;
 	}
 	return 0;
+#else
+	return EM_ASM_INT({
+        return Module.midiAccess ? Module.midiAccess.inputs.size : 0;
+    });
+#endif
 }
 
 std::string MidiIO::getDeviceName(int device) {
 	if (device < 0)
 		return "";
 
+#ifndef ARCH_WEB
 	if (rtMidi) {
 		if (device == this->device)
 			return deviceName;
@@ -59,6 +77,15 @@ std::string MidiIO::getDeviceName(int device) {
 		return stringf("Port %d", device + 1);
 	}
 	return "";
+#else
+	return (char*) EM_ASM_INT({
+		var name = Array.from(Module.midiAccess.inputs.values())[$0].name;
+		var lengthBytes = lengthBytesUTF8(name)+1; // 'jsString.length' would return the length of the string as UTF-16 units, but Emscripten C strings operate as UTF-8.
+        var stringOnHeap = _malloc(lengthBytes);
+        stringToUTF8(name, stringOnHeap, lengthBytes+1);
+        return stringOnHeap;
+    }, device);
+#endif
 }
 
 std::string MidiIO::getChannelName(int channel) {
@@ -105,6 +132,17 @@ void MidiIO::fromJson(json_t *rootJ) {
 // MidiInput
 ////////////////////
 
+extern "C" void midiInputCallbackJS(MidiInput *midiInput, uint8_t cmd, uint8_t data1, uint8_t data2) {
+	// MidiInput *midiInput = (MidiInput*) userData;
+	if (!midiInput) return;
+	MidiMessage msg;
+	msg.cmd = cmd;
+	msg.data1 = data1;
+	msg.data2 = data2;
+
+	midiInput->onMessage(msg);
+}
+
 static void midiInputCallback(double timeStamp, std::vector<unsigned char> *message, void *userData) {
 	if (!message) return;
 	if (!userData) return;
@@ -123,14 +161,23 @@ static void midiInputCallback(double timeStamp, std::vector<unsigned char> *mess
 }
 
 MidiInput::MidiInput() {
+#ifndef ARCH_WEB
 	setDriver(RtMidi::UNSPECIFIED);
+#endif
 }
 
 MidiInput::~MidiInput() {
+#ifndef ARCH_WEB
 	setDriver(-1);
+#else
+	EM_ASM({
+		Array.from(Module.midiAccess.inputs.values())[$0].onmidimessage = null;
+	}, this->device);	
+#endif
 }
 
 void MidiInput::setDriver(int driver) {
+#ifndef ARCH_WEB
 	setDevice(-1);
 	if (rtMidiIn) {
 		delete rtMidiIn;
@@ -147,9 +194,11 @@ void MidiInput::setDriver(int driver) {
 	else if (driver == BRIDGE_DRIVER) {
 		this->driver = BRIDGE_DRIVER;
 	}
+#endif
 }
 
 void MidiInput::setDevice(int device) {
+#ifndef ARCH_WEB
 	if (rtMidi) {
 		rtMidi->closePort();
 
@@ -168,6 +217,18 @@ void MidiInput::setDevice(int device) {
 		}
 		this->device = device;
 	}
+#else
+	EM_ASM({
+		Array.from(Module.midiAccess.inputs.values())[$0].onmidimessage = function(msg) {
+			var cmd = msg.data.length >= 1 ? msg.data[0] : 0;
+			var data1 = msg.data.length >= 2 ? msg.data[1] : 0;
+			var data2 = msg.data.length >= 3 ? msg.data[2] : 0;
+			console.log(msg);
+			ccall('midiInputCallbackJS', 'v', ['number', 'number', 'number', 'number'], [$1, cmd, data1, data2]);
+		};
+	}, device, this);
+	this->device = device;
+#endif
 }
 
 void MidiInputQueue::onMessage(MidiMessage message) {
@@ -197,7 +258,9 @@ bool MidiInputQueue::shift(MidiMessage *message) {
 ////////////////////
 
 MidiOutput::MidiOutput() {
+#ifndef ARCH_WEB
 	setDriver(RtMidi::UNSPECIFIED);
+#endif
 }
 
 MidiOutput::~MidiOutput() {
@@ -205,6 +268,7 @@ MidiOutput::~MidiOutput() {
 }
 
 void MidiOutput::setDriver(int driver) {
+#ifndef ARCH_WEB
 	setDevice(-1);
 	if (rtMidiOut) {
 		delete rtMidiOut;
@@ -216,9 +280,11 @@ void MidiOutput::setDriver(int driver) {
 		rtMidi = rtMidiOut;
 		this->driver = rtMidiOut->getCurrentApi();
 	}
+#endif
 }
 
 void MidiOutput::setDevice(int device) {
+#ifndef ARCH_WEB
 	if (rtMidi) {
 		rtMidi->closePort();
 
@@ -230,6 +296,7 @@ void MidiOutput::setDevice(int device) {
 	}
 	else if (driver == BRIDGE_DRIVER) {
 	}
+#endif
 }
 
 

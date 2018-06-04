@@ -7,38 +7,16 @@
 #include "asset.hpp"
 #include "bridge.hpp"
 #include "osdialog.h"
+#ifdef ARCH_WEB
+#include "emscripten.h"
+#endif
 
 #include <unistd.h>
 
 
 using namespace rack;
 
-
-int main(int argc, char* argv[]) {
-	randomInit();
-	loggerInit();
-
-	info("Rack %s", gApplicationVersion.c_str());
-
-	{
-#if ARCH_LIN
-	    char *path = realpath("/proc/self/exe", NULL);
-	    if (path) {
-	        *(strrchr(path, '/')+1) = 0;
-			chdir(path);
-			free(path);
-	    }
-#endif
-		char *cwd = getcwd(NULL, 0);
-		info("Current working directory: %s", cwd);
-		free(cwd);
-
-		info("Global directory: %s", assetGlobal("").c_str());
-		info("Local directory: %s", assetLocal("").c_str());
-		info("Settings directory: %s", assetHidden("").c_str());
-		info("Plugins directory: %s", pluginPath().c_str());		
-	}
-
+extern "C" void initApp() {
 	pluginInit();
 	engineInit();
 	// bridgeInit();
@@ -61,7 +39,7 @@ int main(int argc, char* argv[]) {
 	gRackWidget->lastPath = oldLastPath;
 
 	engineStart();
-	// windowRun();
+	windowRun();
 	// engineStop();
 
 	// gRackWidget->savePatch(assetHidden("autosave.vcv"));
@@ -72,6 +50,53 @@ int main(int argc, char* argv[]) {
 	// engineDestroy();
 	// pluginDestroy();
 	// loggerDestroy();
+}
+
+int main(int argc, char* argv[]) {
+	randomInit();
+	loggerInit();
+
+	info("Rack %s", gApplicationVersion.c_str());
+
+	{
+#if ARCH_LIN
+	    char *path = realpath("/proc/self/exe", NULL);
+	    if (path) {
+	        *(strrchr(path, '/')+1) = 0;
+			chdir(path);
+			free(path);
+	    }
+#endif
+
+		char *cwd = getcwd(NULL, 0);
+		info("Current working directory: %s", cwd);
+		free(cwd);
+
+		info("Global directory: %s", assetGlobal("").c_str());
+		info("Local directory: %s", assetLocal("").c_str());
+		info("Settings directory: %s", assetHidden("").c_str());
+		info("Plugins directory: %s", pluginPath().c_str());		
+	}
+
+#ifndef ARCH_WEB
+	initApp();
+#else
+	EM_ASM(
+	    FS.mkdir('/work');
+	    FS.mount(IDBFS, {}, '/work');
+	    FS.syncfs(true, function() {
+	    	if (navigator.requestMIDIAccess)
+		    	navigator.requestMIDIAccess().then(function(midiAccess) {
+		    		Module.midiAccess = midiAccess;
+		    		ccall('initApp', 'v');
+		    	}, function() {});
+	    	else
+	    		ccall('initApp', 'v');
+	    });
+	);
+
+	emscripten_exit_with_live_runtime();
+#endif
 
 	return 0;
 }

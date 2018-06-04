@@ -4,6 +4,9 @@
 #include "engine.hpp"
 #include "plugin.hpp"
 #include <jansson.h>
+#ifdef ARCH_WEB
+#include "emscripten.h"
+#endif
 
 
 namespace rack {
@@ -91,6 +94,7 @@ static void settingsFromJson(json_t *rootJ) {
 	if (tokenJ)
 		gToken = json_string_value(tokenJ);
 
+#ifndef ARCH_WEB
 	// windowSize
 	json_t *windowSizeJ = json_object_get(rootJ, "windowSize");
 	if (windowSizeJ) {
@@ -106,6 +110,7 @@ static void settingsFromJson(json_t *rootJ) {
 		json_unpack(windowPosJ, "[F, F]", &x, &y);
 		windowSetWindowPos(Vec(x, y));
 	}
+#endif
 
 	// opacity
 	json_t *opacityJ = json_object_get(rootJ, "wireOpacity");
@@ -182,6 +187,12 @@ void settingsSave(std::string filename) {
 		json_decref(rootJ);
 		fclose(file);
 	}
+
+#ifdef ARCH_WEB
+	EM_ASM(
+	    FS.syncfs(false, function() {});
+	);
+#endif	
 }
 
 void settingsLoad(std::string filename) {

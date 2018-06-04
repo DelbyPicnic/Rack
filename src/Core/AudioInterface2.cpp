@@ -9,10 +9,12 @@
 #include "dsp/samplerate.hpp"
 #include "dsp/ringbuffer.hpp"
 
+#ifndef ARCH_WEB
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #include <RtAudio.h>
 #pragma GCC diagnostic pop
+#endif
 
 
 #define AUDIO_OUTPUTS 0
@@ -156,10 +158,12 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		EventChange e;
 		audioWidget->onChange(e);
 		addChild(audioWidget);
+
+		module->audioIO.setDevice(0, 0);
 	}
 
 	void step() override {
-		static_cast<AudioInterface2*>(module)->audioIO.processAudio();
+		//static_cast<AudioInterface2*>(module)->audioIO.processAudio();
 
 		Widget::step();
 	}

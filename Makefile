@@ -33,19 +33,19 @@ endif
 
 ifeq ($(ARCH), lin)
 	SOURCES += dep/osdialog/osdialog_gtk2.c
-	CFLAGS += $(shell pkg-config --cflags gtk+-2.0) -s USE_PTHREADS=0
+	CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
 	LDFLAGS += -rdynamic \
 		-lpthread -ldl -lz -lasound -lX11 \
 		$(shell pkg-config --libs gtk+-2.0) \
-		-Ldep/lib -Wl,-Bstatic -lglfw3 -lopenal -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
+		-Ldep/lib -Wl,-Bstatic -lglfw3 -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
 
 ifneq (,$(findstring arm,$(CPU)))
-	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a 
+	LDFLAGS += -lGLESv2 dep/lib/libmathlib_static.a
 else
 	LDFLAGS += -lGL
 endif
 
-	TARGET := Rack.bc
+	TARGET := Rack
 endif
 
 ifeq ($(ARCH), mac)
@@ -70,9 +70,22 @@ ifeq ($(ARCH), win)
 	OBJECTS += Rack.res
 endif
 
+ifeq ($(ARCH), web)
+	SOURCES += dep/osdialog/osdialog_web.c
+	CFLAGS += -s USE_PTHREADS=0
+	LDFLAGS += -rdynamic \
+		-lpthread -ldl -lz -lasound -lX11 \
+		$(shell pkg-config --libs gtk+-2.0) \
+		-Ldep/lib -Wl,-Bstatic -lglfw3 -lopenal -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
+	LDFLAGS += -lGLESv2
+	TARGET := Rack.bc
+endif
+
 
 all: $(TARGET)
-	emcc Rack.bc plugins/Fundamental/plugin.so plugins/AudibleInstruments/plugin.so dep/jansson-2.10/src/.libs/libjansson.a dep/speexdsp/libspeexdsp/.libs/libspeexdsp.a -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 --preload-file res --preload-file autosave.vcv --preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --emrun -o Rack.js
+ifeq ($(ARCH), web)
+	emcc Rack.bc plugins/Fundamental/plugin.bc plugins/AudibleInstruments/plugin.bc dep/lib/libjansson.a dep/lib/libspeexdsp.a -s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS']" -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 --preload-file res --preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --emrun -o Rack.js
+endif
 	@echo ---
 	@echo Rack built. Now type \"make run\".
 	@echo ---

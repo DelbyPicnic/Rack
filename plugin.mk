@@ -35,6 +35,11 @@ ifeq ($(ARCH), win)
 	TARGET := plugin.dll
 endif
 
+ifeq ($(ARCH), web)
+	TARGET := plugin.bc
+	FLAGS += -Dinit=init_$(SLUG) -Dplugin=plugin_$(SLUG)
+endif
+
 
 all: $(TARGET)
 

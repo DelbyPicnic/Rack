@@ -1,14 +1,16 @@
 #pragma once
 
+#include <vector>
 #include <jansson.h>
 
+#ifndef ARCH_WEB
 #pragma GCC diagnostic push
 #ifndef __clang__
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #endif
 #include <RtAudio.h>
 #pragma GCC diagnostic pop
-
+#endif
 
 namespace rack {
 
@@ -23,9 +25,11 @@ struct AudioIO {
 	int blockSize = 1024;
 	int numOutputs = 0;
 	int numInputs = 0;
+#ifndef ARCH_WEB
 	RtAudio *rtAudio = NULL;
 	/** Cached */
 	RtAudio::DeviceInfo deviceInfo;
+#endif
 
 	AudioIO();
 	virtual ~AudioIO();
@@ -35,7 +39,9 @@ struct AudioIO {
 	void setDriver(int driver);
 
 	int getDeviceCount();
+#ifndef ARCH_WEB
 	bool getDeviceInfo(int device, RtAudio::DeviceInfo *deviceInfo);
+#endif
 	/** Returns the number of inputs or outputs, whichever is greater */
 	int getDeviceChannels(int device);
 	std::string getDeviceName(int device);

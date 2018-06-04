@@ -9,7 +9,7 @@
 
 #include "osdialog.h"
 
-#if (defined(__arm__) || defined(__aarch64__))
+#if (defined(__arm__) || defined(__aarch64__) || defined(ARCH_WEB))
 #define NANOVG_GLES2_IMPLEMENTATION 1
 #else
 #define NANOVG_GL2_IMPLEMENTATION 1
@@ -383,14 +383,16 @@ void windowInit() {
 // #else
 	// glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
-	float pixelRatio;
-	glfwGetWindowContentScale(NULL, &pixelRatio, NULL);
-	gPixelRatio = roundf(pixelRatio);
+	// float pixelRatio;
+	// glfwGetWindowContentScale(NULL, &pixelRatio, NULL);
+	// gPixelRatio = roundf(pixelRatio);
 
 
 	GLFWmonitor *monitor = NULL;
-	int w = 1400*gPixelRatio, h = 600*gPixelRatio;
+	// int w = 1400*gPixelRatio, h = 600*gPixelRatio;
 // #endif	
+	int w, h, fs;
+	emscripten_get_canvas_size(&w, &h, &fs);
 
 	lastWindowTitle = gApplicationName + " " + gApplicationVersion;
 	gWindow = glfwCreateWindow(w, h, lastWindowTitle.c_str(), monitor, NULL);
@@ -452,11 +454,9 @@ void windowInit() {
 
 	windowSetTheme(nvgRGB(0x33, 0x33, 0x33), nvgRGB(0xf0, 0xf0, 0xf0));
 
-	// float pixelRatio;
-	// glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
-	// gPixelRatio = roundf(pixelRatio);
-
-	emscripten_set_main_loop(windowRun, 0, 0);
+	float pixelRatio;
+	glfwGetWindowContentScale(gWindow, &pixelRatio, NULL);
+	gPixelRatio = roundf(pixelRatio);
 }
 
 void windowDestroy() {
@@ -474,6 +474,46 @@ void windowDestroy() {
 	glfwTerminate();
 }
 
+#ifdef ARCH_WEB
+static void webLoop() {
+	gGuiFrame++;
+
+	// Poll events
+	glfwPollEvents();
+	double startTime = glfwGetTime();
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(gWindow, &xpos, &ypos);
+		cursorPosCallback(gWindow, xpos, ypos);
+	}
+	mouseButtonStickyPop();
+
+	// Set window title
+	/*std::string windowTitle;
+	windowTitle = gApplicationName;
+	windowTitle += " ";
+	windowTitle += gApplicationVersion;
+	if (!gRackWidget->lastPath.empty()) {
+		windowTitle += " - ";
+		windowTitle += stringFilename(gRackWidget->lastPath);
+	}
+	if (windowTitle != lastWindowTitle) {
+		glfwSetWindowTitle(gWindow, windowTitle.c_str());
+		lastWindowTitle = windowTitle;
+	}*/
+
+
+
+	// Step scene
+	gScene->step();
+
+	// Render
+	// bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
+	// if (visible)
+		renderGui();	
+}
+#endif
+
 void windowRun() {
 	assert(gWindow);
 	gGuiFrame = 0;
@@ -482,17 +522,18 @@ void windowRun() {
 	glfwGetWindowSize(gWindow, &windowWidth, &windowHeight);
 	windowSizeCallback(gWindow, windowWidth, windowHeight);
 
+#ifndef ARCH_WEB
 #if (defined(__arm__) || defined(__aarch64__))
 	const double fps = 30.;
 #else
 	const double fps = 60.;
 #endif
 	double wait = 1./fps;
-	// while(!glfwWindowShouldClose(gWindow)) {
+	while(!glfwWindowShouldClose(gWindow)) {
 		gGuiFrame++;
 
 		// Poll events
-		glfwPollEvents();
+		glfwWaitEventsTimeout(wait);
 		double startTime = glfwGetTime();
 		{
 			double xpos, ypos;
@@ -521,8 +562,8 @@ void windowRun() {
 		gScene->step();
 
 		// Render
-		// bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
-		// if (visible)
+		bool visible = glfwGetWindowAttrib(gWindow, GLFW_VISIBLE) && !glfwGetWindowAttrib(gWindow, GLFW_ICONIFIED);
+		if (visible)
 			renderGui();
 
 		/*static int frame = 0;
@@ -536,7 +577,10 @@ void windowRun() {
 		}*/
 
 		wait = std::max(0., 1./fps - (glfwGetTime()-startTime));
-	// }
+	}
+#else
+	emscripten_set_main_loop(webLoop, 0, 0);
+#endif
 }
 
 void windowClose() {
@@ -704,7 +748,6 @@ std::shared_ptr<Image> Image::load(const std::string &filename) {
 
 SVG::SVG(const std::string &filename) {
 	image = 0;
-	info("loading %s\n",filename.c_str());
 	NSVGimage *handle = nsvgParseFromFile(filename.c_str(), "px", SVG_DPI);
 	if (handle) {
 		info("Loaded SVG %s", filename.c_str());

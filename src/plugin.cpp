@@ -355,6 +355,11 @@ std::string pluginPath() {
 	return path;	
 }
 
+#ifdef ARCH_WEB
+extern "C" void init_Fundamental(rack::Plugin *plugin);
+extern "C" void init_AudibleInstruments(rack::Plugin *plugin);
+#endif
+
 void pluginInit() {
 	tagsInit();
 
@@ -366,15 +371,15 @@ void pluginInit() {
 
 	Plugin *fPlugin = new Plugin();
 	fPlugin->path = "plugins/Fundamental";
-	init2(fPlugin);
+	init_Fundamental(fPlugin);
 	gPlugins.push_back(fPlugin);
 
 	Plugin *aPlugin = new Plugin();
 	aPlugin->path = "plugins/AudibleInstruments";
-	init3(aPlugin);
+	init_AudibleInstruments(aPlugin);
 	gPlugins.push_back(aPlugin);
-
 	// Get local plugins directory
+
 	std::string localPlugins = pluginPath();
 
 #if RELEASE

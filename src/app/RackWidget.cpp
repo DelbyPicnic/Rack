@@ -7,6 +7,9 @@
 #include <map>
 #include <algorithm>
 #include "osdialog.h"
+#ifdef ARCH_WEB
+#include "emscripten.h"
+#endif
 
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
@@ -139,6 +142,12 @@ void RackWidget::savePatch(std::string path) {
 	}
 
 	json_decref(rootJ);
+
+#ifdef ARCH_WEB
+	EM_ASM(
+	    FS.syncfs(false, function() {});
+	);
+#endif	
 }
 
 void RackWidget::loadPatch(std::string path) {

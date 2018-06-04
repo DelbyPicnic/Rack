@@ -1,178 +1,194 @@
 <!doctype html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>miRack</title>
-    <style>
-      body {
-        font-family: arial;
-        margin: 0;
-        padding: none;
-      }
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>miRack</title>
+        <style>
+            html {
+                height:100%;
+            }
+            body {
+                font-family: arial;
+                margin: 0;
+                padding: 0;
+                height:100%;
+            }
 
-      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
-      div.emscripten { text-align: center; }      
-      div.emscripten_border { border: 1px solid black; }
-      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-      canvas.emscripten { border: 0px none; background-color: black; }
+            .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+            div.emscripten { text-align: center; }      
+            div.emscripten_border { border: 1px solid black; }
+            /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+            canvas.emscripten { border: 0px none; background-color: black; }
 
-      #emscripten_logo {
-        display: inline-block;
-        margin: 0;
-      }
+            #emscripten_logo {
+                display: inline-block;
+                margin: 0;
+            }
 
-      .spinner {
-        height: 30px;
-        width: 30px;
-        margin: 0;
-        margin-top: 20px;
-        margin-left: 20px;
-        display: inline-block;
-        vertical-align: top;
+            .spinner {
+                height: 30px;
+                width: 30px;
+                margin: 0;
+                margin-top: 20px;
+                margin-left: 20px;
+                display: inline-block;
+                vertical-align: top;
 
-        -webkit-animation: rotation .8s linear infinite;
-        -moz-animation: rotation .8s linear infinite;
-        -o-animation: rotation .8s linear infinite;
-        animation: rotation 0.8s linear infinite;
+                -webkit-animation: rotation .8s linear infinite;
+                -moz-animation: rotation .8s linear infinite;
+                -o-animation: rotation .8s linear infinite;
+                animation: rotation 0.8s linear infinite;
 
-        border-left: 5px solid rgb(235, 235, 235);
-        border-right: 5px solid rgb(235, 235, 235);
-        border-bottom: 5px solid rgb(235, 235, 235);
-        border-top: 5px solid rgb(120, 120, 120);
+                border-left: 5px solid rgb(235, 235, 235);
+                border-right: 5px solid rgb(235, 235, 235);
+                border-bottom: 5px solid rgb(235, 235, 235);
+                border-top: 5px solid rgb(120, 120, 120);
+                
+                border-radius: 100%;
+                background-color: rgb(189, 215, 46);
+            }
+
+            @-webkit-keyframes rotation {
+                from {-webkit-transform: rotate(0deg);}
+                to {-webkit-transform: rotate(360deg);}
+            }
+            @-moz-keyframes rotation {
+                from {-moz-transform: rotate(0deg);}
+                to {-moz-transform: rotate(360deg);}
+            }
+            @-o-keyframes rotation {
+                from {-o-transform: rotate(0deg);}
+                to {-o-transform: rotate(360deg);}
+            }
+            @keyframes rotation {
+                from {transform: rotate(0deg);}
+                to {transform: rotate(360deg);}
+            }
+
+            #status {
+                display: inline-block;
+                vertical-align: top;
+                margin-top: 30px;
+                margin-left: 20px;
+                font-weight: bold;
+                color: rgb(120, 120, 120);
+            }
+
+            #progress {
+                height: 20px;
+                width: 300px;
+            }
+
+        </style>
+    </head>
+    <body>
         
-        border-radius: 100%;
-        background-color: rgb(189, 215, 46);
-      }
+        <div>
+            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" style="display:none;"></canvas>
+        </div>
 
-      @-webkit-keyframes rotation {
-        from {-webkit-transform: rotate(0deg);}
-        to {-webkit-transform: rotate(360deg);}
-      }
-      @-moz-keyframes rotation {
-        from {-moz-transform: rotate(0deg);}
-        to {-moz-transform: rotate(360deg);}
-      }
-      @-o-keyframes rotation {
-        from {-o-transform: rotate(0deg);}
-        to {-o-transform: rotate(360deg);}
-      }
-      @keyframes rotation {
-        from {transform: rotate(0deg);}
-        to {transform: rotate(360deg);}
-      }
+        <div style="position: absolute;top:0;left:0">
+            <div class="spinner" id='spinner'></div>
+            <div class="emscripten" id="status">Downloading...</div>
+        </div>
 
-      #status {
-        position: absolute;
-        display: inline-block;
-        vertical-align: top;
-        margin-top: 30px;
-        margin-left: 20px;
-        font-weight: bold;
-        color: rgb(120, 120, 120);
-      }
+        <div class="emscripten">
+            <progress value="0" max="100" id="progress" hidden=1></progress>
+        </div>
+        
 
-      #progress {
-        height: 20px;
-        width: 300px;
-      }
+        <script type='text/javascript'>
+            var statusElement = document.getElementById('status');
+            var progressElement = document.getElementById('progress');
+            var spinnerElement = document.getElementById('spinner');
 
+            var Module = {
+                preRun: [ function() {
+                    Browser.resizeListeners.push(function(w, h) {
+                        Module.canvas.style.width = w/window.devicePixelRatio + 'px';
+                        Module.canvas.style.height = h/window.devicePixelRatio + 'px';
+                    });                    
+                }],
+                postRun: [],
+                print: (function() {
+                    return function(text) {
+                    };
+                })(),
+                printErr: function(text) {
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    if (0) { // XXX disabled for safety typeof dump == 'function') {
+                        dump(text + '\n'); // fast, straight to the real console
+                    } else {
+                        console.error(text);
+                    }
+                },
+                canvas: (function() {
+                    var canvas = document.getElementById('canvas');
 
-    </style>
-  </head>
-  <body>
-    
+                    // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+                    // application robust, you may want to override this behavior before shipping!
+                    // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+                    canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
 
-    <div class="spinner" id='spinner'></div>
-    <div class="emscripten" id="status">Downloading...</div>
+                    return canvas;
+                })(),
+                setStatus: function(text) {
+                    if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                    if (text === Module.setStatus.last.text) return;
+                    var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                    var now = Date.now();
+                    if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+                    Module.setStatus.last.time = now;
+                    Module.setStatus.last.text = text;
+                    if (m) {
+                        text = m[1];
+                        progressElement.value = parseInt(m[2])*100;
+                        progressElement.max = parseInt(m[4])*100;
+                        progressElement.hidden = false;
+                        spinnerElement.hidden = false;
+                    } else {
+                        progressElement.value = null;
+                        progressElement.max = null;
+                        progressElement.hidden = true;
+                        if (!text) spinnerElement.style.display = 'none';
+                        Module.canvas.style.display = '';
+                    }
+                    statusElement.innerHTML = text;
+                },
+                totalDependencies: 0,
+                monitorRunDependencies: function(left) {
+                    this.totalDependencies = Math.max(this.totalDependencies, left);
+                    Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+                }
+            };
+            Module.setStatus('Downloading...');
 
+            var w = document.body.clientWidth, h = document.body.clientHeight;
+            document.getElementById('canvas').width = w * window.devicePixelRatio;
+            document.getElementById('canvas').height = h * window.devicePixelRatio;
 
-    <div class="emscripten">
-      <progress value="0" max="100" id="progress" hidden=1></progress>
-    </div>
+            alert('This is an early demo. Download size is about 20MB.\n\nChanges are saved every 30 sec.');
+        </script>
 
-    
-    <div>
-      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-    </div>
+        <script type="text/javascript" src="Rack.js"></script>
 
-    <script type='text/javascript'>
-      var statusElement = document.getElementById('status');
-      var progressElement = document.getElementById('progress');
-      var spinnerElement = document.getElementById('spinner');
+        <script>
+            window.onerror = function(event) {
+                // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+                Module.setStatus('Exception thrown, see JavaScript console');
+                spinnerElement.style.display = 'none';
+                Module.setStatus = function(text) {
+                    if (text) Module.printErr('[post-exception status] ' + text);
+                };
+            };
 
-      var Module = {
-        preRun: [],
-        postRun: [],
-        print: (function() {
-          return function(text) {
-          };
-        })(),
-        printErr: function(text) {
-          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-          if (0) { // XXX disabled for safety typeof dump == 'function') {
-            dump(text + '\n'); // fast, straight to the real console
-          } else {
-            console.error(text);
-          }
-        },
-        canvas: (function() {
-          var canvas = document.getElementById('canvas');
-
-          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
-          // application robust, you may want to override this behavior before shipping!
-          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-
-          return canvas;
-        })(),
-        setStatus: function(text) {
-          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
-          if (text === Module.setStatus.last.text) return;
-          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-          var now = Date.now();
-          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
-          Module.setStatus.last.time = now;
-          Module.setStatus.last.text = text;
-          if (m) {
-            text = m[1];
-            progressElement.value = parseInt(m[2])*100;
-            progressElement.max = parseInt(m[4])*100;
-            progressElement.hidden = false;
-            spinnerElement.hidden = false;
-          } else {
-            progressElement.value = null;
-            progressElement.max = null;
-            progressElement.hidden = true;
-            if (!text) spinnerElement.style.display = 'none';
-          }
-          statusElement.innerHTML = text;
-        },
-        totalDependencies: 0,
-        monitorRunDependencies: function(left) {
-          this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-        }
-      };
-      Module.setStatus('Downloading...');
-      window.onerror = function(event) {
-        // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-        Module.setStatus('Exception thrown, see JavaScript console');
-        spinnerElement.style.display = 'none';
-        Module.setStatus = function(text) {
-          if (text) Module.printErr('[post-exception status] ' + text);
-        };
-      };
-    </script>
-    <script type="text/javascript" src="Rack.js"></script>
-    <script>
-    console.log(Browser);
-    Browser.resizeListeners.push(function(w, h) {
-      // document.getElementById('canvas').width = w;
-      // document.getElementById('canvas').height = h;
-      document.getElementById('canvas').style.width = w/window.devicePixelRatio + 'px';
-      document.getElementById('canvas').style.height = h/window.devicePixelRatio + 'px';
-    });
-    </script>
-  </body>
+            window.onresize = function() {
+                var w = document.body.clientWidth, h = document.body.clientHeight;
+                Module.setCanvasSize(w * window.devicePixelRatio, h * window.devicePixelRatio);
+                Module.canvas.style.width = w + 'px';
+                Module.canvas.style.height = h + 'px';
+            };
+        </script>
+    </body>
 </html>
