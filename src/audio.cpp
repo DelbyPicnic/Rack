@@ -4,16 +4,6 @@
 #include "engine.hpp"
 #include <emscripten.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
-#include "tinythread.h"
-
-#define OPENAL_DRIVER -999
-
-ALCdevice *alDevice;
-ALCcontext *alContext = NULL;
-ALuint alSource;
-ALuint alBuffers[10];
 
 namespace rack {
 
@@ -261,71 +251,14 @@ static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrame
 
 float buf[44100*10*2];
 
-static void processAudio1(void *self) {
+extern "C" void processAudioJS(void *self) {
 	AudioIO *audio = (AudioIO*)self;
-
-	if (!alContext)
-		return;
 
 	audio->processAudio();	
-
-	emscripten_async_call(processAudio1, self, 1000/48000*1024);
-}
-
-static void processAudio2(void *self) {
-    info("OpenAL thread started");
-
-	AudioIO *audio = (AudioIO*)self;
-
-	ALenum format = 0x10011;//AL_FORMAT_STEREO_FLOAT32;
-
-	// alBufferData(alBuffers[0], format, buf, 1024*2*sizeof(float), audio->sampleRate);
-	// alBufferData(alBuffers[1], format, buf, 1024*2*sizeof(float), audio->sampleRate);
- //    alSourceQueueBuffers(alSource, 2, &alBuffers[0]);
-	// alSourcePlay(alSource);
-
-    while(1) {
-    	ALuint buffer = 0;
-    	ALint buffersProcessed = 0;
-		alGetSourcei(alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
-		info("%d",buffersProcessed);
-		while(buffersProcessed--) {
-			alSourceUnqueueBuffers(alSource, 1, &buffer);
-			audio->processStream(NULL, buf, audio->blockSize);
-			alBufferData(alBuffers[0], format, buf, audio->blockSize*2*sizeof(float), audio->sampleRate);
-		    alSourceQueueBuffers(alSource, 1, &buffer);
-		}
-
-		ALint state;
-		alGetSourcei(alSource, AL_SOURCE_STATE, &state);
-		info("state %d",state);
-		if (state != AL_PLAYING)
-			alSourcePlay(alSource);
-
-		tthread::this_thread::sleep_for(tthread::chrono::milliseconds(20));
-	}
 }
 
 void AudioIO::processAudio() {
-	if (!alContext)
-		return;
-
-	ALenum format = 0x10011; //AL_FORMAT_STEREO_FLOAT32;
-
-	ALuint buffer = 0;
-	ALint buffersProcessed = 0;
-	alGetSourcei(alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
-	while(buffersProcessed--) {
-		alSourceUnqueueBuffers(alSource, 1, &buffer);
-		processStream(NULL, buf, blockSize);
-		alBufferData(buffer, format, buf, blockSize*2*sizeof(float), sampleRate);
-	    alSourceQueueBuffers(alSource, 1, &buffer);
-	}
-
-	ALint state;
-	alGetSourcei(alSource, AL_SOURCE_STATE, &state);
-	if (state != AL_PLAYING)
-		alSourcePlay(alSource);
+	processStream(NULL, buf, blockSize);
 }
 
 void AudioIO::openStream() {
@@ -408,45 +341,34 @@ void AudioIO::openStream() {
 		bridgeAudioSubscribe(device, this);
 	}
 #else
-	alDevice = alcOpenDevice(NULL);
-	if (!alDevice)
-		fatal("Can't open OpenAL device");
+	sampleRate = EM_ASM_INT({
+		if (!Module.sourceNode) {
+			Module.context = new(window.AudioContext || window.webkitAudioContext)();
+			Module.audioBuf = $1;
+			Module.sourceNode = Module.context.createOscillator();
+			Module.sourceNode.start(0);
+		}
 
-	alContext = alcCreateContext(alDevice, NULL);
-	if (!alcMakeContextCurrent(alContext))
-		fatal("Can't init OpenAL context");
+		Module.audioNode = Module.context.createScriptProcessor($2, 0, 2);
+		Module.audioNode.onaudioprocess = function(ev) {
+			ccall('processAudioJS', 'v', ['number'], [$0]);
 
-	alListener3f(AL_POSITION, 0, 0, 1.0f);
-	alListener3f(AL_VELOCITY, 0, 0, 0);
+			var channel0 = ev.outputBuffer.getChannelData(0);
+			var channel1 = ev.outputBuffer.getChannelData(1);
+			var pData = Module.audioBuf;
+			pData >>= 2;
+			for (var i = 0; i < $2; ++i) {
+				channel0[i] = HEAPF32[pData++];
+				channel1[i] = HEAPF32[pData++];
+			}
+		};
+		Module.sourceNode.connect(Module.audioNode);
+		Module.audioNode.connect(Module.context.destination);
 
-	ALfloat listenerOri[] = { 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
-	alListenerfv(AL_ORIENTATION, listenerOri);
-
-	alGenSources((ALuint)1, &alSource);
-
-	alSourcef(alSource, AL_PITCH, 1);
-	alSourcef(alSource, AL_GAIN, 1);
-	alSource3f(alSource, AL_POSITION, 0, 0, 0);
-	alSource3f(alSource, AL_VELOCITY, 0, 0, 0);
-	alSourcei(alSource, AL_LOOPING, AL_FALSE);
-
-	alGenBuffers(2, alBuffers);
-
-
-	ALenum format = 0x10011;//AL_FORMAT_STEREO_FLOAT32;
-
-	alBufferData(alBuffers[0], format, buf, blockSize*2*sizeof(float), sampleRate);
-	alBufferData(alBuffers[1], format, buf, blockSize*2*sizeof(float), sampleRate);
-	alBufferData(alBuffers[2], format, buf, blockSize*2*sizeof(float), sampleRate);
-	alBufferData(alBuffers[3], format, buf, blockSize*2*sizeof(float), sampleRate);
-    alSourceQueueBuffers(alSource, 4, &alBuffers[0]);
-	alSourcePlay(alSource);
-	ALint state;
-	alGetSourcei(alSource, AL_SOURCE_STATE, &state);
-	info("state %d",state);
-
-	processAudio1(this);
-	// (new tthread::thread((void(*)(void*))processAudio2, (void*)this))->detach();
+		return Module.context.sampleRate;
+	}, this, buf, blockSize);
+	
+	engineSetSampleRate(sampleRate);
 #endif
 }
 
@@ -479,17 +401,13 @@ void AudioIO::closeStream() {
 		bridgeAudioUnsubscribe(device, this);
 	}
 #else
-	if (alContext) {
-		alSourceStop(alSource);
-		alDeleteSources(1, &alSource);
-		alDeleteBuffers(sizeof(alBuffers)/sizeof(ALuint), alBuffers);
-
-		alcDestroyContext(alContext);
-		alcCloseDevice(alDevice);
-
-		alDevice = NULL;
-		alContext = NULL;
-	}
+	EM_ASM({
+		if (Module.sourceNode) {
+			Module.sourceNode.disconnect();
+			Module.audioNode.disconnect();
+			Module.audioNode = null;
+		}
+	});
 #endif
 
 	onCloseStream();

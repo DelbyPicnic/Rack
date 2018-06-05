@@ -84,7 +84,13 @@ endif
 
 all: $(TARGET)
 ifeq ($(ARCH), web)
-	emcc Rack.bc plugins/Fundamental/plugin.bc plugins/AudibleInstruments/plugin.bc dep/lib/libjansson.a dep/lib/libspeexdsp.a -s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS']" -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 --preload-file res --preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --emrun -o Rack.js
+	emcc Rack.bc \
+	plugins/Fundamental/plugin.bc plugins/AudibleInstruments/plugin.bc plugins/Befaco/plugin.bc plugins/cf/plugin.bc \
+	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
+	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 \
+	--preload-file res \
+	--preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --preload-file plugins/Befaco/res --preload-file plugins/cf/res \
+	--emrun -O3 -o Rack.js
 endif
 	@echo ---
 	@echo Rack built. Now type \"make run\".

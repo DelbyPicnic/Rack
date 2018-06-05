@@ -358,6 +358,8 @@ std::string pluginPath() {
 #ifdef ARCH_WEB
 extern "C" void init_Fundamental(rack::Plugin *plugin);
 extern "C" void init_AudibleInstruments(rack::Plugin *plugin);
+extern "C" void init_Befaco(rack::Plugin *plugin);
+extern "C" void init_cf(rack::Plugin *plugin);
 #endif
 
 void pluginInit() {
@@ -365,21 +367,31 @@ void pluginInit() {
 
 	// Load core
 	// This function is defined in core.cpp
-	Plugin *corePlugin = new Plugin();
-	init(corePlugin);
-	gPlugins.push_back(corePlugin);
+	{ Plugin *plugin = new Plugin();
+	init(plugin);
+	gPlugins.push_back(plugin); }
 
-	Plugin *fPlugin = new Plugin();
-	fPlugin->path = "plugins/Fundamental";
-	init_Fundamental(fPlugin);
-	gPlugins.push_back(fPlugin);
+	{ Plugin *plugin = new Plugin();
+	plugin->path = "plugins/Fundamental";
+	init_Fundamental(plugin);
+	gPlugins.push_back(plugin); }
 
-	Plugin *aPlugin = new Plugin();
-	aPlugin->path = "plugins/AudibleInstruments";
-	init_AudibleInstruments(aPlugin);
-	gPlugins.push_back(aPlugin);
+	{ Plugin *plugin = new Plugin();
+	plugin->path = "plugins/AudibleInstruments";
+	init_AudibleInstruments(plugin);
+	gPlugins.push_back(plugin); }
+
+	{ Plugin *plugin = new Plugin();
+	plugin->path = "plugins/Befaco";
+	init_Befaco(plugin);
+	gPlugins.push_back(plugin); }
+
+	{ Plugin *plugin = new Plugin();
+	plugin->path = "plugins/cf";
+	init_cf(plugin);
+	gPlugins.push_back(plugin); }
+
 	// Get local plugins directory
-
 	std::string localPlugins = pluginPath();
 
 #if RELEASE
