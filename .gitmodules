@@ -6,7 +6,7 @@ url=https://github.com/mi-rack/nanovg
 	url = https://github.com/memononen/nanosvg.git
 [submodule "ext/osdialog"]
 	path = dep/osdialog
-	url = https://github.com/AndrewBelt/osdialog.git
+url=https://github.com/mi-rack/osdialog.git
 [submodule "ext/oui-blendish"]
 	path = dep/oui-blendish
 url=https://github.com/mi-rack/oui-blendish
