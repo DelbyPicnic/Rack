@@ -33,6 +33,9 @@ post-DHE-Modules:
 post-Fundamental:
 	cd ../.. && URL=mi-rack/zFundamental DIR=zFundamental $(MAKE) plugin
 
+post-SynthKit:
+	cp -r deps/rack-components/res/* res/
+
 
 pre-%: ;
 post-%: ;
