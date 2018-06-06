@@ -82,8 +82,7 @@
 
         </style>
     </head>
-    <body>
-        
+    <body>        
         <div>
             <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" style="display:none;"></canvas>
         </div>
@@ -96,8 +95,9 @@
         <div class="emscripten">
             <progress value="0" max="100" id="progress" hidden=1></progress>
         </div>
-        
 
+        <input id="upload" type="file" style="display:none;">
+        
         <script type='text/javascript'>
             var statusElement = document.getElementById('status');
             var progressElement = document.getElementById('progress');
@@ -168,9 +168,26 @@
             document.getElementById('canvas').width = w * window.devicePixelRatio;
             document.getElementById('canvas').height = h * window.devicePixelRatio;
 
-            alert('This is an early demo. Download size is about 20MB.\n\nChanges are saved every 30 sec.');
+/*            function handleDragOver(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+                evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+            }            
+
+            function handleFileSelect(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+
+                var files = evt.dataTransfer.files; // FileList object.
+              }            
+
+            document.getElementById('canvas').addEventListener('dragover', handleDragOver, false);
+            document.getElementById('canvas').addEventListener('drop', handleFileSelect, false);*/
+
+            alert('This is an early demo. Download size is about 40MB.\n\nMIDI input requires Chrome browser. Some modules may not work, audio artifacts may present, you\'ve been warned.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');
         </script>
 
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
         <script type="text/javascript" src="Rack.js"></script>
 
         <script>

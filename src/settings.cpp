@@ -4,10 +4,6 @@
 #include "engine.hpp"
 #include "plugin.hpp"
 #include <jansson.h>
-#ifdef ARCH_WEB
-#include "emscripten.h"
-#endif
-
 
 namespace rack {
 
@@ -187,12 +183,6 @@ void settingsSave(std::string filename) {
 		json_decref(rootJ);
 		fclose(file);
 	}
-
-#ifdef ARCH_WEB
-	EM_ASM(
-	    FS.syncfs(false, function() {});
-	);
-#endif	
 }
 
 void settingsLoad(std::string filename) {

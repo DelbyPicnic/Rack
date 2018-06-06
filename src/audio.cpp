@@ -226,6 +226,8 @@ std::vector<int> AudioIO::getBlockSizes() {
 }
 
 void AudioIO::setBlockSize(int blockSize) {
+	//TODO: UI is not updated accordingly in this case
+	blockSize = max(blockSize, getBlockSizes()[0]);
 	if (blockSize == this->blockSize)
 		return;
 	closeStream();
@@ -402,9 +404,10 @@ void AudioIO::closeStream() {
 	}
 #else
 	EM_ASM({
-		if (Module.sourceNode) {
+		if (Module.audioNode) {
 			Module.sourceNode.disconnect();
 			Module.audioNode.disconnect();
+			Module.audioNode.onaudioprocess = null;
 			Module.audioNode = null;
 		}
 	});

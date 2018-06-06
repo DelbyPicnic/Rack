@@ -71,8 +71,10 @@ ifeq ($(ARCH), win)
 endif
 
 ifeq ($(ARCH), web)
+	WEB_PLUGINS := Fundamental AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
+ 	FLAGS += -DWEB_PLUGINS="$(foreach k,$(WEB_PLUGINS),WEB_PLUGIN($k))"
+
 	SOURCES += dep/osdialog/osdialog_web.c
-	CFLAGS += -s USE_PTHREADS=0
 	LDFLAGS += -rdynamic \
 		-lpthread -ldl -lz -lasound -lX11 \
 		$(shell pkg-config --libs gtk+-2.0) \
@@ -85,12 +87,10 @@ endif
 all: $(TARGET)
 ifeq ($(ARCH), web)
 	emcc Rack.bc \
-	plugins/Fundamental/plugin.bc plugins/AudibleInstruments/plugin.bc plugins/Befaco/plugin.bc plugins/cf/plugin.bc \
+	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --preload-file plugins/$(k)/res) \
 	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
-	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s USE_PTHREADS=0 -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 -lglfw3 \
-	--preload-file res \
-	--preload-file plugins/Fundamental/res --preload-file plugins/AudibleInstruments/res --preload-file plugins/Befaco/res --preload-file plugins/cf/res \
-	--emrun -O3 -o Rack.js
+	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 \
+	--preload-file res --preload-file template.vcv --emrun -O3 -o Rack.js
 endif
 	@echo ---
 	@echo Rack built. Now type \"make run\".
@@ -146,7 +146,7 @@ dep:
 	@echo Dependencies built. Now type \"make\".
 	@echo ---
 
-run: $(TARGET)
+run: all
 ifeq ($(ARCH), lin)
 	LD_LIBRARY_PATH=dep/lib ./$<
 endif
@@ -155,6 +155,9 @@ ifeq ($(ARCH), mac)
 endif
 ifeq ($(ARCH), win)
 	env PATH="$(PATH)":dep/bin ./$<
+endif
+ifeq ($(ARCH), web)
+	emrun Rack.html
 endif
 
 debug: $(TARGET)

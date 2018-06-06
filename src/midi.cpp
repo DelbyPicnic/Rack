@@ -171,7 +171,8 @@ MidiInput::~MidiInput() {
 	setDriver(-1);
 #else
 	EM_ASM({
-		Array.from(Module.midiAccess.inputs.values())[$0].onmidimessage = null;
+		if (Module.midiAccess)
+			Array.from(Module.midiAccess.inputs.values())[$0].onmidimessage = null;
 	}, this->device);	
 #endif
 }

@@ -37,11 +37,13 @@ endif
 
 ifeq ($(ARCH), web)
 	TARGET := plugin.bc
-	FLAGS += -Dinit=init_$(SLUG) -Dplugin=plugin_$(SLUG)
 endif
 
 
 all: $(TARGET)
+	llvm-dis plugin.bc
+	$(RACK_DIR)/em_fix_plugin.pl $(SLUG) > plugin-fix.ll
+	llvm-as plugin-fix.ll -o=plugin-fix.bc
 
 include $(RACK_DIR)/compile.mk
 

@@ -2,6 +2,10 @@
 #include "window.hpp"
 #include "engine.hpp"
 #include "settings.hpp"
+#include "asset.hpp"
+#ifdef ARCH_WEB
+#include <emscripten.h>
+#endif
 
 namespace rack {
 
@@ -20,15 +24,44 @@ struct DisconnectItem : MenuItem {
 
 struct OpenItem : MenuItem {
 	void onAction(EventAction &e) override {
+#ifndef ARCH_WEB		
 		gRackWidget->openDialog();
+#else
+		EM_ASM(
+		    alert('Drop a .vcv file on the window to open.');
+		);
+#endif
 	}
 };
 
 struct SaveItem : MenuItem {
 	void onAction(EventAction &e) override {
+#ifndef ARCH_WEB		
 		gRackWidget->saveDialog();
+#else
+		gRackWidget->savePatch(assetHidden("autosave.vcv"));
+		EM_ASM(
+		    FS.syncfs(false, function() {});
+		);
+#endif
 	}
 };
+
+#ifdef ARCH_WEB
+struct DownloadItem : MenuItem {
+	void onAction(EventAction &e) override {
+		gRackWidget->savePatch(assetHidden("autosave.vcv"));
+		EM_ASM(
+		    FS.syncfs(false, function() {
+		    	//TODO: use binary
+		    	var text = FS.readFile('/work/autosave.vcv', { encoding: 'utf8' });
+		    	var blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+				saveAs(blob, 'download.vcv', true);
+		    });
+		);
+	}
+};
+#endif
 
 struct SaveAsItem : MenuItem {
 	void onAction(EventAction &e) override {
@@ -58,9 +91,13 @@ struct FileChoice : ChoiceButton {
 		menu->addChild(MenuItem::create<DisconnectItem>("Disconnect Cables"));
 		menu->addChild(MenuItem::create<OpenItem>("Open", WINDOW_MOD_KEY_NAME "+O"));
 		menu->addChild(MenuItem::create<SaveItem>("Save", WINDOW_MOD_KEY_NAME "+S"));
+#ifndef ARCH_WEB
 		menu->addChild(MenuItem::create<SaveAsItem>("Save As", WINDOW_MOD_KEY_NAME "+Shift+S"));
 		menu->addChild(MenuItem::create<RevertItem>("Revert"));
 		menu->addChild(MenuItem::create<QuitItem>("Quit", WINDOW_MOD_KEY_NAME "+Q"));
+#else
+		menu->addChild(MenuItem::create<DownloadItem>("Save & Download", WINDOW_MOD_KEY_NAME "+Shift+S"));
+#endif
 	}
 };
 

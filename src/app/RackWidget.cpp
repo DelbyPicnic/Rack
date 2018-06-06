@@ -88,7 +88,11 @@ void RackWidget::reset() {
 	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Clear your patch and start over?")) {
 		clear();
 		// Fails silently if file does not exist
+#ifndef ARCH_WEB
 		loadPatch(assetHidden("template.vcv"));
+#else
+		loadPatch(assetGlobal("template.vcv"));
+#endif
 		lastPath = "";
 	}
 }
@@ -142,12 +146,6 @@ void RackWidget::savePatch(std::string path) {
 	}
 
 	json_decref(rootJ);
-
-#ifdef ARCH_WEB
-	EM_ASM(
-	    FS.syncfs(false, function() {});
-	);
-#endif	
 }
 
 void RackWidget::loadPatch(std::string path) {
@@ -461,6 +459,11 @@ void RackWidget::step() {
 	if (gGuiFrame % (30 * 60) == 0) {
 		savePatch(assetHidden("autosave.vcv"));
 		settingsSave(assetHidden("settings.json"));
+#ifdef ARCH_WEB
+		EM_ASM(
+		    FS.syncfs(false, function() {});
+		);
+#endif	
 	}
 
 	Widget::step();

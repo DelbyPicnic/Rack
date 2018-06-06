@@ -227,7 +227,16 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 	return true;*/
 }
 
+#ifdef ARCH_WEB
+#define WEB_DECL_PLUGIN(n) extern "C" void init_##n(rack::Plugin *plugin);
+#define WEB_LOAD_PLUGIN(n) { Plugin *plugin = new Plugin(); plugin->path = "plugins/" # n; init_##n(plugin); gPlugins.push_back(plugin); }
+#define WEB_PLUGIN WEB_DECL_PLUGIN
+WEB_PLUGINS
+#undef WEB_PLUGIN
+#endif
+
 static void loadPlugins(std::string path) {
+#ifndef ARCH_WEB
 	std::string message;
 	
 	auto entries = systemListEntries(path);
@@ -244,6 +253,11 @@ static void loadPlugins(std::string path) {
 		message += "See log for details.";
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
 	}
+#else
+#define WEB_PLUGIN WEB_LOAD_PLUGIN
+	WEB_PLUGINS
+#undef WEB_PLUGIN
+#endif
 }
 
 /** Returns 0 if successful */
@@ -355,41 +369,14 @@ std::string pluginPath() {
 	return path;	
 }
 
-#ifdef ARCH_WEB
-extern "C" void init_Fundamental(rack::Plugin *plugin);
-extern "C" void init_AudibleInstruments(rack::Plugin *plugin);
-extern "C" void init_Befaco(rack::Plugin *plugin);
-extern "C" void init_cf(rack::Plugin *plugin);
-#endif
-
 void pluginInit() {
 	tagsInit();
 
 	// Load core
 	// This function is defined in core.cpp
-	{ Plugin *plugin = new Plugin();
+	Plugin *plugin = new Plugin();
 	init(plugin);
-	gPlugins.push_back(plugin); }
-
-	{ Plugin *plugin = new Plugin();
-	plugin->path = "plugins/Fundamental";
-	init_Fundamental(plugin);
-	gPlugins.push_back(plugin); }
-
-	{ Plugin *plugin = new Plugin();
-	plugin->path = "plugins/AudibleInstruments";
-	init_AudibleInstruments(plugin);
-	gPlugins.push_back(plugin); }
-
-	{ Plugin *plugin = new Plugin();
-	plugin->path = "plugins/Befaco";
-	init_Befaco(plugin);
-	gPlugins.push_back(plugin); }
-
-	{ Plugin *plugin = new Plugin();
-	plugin->path = "plugins/cf";
-	init_cf(plugin);
-	gPlugins.push_back(plugin); }
+	gPlugins.push_back(plugin);
 
 	// Get local plugins directory
 	std::string localPlugins = pluginPath();

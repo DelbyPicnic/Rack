@@ -25,6 +25,7 @@ extern "C" void initApp() {
 	settingsLoad(assetHidden("settings.json"));
 	std::string oldLastPath = gRackWidget->lastPath;
 
+#ifndef ARCH_WEB
 	// To prevent launch crashes, if Rack crashes between now and 15 seconds from now, the "skipAutosaveOnLaunch" property will remain in settings.json, so that in the next launch, the broken autosave will not be loaded.
 	bool oldSkipAutosaveOnLaunch = skipAutosaveOnLaunch;
 	skipAutosaveOnLaunch = true;
@@ -36,6 +37,11 @@ extern "C" void initApp() {
 	else {
 		gRackWidget->loadPatch(assetHidden("autosave.vcv"));
 	}
+#else
+	gRackWidget->loadPatch(assetHidden("autosave.vcv"));
+	if (!gModules.size())
+		gRackWidget->loadPatch(assetGlobal("template.vcv"));
+#endif
 	gRackWidget->lastPath = oldLastPath;
 
 	engineStart();
