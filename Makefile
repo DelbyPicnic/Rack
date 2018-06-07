@@ -71,8 +71,9 @@ ifeq ($(ARCH), win)
 endif
 
 ifeq ($(ARCH), web)
-	WEB_PLUGINS := Fundamental AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
+	WEB_PLUGINS := Fundamental #AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
  	FLAGS += -DWEB_PLUGINS="$(foreach k,$(WEB_PLUGINS),WEB_PLUGIN($k))"
+ 	FLAGS += -s USE_PTHREADS=1
 
 	SOURCES += dep/osdialog/osdialog_web.c
 	LDFLAGS += -rdynamic \
@@ -87,10 +88,14 @@ endif
 all: $(TARGET)
 ifeq ($(ARCH), web)
 	emcc Rack.bc \
-	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --preload-file plugins/$(k)/res) \
+	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --embed-file plugins/$(k)/res) \
 	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
 	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 \
-	--preload-file res --preload-file template.vcv --emrun -O3 -o Rack.js
+	--embed-file res --embed-file template.vcv --emrun -o Rack.js -s USE_PTHREADS=1
+	emcc Rack.bc --memory-init-file 0 \
+	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc) \
+	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=64MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 \
+	-s MODULARIZE_INSTANCE=1 -s "MODULARIZE=1" -s EXPORT_NAME="'librack'" -s SINGLE_FILE=1 --emrun -o Rack2.js -s USE_PTHREADS=1
 endif
 	@echo ---
 	@echo Rack built. Now type \"make run\".

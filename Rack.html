@@ -185,6 +185,30 @@
             document.getElementById('canvas').addEventListener('drop', handleFileSelect, false);*/
 
             alert('This is an early demo. Download size is about 40MB.\n\nMIDI input requires Chrome browser. Some modules may not work, audio artifacts may present, you\'ve been warned.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');
+
+            function startAudio(addr) {
+                if (Module.context)
+                    return;
+                Module.context = new AudioContext();
+                Module.context.audioWorklet.addModule('Rack2.js').then(()=>{
+                  Module.node = new AudioWorkletNode(Module.context, 'port-processor');
+                  Module.node.port.postMessage({
+                    cmd:'load',
+                    buffer:buffer,
+                    PthreadWorkerInit:PthreadWorkerInit,
+                    stackSize:2097152,
+                    stackBase:Module._malloc(2097152),
+                    addr:addr,
+                  });
+
+                  let oscillator = new OscillatorNode(Module.context);
+                  Module.osc = oscillator;
+                  oscillator.connect(Module.node);
+                  Module.node.connect(Module.context.destination);
+                  oscillator.start();
+
+                });
+            }
         </script>
 
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
