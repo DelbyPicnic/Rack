@@ -219,8 +219,6 @@ std::vector<int> AudioIO::getBlockSizes() {
 	if (rtAudio) {
 		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
 	}
-#else
-	return {/*64,*/ 512, 1024, 2048, 4096};
 #endif
 	return {};
 }
@@ -252,11 +250,11 @@ static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrame
 #endif
 
 float buf[44100*10*2];
-
+AudioIO *audio = NULL;
 extern "C" void processAudioJS(void *self) {
-	AudioIO *audio = (AudioIO*)self;
-
-	audio->processAudio();	
+	// AudioIO *audio = (AudioIO*)self;
+	if (audio)
+		audio->processAudio();	
 }
 
 void AudioIO::processAudio() {
@@ -343,32 +341,18 @@ void AudioIO::openStream() {
 		bridgeAudioSubscribe(device, this);
 	}
 #else
-	sampleRate = EM_ASM_INT({
-		if (!Module.sourceNode) {
-			Module.context = new(window.AudioContext || window.webkitAudioContext)();
-			Module.audioBuf = $1;
-			Module.sourceNode = Module.context.createOscillator();
-			Module.sourceNode.start(0);
-		}
+	audio = this;
 
-		Module.audioNode = Module.context.createScriptProcessor($2, 0, 2);
-		Module.audioNode.onaudioprocess = function(ev) {
-			ccall('processAudioJS', 'v', ['number'], [$0]);
-
-			var channel0 = ev.outputBuffer.getChannelData(0);
-			var channel1 = ev.outputBuffer.getChannelData(1);
-			var pData = Module.audioBuf;
-			pData >>= 2;
-			for (var i = 0; i < $2; ++i) {
-				channel0[i] = HEAPF32[pData++];
-				channel1[i] = HEAPF32[pData++];
-			}
-		};
-		Module.sourceNode.connect(Module.audioNode);
-		Module.audioNode.connect(Module.context.destination);
-
-		return Module.context.sampleRate;
+	EM_ASM({
+		startAudio($0, $1, $2);
 	}, this, buf, blockSize);
+
+	sampleRate = EM_ASM_INT({
+		return getAudioSampleRate();
+	});
+	blockSize = EM_ASM_INT({
+		return getAudioBlockSize();
+	});
 	
 	engineSetSampleRate(sampleRate);
 #endif
@@ -404,12 +388,7 @@ void AudioIO::closeStream() {
 	}
 #else
 	EM_ASM({
-		if (Module.audioNode) {
-			Module.sourceNode.disconnect();
-			Module.audioNode.disconnect();
-			Module.audioNode.onaudioprocess = null;
-			Module.audioNode = null;
-		}
+		stopAudio();
 	});
 #endif
 

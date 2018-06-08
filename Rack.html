@@ -9,10 +9,10 @@
                 height:100%;
             }
             body {
-                font-family: arial;
+                font-family: sans-serif;
                 margin: 0;
-                padding: 0;
                 height:100%;
+                overflow:hidden;
             }
 
             .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
@@ -184,7 +184,108 @@
             document.getElementById('canvas').addEventListener('dragover', handleDragOver, false);
             document.getElementById('canvas').addEventListener('drop', handleFileSelect, false);*/
 
-            alert('This is an early demo. Download size is about 40MB.\n\nMIDI input requires Chrome browser. Some modules may not work, audio artifacts may present, you\'ve been warned.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');
+            var useAudioWorklet = (window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
+
+            function startAudio(audio, addr) {
+                if (useAudioWorklet) {
+                    if (Module.context) {
+                        if (Module.node)
+                            Module.node.port.postMessage({
+                                cmd: 'start',
+                                audio: audio,
+                                addr: addr,
+                            });
+
+                        return;
+                    }
+
+                    Module.context = new AudioContext();
+                    Module.context.audioWorklet.addModule('Rack2.js').then(()=>{
+                        Module.node = new AudioWorkletNode(Module.context, 'port-processor', { outputChannelCount:[2] });
+                        Module.node.channelCountMode = 'explicit';
+                        Module.node.port.postMessage({
+                            cmd: 'init',
+                            buffer: buffer,
+                            PthreadWorkerInit: PthreadWorkerInit,
+                            stackSize: 2097152,
+                            stackBase: Module._malloc(2097152),
+                            tempDoublePtr: Module.getMemory(8),
+                            TOTAL_MEMORY: Module.TOTAL_MEMORY,
+                            STATICTOP: Module.STATICTOP,
+                            DYNAMIC_BASE: Module.DYNAMIC_BASE,
+                            DYNAMICTOP_PTR: Module.DYNAMICTOP_PTR,
+                        });
+
+                        Module.node.port.postMessage({
+                            cmd: 'start',
+                            audio: audio,
+                            addr: addr,
+                        });
+
+                        let oscillator = new OscillatorNode(Module.context);
+                        Module.osc = oscillator;
+                        oscillator.connect(Module.node);
+                        Module.node.connect(Module.context.destination);
+                        oscillator.start();
+                    });
+                
+                } else {
+                    if (Module.context) {
+                        // Module.sourceNode.start(0);
+                        return;
+                    }
+
+                    Module.context = new(window.AudioContext || window.webkitAudioContext)();
+                    Module.sourceNode = Module.context.createOscillator();
+                    Module.sourceNode.start(0);
+
+                    Module.audioNode = Module.context.createScriptProcessor(1024, 0, 2);
+                    Module.audioNode.onaudioprocess = function(ev) {
+                        ccall('processAudioJS', 'v', ['number'], [audio]);
+
+                        var channel0 = ev.outputBuffer.getChannelData(0);
+                        var channel1 = ev.outputBuffer.getChannelData(1);
+                        var pData = addr;
+                        pData >>= 2;
+                        for (var i = 0; i < 1024; ++i) {
+                            channel0[i] = HEAPF32[pData++];
+                            channel1[i] = HEAPF32[pData++];
+                        }
+                    };
+                    Module.sourceNode.connect(Module.audioNode);
+                    Module.audioNode.connect(Module.context.destination);
+                }
+            }
+
+            function stopAudio() {
+                if (useAudioWorklet) {
+                    if (!Module.node)
+                        return;
+
+                    Module.node.port.postMessage({
+                        cmd: 'stop',
+                    });
+                
+                } else {
+                    if (!Module.context)
+                        return;
+
+                    // Module.sourceNode.stop();
+                }
+            }
+
+            function getAudioSampleRate() {
+                return Module.context.sampleRate;
+            }
+
+            function getAudioBlockSize() {
+                if (useAudioWorklet)
+                    return Module.context.sampleRate * Module.context.baseLatency / 2;
+                else
+                    return 1024;
+            }
+
+            alert('Download size is about 40MB, please be patient. Some modules may not work and/or crash the app, you\'ve been warned.\n\nIMPORTANT\n\n1. MIDI input requires Chrome browser.\n\n2. For best results, use the latest version of Chrome, then navigate to chrome://flags and enable SharedArrayBuffer support.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');            
         </script>
 
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
