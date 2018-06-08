@@ -29,7 +29,9 @@ $r = '(\b)(' . join ('|', keys %names) . ')(\b)';
 seek F, 0, 0;
 
 while (<F>) {
-	$_ =~ s/$r/\1\2_$slug\3/g;
+	if (not $_ =~ /c"[^"]*$r/) {
+		$_ =~ s/$r/\1\2_$slug\3/g;
+	}
 	$_ =~ s/define void \@init\(/define void \@init_$slug\(/;
 	print $_;
 }

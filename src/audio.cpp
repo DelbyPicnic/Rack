@@ -219,8 +219,6 @@ std::vector<int> AudioIO::getBlockSizes() {
 	if (rtAudio) {
 		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
 	}
-#else
-	return {/*64,*/ 512, 1024, 2048, 4096};
 #endif
 	return {};
 }
@@ -260,7 +258,7 @@ extern "C" void processAudioJS(void *self) {
 }
 
 void AudioIO::processAudio() {
-	processStream(NULL, buf, 128);
+	processStream(NULL, buf, blockSize);
 }
 
 void AudioIO::openStream() {
@@ -344,9 +342,17 @@ void AudioIO::openStream() {
 	}
 #else
 	audio = this;
-	sampleRate = EM_ASM_INT({
-		startAudio($1);
+
+	EM_ASM({
+		startAudio($0, $1, $2);
 	}, this, buf, blockSize);
+
+	sampleRate = EM_ASM_INT({
+		return getAudioSampleRate();
+	});
+	blockSize = EM_ASM_INT({
+		return getAudioBlockSize();
+	});
 	
 	engineSetSampleRate(sampleRate);
 #endif
@@ -382,12 +388,7 @@ void AudioIO::closeStream() {
 	}
 #else
 	EM_ASM({
-		if (Module.audioNode) {
-			Module.sourceNode.disconnect();
-			Module.audioNode.disconnect();
-			Module.audioNode.onaudioprocess = null;
-			Module.audioNode = null;
-		}
+		stopAudio();
 	});
 #endif
 
