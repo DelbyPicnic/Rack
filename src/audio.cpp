@@ -251,10 +251,12 @@ static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrame
 
 float buf[44100*10*2];
 AudioIO *audio = NULL;
-extern "C" void processAudioJS(void *self) {
+extern "C" void processAudioJS(int blockSize) {
 	// AudioIO *audio = (AudioIO*)self;
-	if (audio)
+	if (audio) {
+		audio->blockSize = blockSize;		
 		audio->processAudio();	
+	}
 }
 
 void AudioIO::processAudio() {

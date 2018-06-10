@@ -30,13 +30,14 @@ class PortProcessor extends AudioWorkletProcessor {
         if (!this.addr)
             return true;
 
-        this.lr._processAudioJS();
-
         var out = outputs[0];
         var channel0 = out[0];
         var channel1 = out[1];
         var pData = this.addr;
         pData >>= 2;
+
+        this.lr._processAudioJS(channel0.length);
+
         for (var i = 0; i < channel0.length; ++i) {
             channel0[i] = this.lr.HEAPF32[pData++];
             channel1[i] = this.lr.HEAPF32[pData++];

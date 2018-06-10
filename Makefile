@@ -90,12 +90,12 @@ ifeq ($(ARCH), web)
 	emcc Rack.bc \
 	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --preload-file plugins/$(k)/res) \
 	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
-	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 \
+	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
 	--preload-file res --preload-file template.vcv --emrun -O3 -o Rack.js -s USE_PTHREADS=1
 	
 	emcc Rack.bc --memory-init-file 0 \
 	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc) \
-	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s WASM=0 \
+	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
 	-s "MODULARIZE=1" -s EXPORT_NAME="'librack'" -s SINGLE_FILE=1 --emrun -O3 -o Rack2.js -s USE_PTHREADS=1 --pre-js Rack2.pre.js
 	
 	cat Rack2.post.js >>Rack2.js

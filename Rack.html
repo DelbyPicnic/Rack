@@ -186,6 +186,10 @@
 
             var useAudioWorklet = (window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
 
+            // In Safari, there are Atomics but they don't work without SharedArrayBuffer which is disabled
+            if (window.SharedArrayBuffer === undefined)
+                delete window.Atomics;
+
             function startAudio(audio, addr) {
                 if (useAudioWorklet) {
                     if (Module.context) {
@@ -199,7 +203,7 @@
                         return;
                     }
 
-                    Module.context = new AudioContext();
+                    Module.context = new AudioContext({ sampleRate:44100, latencyHint:'balanced' });
                     Module.context.audioWorklet.addModule('Rack2.js').then(()=>{
                         Module.node = new AudioWorkletNode(Module.context, 'port-processor', { outputChannelCount:[2] });
                         Module.node.channelCountMode = 'explicit';
@@ -235,13 +239,13 @@
                         return;
                     }
 
-                    Module.context = new(window.AudioContext || window.webkitAudioContext)();
+                    Module.context = new(window.AudioContext || window.webkitAudioContext)({ sampleRate:44100, latencyHint:'balanced' });
                     Module.sourceNode = Module.context.createOscillator();
                     Module.sourceNode.start(0);
 
                     Module.audioNode = Module.context.createScriptProcessor(1024, 0, 2);
                     Module.audioNode.onaudioprocess = function(ev) {
-                        ccall('processAudioJS', 'v', ['number'], [audio]);
+                        ccall('processAudioJS', 'v', ['number'], [1024]);
 
                         var channel0 = ev.outputBuffer.getChannelData(0);
                         var channel1 = ev.outputBuffer.getChannelData(1);
@@ -280,7 +284,7 @@
 
             function getAudioBlockSize() {
                 if (useAudioWorklet)
-                    return Module.context.sampleRate * Module.context.baseLatency / 2;
+                    return 128;
                 else
                     return 1024;
             }

@@ -50,10 +50,9 @@ struct AudioInterfaceIO2 : AudioIO {
 	void processStream(const float *input, float *output, int frames) override {
 
 		// engineWaitMT();
+		bufPtr = output;
 		for (int i = 0; i < frames; i++)
 			engineStep();
-		memcpy(output, buf, frames*2*sizeof(float));
-		bufPtr = buf;
 		// engineStepMT(frames);
 	}
 
