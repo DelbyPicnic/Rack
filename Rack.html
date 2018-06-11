@@ -247,7 +247,7 @@
                     Module.audioNode = Module.context.createScriptProcessor(blockSize, 0, 2);
                     Module.audioNode.blockSize = blockSize;
                     Module.audioNode.onaudioprocess = function(ev) {
-                        ccall('processAudioJS', 'v', ['number'], [blockSize]);
+                        Module._processAudioJS(blockSize);
 
                         var channel0 = ev.outputBuffer.getChannelData(0);
                         var channel1 = ev.outputBuffer.getChannelData(1);
