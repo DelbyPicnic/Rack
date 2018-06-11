@@ -184,13 +184,14 @@
             document.getElementById('canvas').addEventListener('dragover', handleDragOver, false);
             document.getElementById('canvas').addEventListener('drop', handleFileSelect, false);*/
 
-            var useAudioWorklet = (window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
-
             // In Safari, there are Atomics but they don't work without SharedArrayBuffer which is disabled
             if (window.SharedArrayBuffer === undefined)
                 delete window.Atomics;
 
-            function startAudio(audio, addr) {
+            // Not yet.
+            var useAudioWorklet = false; //(window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
+
+            function startAudio(audio, addr, blockSize) {
                 if (useAudioWorklet) {
                     if (Module.context) {
                         if (Module.node)
@@ -234,24 +235,25 @@
                     });
                 
                 } else {
-                    if (Module.context) {
-                        // Module.sourceNode.start(0);
+                    if (Module.audioNode)
                         return;
+
+                    if (!Module.context) {
+                        Module.context = new(window.AudioContext || window.webkitAudioContext)({ sampleRate:44100, latencyHint:'balanced' });
+                        Module.sourceNode = Module.context.createOscillator();
+                        Module.sourceNode.start(0);
                     }
 
-                    Module.context = new(window.AudioContext || window.webkitAudioContext)({ sampleRate:44100, latencyHint:'balanced' });
-                    Module.sourceNode = Module.context.createOscillator();
-                    Module.sourceNode.start(0);
-
-                    Module.audioNode = Module.context.createScriptProcessor(1024, 0, 2);
+                    Module.audioNode = Module.context.createScriptProcessor(blockSize, 0, 2);
+                    Module.audioNode.blockSize = blockSize;
                     Module.audioNode.onaudioprocess = function(ev) {
-                        ccall('processAudioJS', 'v', ['number'], [1024]);
+                        ccall('processAudioJS', 'v', ['number'], [blockSize]);
 
                         var channel0 = ev.outputBuffer.getChannelData(0);
                         var channel1 = ev.outputBuffer.getChannelData(1);
                         var pData = addr;
                         pData >>= 2;
-                        for (var i = 0; i < 1024; ++i) {
+                        for (var i = 0; i < blockSize; ++i) {
                             channel0[i] = HEAPF32[pData++];
                             channel1[i] = HEAPF32[pData++];
                         }
@@ -271,10 +273,13 @@
                     });
                 
                 } else {
-                    if (!Module.context)
+                    if (!Module.audioNode)
                         return;
 
-                    // Module.sourceNode.stop();
+                    Module.sourceNode.disconnect();
+                    Module.audioNode.disconnect();
+                    Module.audioNode.onaudioprocess = null;
+                    Module.audioNode = null;
                 }
             }
 
@@ -286,10 +291,11 @@
                 if (useAudioWorklet)
                     return 128;
                 else
-                    return 1024;
+                    return Module.audioNode.blockSize;
             }
 
-            alert('Download size is about 40MB, please be patient. Some modules may not work and/or crash the app, you\'ve been warned.\n\nIMPORTANT\n\n1. MIDI input requires Chrome browser.\n\n2. For best results, use the latest version of Chrome, then navigate to chrome://flags and enable SharedArrayBuffer support.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');            
+            //alert('Download size is about 40MB, please be patient. Some modules may not work and/or crash the app, you\'ve been warned.\n\nIMPORTANT\n\n1. MIDI input requires Chrome browser.\n\n2. For best results, use the latest version of Chrome, then navigate to chrome://flags and enable SharedArrayBuffer support.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');            
+            alert('Download size is about 40MB, please be patient. Some modules may not work and/or crash the app, you\'ve been warned.\n\nMIDI input requires Chrome browser.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');
         </script>
 
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>

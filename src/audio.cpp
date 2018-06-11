@@ -219,8 +219,10 @@ std::vector<int> AudioIO::getBlockSizes() {
 	if (rtAudio) {
 		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
 	}
-#endif
 	return {};
+#else
+	return {512, 1024, 2048, 4096};
+#endif
 }
 
 void AudioIO::setBlockSize(int blockSize) {
@@ -442,7 +444,7 @@ void AudioIO::fromJson(json_t *rootJ) {
 
 	json_t *blockSizeJ = json_object_get(rootJ, "blockSize");
 	if (blockSizeJ)
-		blockSize = json_integer_value(blockSizeJ);
+		blockSize = max(json_integer_value(blockSizeJ), getBlockSizes()[0]);
 
 	openStream();
 	onDeviceChange();
