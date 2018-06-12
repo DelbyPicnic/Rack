@@ -58,6 +58,27 @@ void Plugin::addModel(Model *model) {
 // private API
 ////////////////////
 
+static void replaceExisting(Plugin *plugin) {
+	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
+	info("%s",plugin->slug.c_str());
+	if (oldPlugin) {
+		for (Model *model : plugin->models) {
+			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
+				if (model->slug == (*it)->slug) {
+					it = oldPlugin->models.erase(it);
+					oldPlugin->models.insert(it, model);
+#ifndef ARCH_WEB
+					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", libraryFilename.c_str(), model->slug.c_str(), plugin->slug.c_str());
+#else
+					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", plugin->path.c_str(), model->slug.c_str(), plugin->slug.c_str());
+#endif
+				} else
+					it++;
+			}
+		}
+	}	
+}
+
 static bool loadPlugin(std::string path) {
 	std::string libraryFilename;
 #if ARCH_LIN
@@ -111,20 +132,8 @@ static bool loadPlugin(std::string path) {
 	plugin->handle = handle;
 	initCallback(plugin);
 
-	// Reject plugin if slug already exists
-	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
-	if (oldPlugin) {
-		for (Model *model : plugin->models) {
-			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
-				if (model->slug == (*it)->slug) {
-					it = oldPlugin->models.erase(it);
-					oldPlugin->models.insert(it, model);
-					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", libraryFilename.c_str(), model->slug.c_str(), plugin->slug.c_str());
-				} else
-					it++;
-			}
-		}
-	}
+	// Replace already registered modules
+	replaceExisting(plugin);
 
 	// Add plugin to list
 	gPlugins.push_back(plugin);
@@ -229,7 +238,7 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 
 #ifdef ARCH_WEB
 #define WEB_DECL_PLUGIN(n) extern "C" void init_##n(rack::Plugin *plugin);
-#define WEB_LOAD_PLUGIN(n) { Plugin *plugin = new Plugin(); plugin->path = "plugins/" # n; init_##n(plugin); gPlugins.push_back(plugin); }
+#define WEB_LOAD_PLUGIN(n) { Plugin *plugin = new Plugin(); plugin->path = "plugins/" # n; init_##n(plugin); replaceExisting(plugin); gPlugins.push_back(plugin); }
 #define WEB_PLUGIN WEB_DECL_PLUGIN
 WEB_PLUGINS
 #undef WEB_PLUGIN

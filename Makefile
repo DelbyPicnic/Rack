@@ -71,7 +71,7 @@ ifeq ($(ARCH), win)
 endif
 
 ifeq ($(ARCH), web)
-	WEB_PLUGINS := Fundamental AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
+	WEB_PLUGINS := Fundamental zFundamental AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
  	FLAGS += -DWEB_PLUGINS="$(foreach k,$(WEB_PLUGINS),WEB_PLUGIN($k))"
  	FLAGS += -s USE_PTHREADS=1
 

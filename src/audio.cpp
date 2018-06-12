@@ -358,6 +358,7 @@ void AudioIO::openStream() {
 		return getAudioBlockSize();
 	});
 	
+	setChannels(2, 0);
 	engineSetSampleRate(sampleRate);
 #endif
 }
