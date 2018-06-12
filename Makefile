@@ -25,7 +25,7 @@ STRIP ?= strip
 
 # Sources and build flags
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
-SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp
+SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp dep/osdialog/osdialog.c
 SOURCES += $(wildcard dep/pfft/pffft.c) $(wildcard dep/pfft/fftpack.c)
 
 ifneq (,$(findstring arm,$(CPU)))
