@@ -37,13 +37,18 @@ endif
 
 ifeq ($(ARCH), web)
 	TARGET := plugin.bc
+	TARGET_POST := plugin-fix.bc
 endif
 
 
-all: $(TARGET)
+all: $(TARGET) $(TARGET_POST)
+
+ifeq ($(ARCH), web)
+plugin-fix.bc: $(TARGET) $(RACK_DIR)/em_fix_plugin.pl
 	llvm-dis plugin.bc
 	$(RACK_DIR)/em_fix_plugin.pl $(SLUG) > plugin-fix.ll
 	llvm-as plugin-fix.ll -o=plugin-fix.bc
+endif
 
 include $(RACK_DIR)/compile.mk
 

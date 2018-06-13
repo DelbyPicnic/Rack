@@ -22,7 +22,11 @@ struct AudioIO {
 	int offset = 0;
 	int maxChannels = 8;
 	int sampleRate = 48000;
+#ifndef ARCH_WEB
+	int blockSize = 512;
+#else
 	int blockSize = 1024;
+#endif
 	int numOutputs = 0;
 	int numInputs = 0;
 #ifndef ARCH_WEB
@@ -58,8 +62,6 @@ struct AudioIO {
 	/** Must close the stream before opening */
 	void openStream();
 	void closeStream();
-
-	void processAudio();
 
 	virtual void processStream(const float *input, float *output, int frames) {}
 	virtual void onCloseStream() {}

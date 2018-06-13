@@ -16,7 +16,9 @@
 #include <stdexcept>
 #include <algorithm>
 
-// #include <zip.h>
+#ifndef ARCH_WEB
+#include <zip.h>
+#endif
 #include <jansson.h>
 
 #if ARCH_WIN
@@ -142,8 +144,8 @@ static bool loadPlugin(std::string path) {
 	return true;
 }
 
-static bool syncPlugin(json_t *pluginJ, bool dryRun) {
-/*	json_t *slugJ = json_object_get(pluginJ, "slug");
+/*static bool syncPlugin(json_t *pluginJ, bool dryRun) {
+	json_t *slugJ = json_object_get(pluginJ, "slug");
 	if (!slugJ)
 		return false;
 	std::string slug = json_string_value(slugJ);
@@ -233,8 +235,8 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 	}
 
 	downloadName = "";
-	return true;*/
-}
+	return true;
+}*/
 
 #ifdef ARCH_WEB
 #define WEB_DECL_PLUGIN(n) extern "C" void init_##n(rack::Plugin *plugin);
@@ -269,8 +271,9 @@ static void loadPlugins(std::string path) {
 #endif
 }
 
+#ifndef ARCH_WEB
 /** Returns 0 if successful */
-/*static int extractZipHandle(zip_t *za, const char *dir) {
+static int extractZipHandle(zip_t *za, const char *dir) {
 	int err;
 	for (int i = 0; i < zip_get_num_entries(za, 0); i++) {
 		zip_stat_t zs;
@@ -320,11 +323,11 @@ static void loadPlugins(std::string path) {
 		}
 	}
 	return 0;
-}*/
+}
 
 /** Returns 0 if successful */
 static int extractZip(const char *filename, const char *path) {
-/*	int err;
+	int err;
 	zip_t *za = zip_open(filename, 0, &err);
 	if (!za) {
 		warn("Could not open zip %s: error %d", filename, err);
@@ -335,12 +338,11 @@ static int extractZip(const char *filename, const char *path) {
 	});
 
 	err = extractZipHandle(za, path);
-	return err;*/
-	return 0;
+	return err;
 }
 
 static void extractPackages(std::string path) {
-/*	std::string message;
+	std::string message;
 
 	for (std::string packagePath : systemListEntries(path)) {
 		if (stringExtension(packagePath) != "zip")
@@ -359,8 +361,9 @@ static void extractPackages(std::string path) {
 	}
 	if (!message.empty()) {
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
-	}*/
+	}
 }
+#endif
 
 ////////////////////
 // public API
@@ -383,9 +386,9 @@ void pluginInit() {
 
 	// Load core
 	// This function is defined in core.cpp
-	Plugin *plugin = new Plugin();
-	init(plugin);
-	gPlugins.push_back(plugin);
+	Plugin *corePlugin = new Plugin();
+	init(corePlugin);
+	gPlugins.push_back(corePlugin);
 
 	// Get local plugins directory
 	std::string localPlugins = pluginPath();
@@ -401,7 +404,9 @@ void pluginInit() {
 #endif
 
 	// Extract packages and load plugins
+#ifndef ARCH_WEB
 	extractPackages(localPlugins);
+#endif
 	loadPlugins(localPlugins);
 }
 
@@ -424,8 +429,7 @@ void pluginDestroy() {
 }
 
 bool pluginSync(bool dryRun) {
-	return false;
-	if (gToken.empty())
+	/*if (gToken.empty())
 		return false;
 
 	bool available = false;
@@ -505,7 +509,8 @@ bool pluginSync(bool dryRun) {
 		isDownloading = false;
 	}
 
-	return available;
+	return available;*/
+	return false;
 }
 
 void pluginLogIn(std::string email, std::string password) {

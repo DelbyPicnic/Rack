@@ -48,12 +48,16 @@ struct AudioInterfaceIO2 : AudioIO {
 	}
 
 	void processStream(const float *input, float *output, int frames) override {
-
-		// engineWaitMT();
+#ifndef ARCH_WEB
+		engineWaitMT();
+		memcpy(output, buf, frames*2*sizeof(float));
+		bufPtr = buf;
+		engineStepMT(frames);
+#else		
 		bufPtr = output;
 		for (int i = 0; i < frames; i++)
 			engineStep();
-		// engineStepMT(frames);
+#endif
 	}
 
 	void onDeviceChange() override {
@@ -158,13 +162,9 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		audioWidget->onChange(e);
 		addChild(audioWidget);
 
+#ifdef ARCH_WEB
 		module->audioIO.setDevice(0, 0);
-	}
-
-	void step() override {
-		//static_cast<AudioInterface2*>(module)->audioIO.processAudio();
-
-		Widget::step();
+#endif
 	}
 
 	~AudioInterfaceWidget2() {

@@ -54,7 +54,7 @@ ifeq ($(ARCH), mac)
 	LDFLAGS += -stdlib=libc++ \
 		-lpthread -ldl -lz \
 		-framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -framework CoreAudio -framework CoreMIDI \
-		dep/lib/libglfw3.a dep/lib/libjansson.a dep/lib/libspeexdsp.a dep/lib/libzip.a dep/lib/librtaudio.a dep/lib/librtmidi.a
+		dep/lib/libglfw3.a dep/lib/libjansson.a dep/lib/libspeexdsp.a dep/lib/libzip.a dep/lib/librtaudio.a dep/lib/librtmidi.a dep/lib/libcrypto.a dep/lib/libssl.a dep/lib/libcurl.a
 	TARGET := Rack
 	BUNDLE := dist/$(TARGET).app
 endif
@@ -82,29 +82,32 @@ ifeq ($(ARCH), web)
 		-Ldep/lib -Wl,-Bstatic -lglfw3 -lopenal -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
 	LDFLAGS += -lGLESv2
 	TARGET := Rack.bc
+	TARGET_POST := Rack.js Rack2.js
 endif
 
 
-all: $(TARGET)
+all: $(TARGET) $(TARGET_POST)
+	@echo ---
+	@echo Rack built. Now type \"make run\".
+	@echo ---
+
 ifeq ($(ARCH), web)
+Rack.js: $(TARGET)
 	emcc Rack.bc \
 	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --preload-file plugins/$(k)/res) \
 	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
-	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
+	-s EXPORTED_FUNCTIONS="['_main','_main2','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
 	--preload-file res --preload-file template.vcv --emrun -O3 -o Rack.js -s USE_PTHREADS=1
-	
+
+Rack2.js: $(TARGET) Rack2.post.js Rack2.pre.js
 	emcc Rack.bc --memory-init-file 0 \
 	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc) \
-	-s EXPORTED_FUNCTIONS="['_initApp','_main','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
+	-s EXPORTED_FUNCTIONS="['_main','_main2','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
 	-s "MODULARIZE=1" -s EXPORT_NAME="'librack'" -s SINGLE_FILE=1 --emrun -O3 -o Rack2.js -s USE_PTHREADS=1 --pre-js Rack2.pre.js
 	
 	cat Rack2.post.js >>Rack2.js
 endif
 	
-	@echo ---
-	@echo Rack built. Now type \"make run\".
-	@echo ---
-
 PREREQS = cmake autoconf automake pkg-config libtool shtool jq
 ifeq ($(ARCH), lin)
 	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound2-dev zlib1g-dev

@@ -2,7 +2,6 @@
 #include "util/common.hpp"
 #include "bridge.hpp"
 #include "engine.hpp"
-#include <emscripten.h>
 
 
 namespace rack {
@@ -249,21 +248,17 @@ static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrame
 	audioIO->processStream((const float *) inputBuffer, (float *) outputBuffer, nFrames);
 	return 0;
 }
-#endif
-
+#else
 float buf[44100*10*2];
 AudioIO *audio = NULL;
 extern "C" void processAudioJS(int blockSize) {
 	// AudioIO *audio = (AudioIO*)self;
 	if (audio) {
 		audio->blockSize = blockSize;		
-		audio->processAudio();	
+		audio->processStream(NULL, buf, audio->blockSize);
 	}
 }
-
-void AudioIO::processAudio() {
-	processStream(NULL, buf, blockSize);
-}
+#endif
 
 void AudioIO::openStream() {
 	if (device < 0)
@@ -340,7 +335,8 @@ void AudioIO::openStream() {
 		this->sampleRate = rtAudio->getStreamSampleRate();
 		engineSetSampleRate(sampleRate);
 		onOpenStream();
-	} else if (driver == BRIDGE_DRIVER) {
+	}
+	else if (driver == BRIDGE_DRIVER) {
 		setChannels(BRIDGE_OUTPUTS, BRIDGE_INPUTS);
 		bridgeAudioSubscribe(device, this);
 	}

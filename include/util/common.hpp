@@ -12,6 +12,10 @@
 #include <condition_variable>
 #include <mutex>
 
+#ifdef ARCH_WEB
+#include <emscripten/emscripten.h>
+#endif
+
 ////////////////////
 // Handy macros
 ////////////////////

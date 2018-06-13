@@ -7,9 +7,6 @@
 #include <map>
 #include <algorithm>
 #include "osdialog.h"
-#ifdef ARCH_WEB
-#include "emscripten.h"
-#endif
 
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
@@ -471,7 +468,8 @@ void RackWidget::step() {
 
 void RackWidget::draw(NVGcontext *vg) {
 	// Rails
-	/*Rect bound = getViewport(Rect(Vec(), box.size));
+#ifndef ARCH_WEB
+	Rect bound = getViewport(Rect(Vec(), box.size));
 	Vec railsOrigin = bound.pos.div(RACK_GRID_SIZE).floor().mult(RACK_GRID_SIZE);
 	int railCount = (bound.size.y+bound.pos.y-railsOrigin.y) / RACK_GRID_HEIGHT;
 	if ((bound.pos.y-railsOrigin.y) > RACK_GRID_WIDTH)
@@ -488,7 +486,8 @@ void RackWidget::draw(NVGcontext *vg) {
 		nvgFill(vg);
 		nvgTranslate(vg, 0, RACK_GRID_HEIGHT);
 	}
-	nvgRestore(vg);*/
+	nvgRestore(vg);
+#endif
 
 	float zoom = 1./gRackScene->zoomWidget->zoom;
 	Vec pos = parent->parent->box.pos.neg().mult(zoom);

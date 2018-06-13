@@ -3,9 +3,6 @@
 #include "engine.hpp"
 #include "settings.hpp"
 #include "asset.hpp"
-#ifdef ARCH_WEB
-#include <emscripten.h>
-#endif
 
 namespace rack {
 

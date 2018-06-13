@@ -7,19 +7,18 @@
 #include "asset.hpp"
 #include "bridge.hpp"
 #include "osdialog.h"
-#ifdef ARCH_WEB
-#include "emscripten.h"
-#endif
 
 #include <unistd.h>
 
 
 using namespace rack;
 
-extern "C" void initApp() {
+extern "C" void main2() {
 	pluginInit();
 	engineInit();
+#ifndef ARCH_WEB
 	// bridgeInit();
+#endif
 	windowInit();
 	appInit();
 	settingsLoad(assetHidden("settings.json"));
@@ -46,16 +45,20 @@ extern "C" void initApp() {
 
 	engineStart();
 	windowRun();
-	// engineStop();
+#ifndef ARCH_WEB
+	engineStop();
 
-	// gRackWidget->savePatch(assetHidden("autosave.vcv"));
-	// settingsSave(assetHidden("settings.json"));
-	// appDestroy();
-	// windowDestroy();
-	// // bridgeDestroy();
-	// engineDestroy();
-	// pluginDestroy();
-	// loggerDestroy();
+	gRackWidget->savePatch(assetHidden("autosave.vcv"));
+	settingsSave(assetHidden("settings.json"));
+	appDestroy();
+	windowDestroy();
+#ifndef ARCH_WEB
+	// bridgeDestroy();
+#endif
+	engineDestroy();
+	pluginDestroy();
+	loggerDestroy();
+#endif
 }
 
 int main(int argc, char* argv[]) {
@@ -85,7 +88,7 @@ int main(int argc, char* argv[]) {
 	}
 
 #ifndef ARCH_WEB
-	initApp();
+	main2();
 #else
 	EM_ASM(
 	    FS.mkdir('/work');
@@ -94,10 +97,10 @@ int main(int argc, char* argv[]) {
 	    	if (navigator.requestMIDIAccess)
 		    	navigator.requestMIDIAccess().then(function(midiAccess) {
 		    		Module.midiAccess = midiAccess;
-		    		ccall('initApp', 'v');
+		    		ccall('main2', 'v');
 		    	}, function() {});
 	    	else
-	    		ccall('initApp', 'v');
+	    		ccall('main2', 'v');
 	    });
 	);
 

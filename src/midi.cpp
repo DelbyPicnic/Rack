@@ -1,8 +1,5 @@
 #include "midi.hpp"
 #include "bridge.hpp"
-#ifdef ARCH_WEB
-#include <emscripten.h>
-#endif
 
 namespace rack {
 
@@ -132,17 +129,7 @@ void MidiIO::fromJson(json_t *rootJ) {
 // MidiInput
 ////////////////////
 
-extern "C" void midiInputCallbackJS(MidiInput *midiInput, uint8_t cmd, uint8_t data1, uint8_t data2) {
-	// MidiInput *midiInput = (MidiInput*) userData;
-	if (!midiInput) return;
-	MidiMessage msg;
-	msg.cmd = cmd;
-	msg.data1 = data1;
-	msg.data2 = data2;
-
-	midiInput->onMessage(msg);
-}
-
+#ifndef ARCH_WEB
 static void midiInputCallback(double timeStamp, std::vector<unsigned char> *message, void *userData) {
 	if (!message) return;
 	if (!userData) return;
@@ -159,6 +146,18 @@ static void midiInputCallback(double timeStamp, std::vector<unsigned char> *mess
 
 	midiInput->onMessage(msg);
 }
+#else
+extern "C" void midiInputCallbackJS(MidiInput *midiInput, uint8_t cmd, uint8_t data1, uint8_t data2) {
+	// MidiInput *midiInput = (MidiInput*) userData;
+	if (!midiInput) return;
+	MidiMessage msg;
+	msg.cmd = cmd;
+	msg.data1 = data1;
+	msg.data2 = data2;
+
+	midiInput->onMessage(msg);
+}
+#endif
 
 MidiInput::MidiInput() {
 #ifndef ARCH_WEB

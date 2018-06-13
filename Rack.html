@@ -189,7 +189,7 @@
                 delete window.Atomics;
 
             // Not yet.
-            var useAudioWorklet = false; //(window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
+            var useAudioWorklet = (window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
 
             function startAudio(audio, addr, blockSize) {
                 if (useAudioWorklet) {
@@ -227,7 +227,7 @@
                             addr: addr,
                         });
 
-                        let oscillator = new OscillatorNode(Module.context);
+                        let oscillator = Module._osc = new OscillatorNode(Module.context);
                         Module.osc = oscillator;
                         oscillator.connect(Module.node);
                         Module.node.connect(Module.context.destination);
