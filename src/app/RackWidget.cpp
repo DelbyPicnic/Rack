@@ -85,7 +85,11 @@ void RackWidget::reset() {
 	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Clear your patch and start over?")) {
 		clear();
 		// Fails silently if file does not exist
+#ifndef ARCH_WEB
 		loadPatch(assetHidden("template.vcv"));
+#else
+		loadPatch(assetGlobal("template.vcv"));
+#endif
 		lastPath = "";
 	}
 }
@@ -452,6 +456,11 @@ void RackWidget::step() {
 	if (gGuiFrame % (30 * 60) == 0) {
 		savePatch(assetHidden("autosave.vcv"));
 		settingsSave(assetHidden("settings.json"));
+#ifdef ARCH_WEB
+		EM_ASM(
+		    FS.syncfs(false, function() {});
+		);
+#endif	
 	}
 
 	Widget::step();
@@ -459,6 +468,7 @@ void RackWidget::step() {
 
 void RackWidget::draw(NVGcontext *vg) {
 	// Rails
+#ifndef ARCH_WEB
 	Rect bound = getViewport(Rect(Vec(), box.size));
 	Vec railsOrigin = bound.pos.div(RACK_GRID_SIZE).floor().mult(RACK_GRID_SIZE);
 	int railCount = (bound.size.y+bound.pos.y-railsOrigin.y) / RACK_GRID_HEIGHT;
@@ -477,6 +487,7 @@ void RackWidget::draw(NVGcontext *vg) {
 		nvgTranslate(vg, 0, RACK_GRID_HEIGHT);
 	}
 	nvgRestore(vg);
+#endif
 
 	float zoom = 1./gRackScene->zoomWidget->zoom;
 	Vec pos = parent->parent->box.pos.neg().mult(zoom);

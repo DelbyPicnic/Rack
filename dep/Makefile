@@ -43,6 +43,12 @@ ifeq ($(ARCH), win)
 	openssl = bin/libssl-1_1-x64.dll
 endif
 
+ifeq ($(ARCH), web)
+	jansson = lib/libjansson.so
+	libspeexdsp = lib/libspeexdsp.so
+endif
+
+
 DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(mathlib)
 include $(RACK_DIR)/dep.mk
 

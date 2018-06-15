@@ -80,6 +80,10 @@ std::string assetLocal(std::string filename) {
 		dir += "/Documents";
 #endif
 
+#if ARCH_WEB
+	dir = "/work";
+#endif
+
 	return dir + "/" + filename;
 }
 
@@ -87,6 +91,7 @@ std::string assetLocal(std::string filename) {
 std::string assetHidden(std::string filename) {
 	std::string dir;
 
+#ifndef ARCH_WEB
 #if RELEASE
 #if ARCH_MAC
 	// Use Application Support folder
@@ -123,6 +128,11 @@ std::string assetHidden(std::string filename) {
 #else
 	dir = ".";
 #endif
+
+#else
+	dir = "/work";
+#endif
+
 
 	return dir + "/" + filename;
 }

@@ -16,7 +16,9 @@
 #include <stdexcept>
 #include <algorithm>
 
+#ifndef ARCH_WEB
 #include <zip.h>
+#endif
 #include <jansson.h>
 
 #if ARCH_WIN
@@ -57,6 +59,23 @@ void Plugin::addModel(Model *model) {
 ////////////////////
 // private API
 ////////////////////
+
+static void replaceExisting(Plugin *plugin) {
+	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
+	info("%s",plugin->slug.c_str());
+	if (oldPlugin) {
+		for (Model *model : plugin->models) {
+			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
+				if (model->slug == (*it)->slug) {
+					it = oldPlugin->models.erase(it);
+					oldPlugin->models.insert(it, model);
+					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", plugin->path.c_str(), model->slug.c_str(), plugin->slug.c_str());
+				} else
+					it++;
+			}
+		}
+	}	
+}
 
 static bool loadPlugin(std::string path) {
 	std::string libraryFilename;
@@ -111,20 +130,8 @@ static bool loadPlugin(std::string path) {
 	plugin->handle = handle;
 	initCallback(plugin);
 
-	// Reject plugin if slug already exists
-	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
-	if (oldPlugin) {
-		for (Model *model : plugin->models) {
-			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
-				if (model->slug == (*it)->slug) {
-					it = oldPlugin->models.erase(it);
-					oldPlugin->models.insert(it, model);
-					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", libraryFilename.c_str(), model->slug.c_str(), plugin->slug.c_str());
-				} else
-					it++;
-			}
-		}
-	}
+	// Replace already registered modules
+	replaceExisting(plugin);
 
 	// Add plugin to list
 	gPlugins.push_back(plugin);
@@ -133,7 +140,7 @@ static bool loadPlugin(std::string path) {
 	return true;
 }
 
-static bool syncPlugin(json_t *pluginJ, bool dryRun) {
+/*static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 	json_t *slugJ = json_object_get(pluginJ, "slug");
 	if (!slugJ)
 		return false;
@@ -225,9 +232,18 @@ static bool syncPlugin(json_t *pluginJ, bool dryRun) {
 
 	downloadName = "";
 	return true;
-}
+}*/
+
+#ifdef ARCH_WEB
+#define WEB_DECL_PLUGIN(n) extern "C" void init_##n(rack::Plugin *plugin);
+#define WEB_LOAD_PLUGIN(n) { Plugin *plugin = new Plugin(); plugin->path = "plugins/" # n; init_##n(plugin); replaceExisting(plugin); gPlugins.push_back(plugin); }
+#define WEB_PLUGIN WEB_DECL_PLUGIN
+WEB_PLUGINS
+#undef WEB_PLUGIN
+#endif
 
 static void loadPlugins(std::string path) {
+#ifndef ARCH_WEB
 	std::string message;
 	
 	auto entries = systemListEntries(path);
@@ -244,8 +260,14 @@ static void loadPlugins(std::string path) {
 		message += "See log for details.";
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
 	}
+#else
+#define WEB_PLUGIN WEB_LOAD_PLUGIN
+	WEB_PLUGINS
+#undef WEB_PLUGIN
+#endif
 }
 
+#ifndef ARCH_WEB
 /** Returns 0 if successful */
 static int extractZipHandle(zip_t *za, const char *dir) {
 	int err;
@@ -337,6 +359,7 @@ static void extractPackages(std::string path) {
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
 	}
 }
+#endif
 
 ////////////////////
 // public API
@@ -377,7 +400,9 @@ void pluginInit() {
 #endif
 
 	// Extract packages and load plugins
+#ifndef ARCH_WEB
 	extractPackages(localPlugins);
+#endif
 	loadPlugins(localPlugins);
 }
 
@@ -400,8 +425,7 @@ void pluginDestroy() {
 }
 
 bool pluginSync(bool dryRun) {
-	return false;
-	if (gToken.empty())
+	/*if (gToken.empty())
 		return false;
 
 	bool available = false;
@@ -481,11 +505,12 @@ bool pluginSync(bool dryRun) {
 		isDownloading = false;
 	}
 
-	return available;
+	return available;*/
+	return false;
 }
 
 void pluginLogIn(std::string email, std::string password) {
-	json_t *reqJ = json_object();
+/*	json_t *reqJ = json_object();
 	json_object_set(reqJ, "email", json_string(email.c_str()));
 	json_object_set(reqJ, "password", json_string(password.c_str()));
 	json_t *resJ = requestJson(METHOD_POST, gApiHost + "/token", reqJ);
@@ -506,7 +531,7 @@ void pluginLogIn(std::string email, std::string password) {
 			}
 		}
 		json_decref(resJ);
-	}
+	}*/
 }
 
 void pluginLogOut() {

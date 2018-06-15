@@ -1,0 +1,26 @@
+{
+  "version": "0.6.0",
+  "modules": [
+    {
+      "plugin": "Core",
+      "version": "0.6.0",
+      "model": "AudioInterface",
+      "pos": [
+        50,
+        0
+      ],
+      "params": [],
+      "data": {
+        "audio": {
+          "driver": 0,
+          "deviceName": "Default",
+          "offset": 0,
+          "maxChannels": 2,
+          "sampleRate": 44100,
+          "blockSize": 1024
+        }
+      }
+    }
+  ],
+  "wires": []
+}

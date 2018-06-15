@@ -13,6 +13,53 @@
 
 using namespace rack;
 
+extern "C" void main2() {
+	pluginInit();
+	engineInit();
+#ifndef ARCH_WEB
+	// bridgeInit();
+#endif
+	windowInit();
+	appInit();
+	settingsLoad(assetHidden("settings.json"));
+	std::string oldLastPath = gRackWidget->lastPath;
+
+#ifndef ARCH_WEB
+	// To prevent launch crashes, if Rack crashes between now and 15 seconds from now, the "skipAutosaveOnLaunch" property will remain in settings.json, so that in the next launch, the broken autosave will not be loaded.
+	bool oldSkipAutosaveOnLaunch = skipAutosaveOnLaunch;
+	skipAutosaveOnLaunch = true;
+	settingsSave(assetHidden("settings.json"));
+	skipAutosaveOnLaunch = false;
+	if (oldSkipAutosaveOnLaunch && osdialog_message(OSDIALOG_INFO, OSDIALOG_YES_NO, "Rack has recovered from a crash, possibly caused by a faulty module in your patch. Would you like to clear your patch and start over?")) {
+		// Do nothing. Empty patch is already loaded.
+	}
+	else {
+		gRackWidget->loadPatch(assetHidden("autosave.vcv"));
+	}
+#else
+	gRackWidget->loadPatch(assetHidden("autosave.vcv"));
+	if (!gModules.size())
+		gRackWidget->loadPatch(assetGlobal("template.vcv"));
+#endif
+	gRackWidget->lastPath = oldLastPath;
+
+	engineStart();
+	windowRun();
+#ifndef ARCH_WEB
+	engineStop();
+
+	gRackWidget->savePatch(assetHidden("autosave.vcv"));
+	settingsSave(assetHidden("settings.json"));
+	appDestroy();
+	windowDestroy();
+#ifndef ARCH_WEB
+	// bridgeDestroy();
+#endif
+	engineDestroy();
+	pluginDestroy();
+	loggerDestroy();
+#endif
+}
 
 int main(int argc, char* argv[]) {
 	randomInit();
@@ -29,6 +76,7 @@ int main(int argc, char* argv[]) {
 			free(path);
 	    }
 #endif
+
 		char *cwd = getcwd(NULL, 0);
 		info("Current working directory: %s", cwd);
 		free(cwd);
@@ -39,39 +87,25 @@ int main(int argc, char* argv[]) {
 		info("Plugins directory: %s", pluginPath().c_str());		
 	}
 
-	pluginInit();
-	engineInit();
-	// bridgeInit();
-	windowInit();
-	appInit();
-	settingsLoad(assetHidden("settings.json"));
-	std::string oldLastPath = gRackWidget->lastPath;
+#ifndef ARCH_WEB
+	main2();
+#else
+	EM_ASM(
+	    FS.mkdir('/work');
+	    FS.mount(IDBFS, {}, '/work');
+	    FS.syncfs(true, function() {
+	    	if (navigator.requestMIDIAccess)
+		    	navigator.requestMIDIAccess().then(function(midiAccess) {
+		    		Module.midiAccess = midiAccess;
+		    		ccall('main2', 'v');
+		    	}, function() {});
+	    	else
+	    		ccall('main2', 'v');
+	    });
+	);
 
-	// To prevent launch crashes, if Rack crashes between now and 15 seconds from now, the "skipAutosaveOnLaunch" property will remain in settings.json, so that in the next launch, the broken autosave will not be loaded.
-	bool oldSkipAutosaveOnLaunch = skipAutosaveOnLaunch;
-	skipAutosaveOnLaunch = true;
-	settingsSave(assetHidden("settings.json"));
-	skipAutosaveOnLaunch = false;
-	if (oldSkipAutosaveOnLaunch && osdialog_message(OSDIALOG_INFO, OSDIALOG_YES_NO, "Rack has recovered from a crash, possibly caused by a faulty module in your patch. Would you like to clear your patch and start over?")) {
-		// Do nothing. Empty patch is already loaded.
-	}
-	else {
-		gRackWidget->loadPatch(assetHidden("autosave.vcv"));
-	}
-	gRackWidget->lastPath = oldLastPath;
-
-	engineStart();
-	windowRun();
-	engineStop();
-
-	gRackWidget->savePatch(assetHidden("autosave.vcv"));
-	settingsSave(assetHidden("settings.json"));
-	appDestroy();
-	windowDestroy();
-	// bridgeDestroy();
-	engineDestroy();
-	pluginDestroy();
-	loggerDestroy();
+	emscripten_exit_with_live_runtime();
+#endif
 
 	return 0;
 }

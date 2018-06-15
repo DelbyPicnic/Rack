@@ -3,11 +3,14 @@
 #include "bridge.hpp"
 #include "engine.hpp"
 
+
 namespace rack {
 
 
 AudioIO::AudioIO() {
+#ifndef ARCH_WEB
 	setDriver(RtAudio::UNSPECIFIED);
+#endif
 }
 
 AudioIO::~AudioIO() {
@@ -15,17 +18,20 @@ AudioIO::~AudioIO() {
 }
 
 std::vector<int> AudioIO::getDrivers() {
+	std::vector<int> drivers;
+#ifndef ARCH_WEB
 	std::vector<RtAudio::Api> apis;
 	RtAudio::getCompiledApi(apis);
-	std::vector<int> drivers;
 	for (RtAudio::Api api : apis)
 		drivers.push_back((int) api);
 	// Add fake Bridge driver
 	// drivers.push_back(BRIDGE_DRIVER);
+#endif
 	return drivers;
 }
 
 std::string AudioIO::getDriverName(int driver) {
+#ifndef ARCH_WEB
 	switch (driver) {
 		case RtAudio::UNSPECIFIED: return "Unspecified";
 		case RtAudio::LINUX_ALSA: return "ALSA";
@@ -40,9 +46,13 @@ std::string AudioIO::getDriverName(int driver) {
 		case BRIDGE_DRIVER: return "Bridge";
 		default: return "Unknown";
 	}
+#else
+	return "Web Audio";
+#endif
 }
 
 void AudioIO::setDriver(int driver) {
+#ifndef ARCH_WEB
 	// Close device
 	setDevice(-1, 0);
 
@@ -61,9 +71,11 @@ void AudioIO::setDriver(int driver) {
 	else if (driver == BRIDGE_DRIVER) {
 		this->driver = BRIDGE_DRIVER;
 	}
+#endif
 }
 
 int AudioIO::getDeviceCount() {
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		return rtAudio->getDeviceCount();
 	}
@@ -71,8 +83,12 @@ int AudioIO::getDeviceCount() {
 		return BRIDGE_NUM_PORTS;
 	}
 	return 0;
+#else
+	return 1;
+#endif
 }
 
+#ifndef ARCH_WEB
 bool AudioIO::getDeviceInfo(int device, RtAudio::DeviceInfo *deviceInfo) {
 	if (!deviceInfo)
 		return false;
@@ -95,8 +111,10 @@ bool AudioIO::getDeviceInfo(int device, RtAudio::DeviceInfo *deviceInfo) {
 
 	return false;
 }
+#endif
 
 int AudioIO::getDeviceChannels(int device) {
+#ifndef ARCH_WEB
 	if (device < 0)
 		return 0;
 
@@ -109,12 +127,16 @@ int AudioIO::getDeviceChannels(int device) {
 		return max(BRIDGE_OUTPUTS, BRIDGE_INPUTS);
 	}
 	return 0;
+#else
+	return 2;
+#endif
 }
 
 std::string AudioIO::getDeviceName(int device) {
 	if (device < 0)
 		return "";
 
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		RtAudio::DeviceInfo deviceInfo;
 		if (getDeviceInfo(device, &deviceInfo))
@@ -124,12 +146,16 @@ std::string AudioIO::getDeviceName(int device) {
 		return stringf("%d", device + 1);
 	}
 	return "";
+#else
+	return "Default";
+#endif
 }
 
 std::string AudioIO::getDeviceDetail(int device, int offset) {
 	if (device < 0)
 		return "";
 
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		RtAudio::DeviceInfo deviceInfo;
 		if (getDeviceInfo(device, &deviceInfo)) {
@@ -148,6 +174,9 @@ std::string AudioIO::getDeviceDetail(int device, int offset) {
 		return stringf("Port %d", device + 1);
 	}
 	return "";
+#else
+	return "Default";
+#endif
 }
 
 void AudioIO::setDevice(int device, int offset) {
@@ -159,6 +188,7 @@ void AudioIO::setDevice(int device, int offset) {
 }
 
 std::vector<int> AudioIO::getSampleRates() {
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		try {
 			RtAudio::DeviceInfo deviceInfo = rtAudio->getDeviceInfo(device);
@@ -169,6 +199,8 @@ std::vector<int> AudioIO::getSampleRates() {
 			warn("Failed to query RtAudio device: %s", e.what());
 		}
 	}
+#endif
+
 	return {};
 }
 
@@ -182,10 +214,14 @@ void AudioIO::setSampleRate(int sampleRate) {
 }
 
 std::vector<int> AudioIO::getBlockSizes() {
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		return {/*64,*/ 128, 256, 512, 1024, 2048, 4096};
 	}
 	return {};
+#else
+	return {512, 1024, 2048, 4096};
+#endif
 }
 
 void AudioIO::setBlockSize(int blockSize) {
@@ -203,17 +239,30 @@ void AudioIO::setChannels(int numOutputs, int numInputs) {
 }
 
 
+#ifndef ARCH_WEB
 static int rtCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
 	AudioIO *audioIO = (AudioIO*) userData;
 	assert(audioIO);
 	audioIO->processStream((const float *) inputBuffer, (float *) outputBuffer, nFrames);
 	return 0;
 }
+#else
+float buf[44100*10*2];
+AudioIO *audio = NULL;
+extern "C" void processAudioJS(int blockSize) {
+	// AudioIO *audio = (AudioIO*)self;
+	if (audio) {
+		audio->blockSize = blockSize;		
+		audio->processStream(NULL, buf, audio->blockSize);
+	}
+}
+#endif
 
 void AudioIO::openStream() {
 	if (device < 0)
 		return;
 
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		// Open new device
 		try {
@@ -258,6 +307,8 @@ void AudioIO::openStream() {
 			}
 		}
 
+		blockSize = max(blockSize, getBlockSizes()[0]);
+
 		try {
 			info("Opening audio RtAudio device %d with %d in %d out", device, numInputs, numOutputs);
 			rtAudio->openStream(
@@ -289,11 +340,30 @@ void AudioIO::openStream() {
 		setChannels(BRIDGE_OUTPUTS, BRIDGE_INPUTS);
 		bridgeAudioSubscribe(device, this);
 	}
+#else
+	audio = this;
+	blockSize = max(blockSize, getBlockSizes()[0])
+
+	EM_ASM({
+		startAudio($0, $1, $2);
+	}, this, buf, blockSize);
+
+	sampleRate = EM_ASM_INT({
+		return getAudioSampleRate();
+	});
+	blockSize = EM_ASM_INT({
+		return getAudioBlockSize();
+	});
+	
+	setChannels(2, 0);
+	engineSetSampleRate(sampleRate);
+#endif
 }
 
 void AudioIO::closeStream() {
 	setChannels(0, 0);
 
+#ifndef ARCH_WEB
 	if (rtAudio) {
 		if (rtAudio->isStreamRunning()) {
 			info("Stopping RtAudio stream %d", device);
@@ -318,6 +388,11 @@ void AudioIO::closeStream() {
 	else if (driver == BRIDGE_DRIVER) {
 		bridgeAudioUnsubscribe(device, this);
 	}
+#else
+	EM_ASM({
+		stopAudio();
+	});
+#endif
 
 	onCloseStream();
 }

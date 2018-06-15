@@ -91,6 +91,7 @@ static void settingsFromJson(json_t *rootJ) {
 	if (tokenJ)
 		gToken = json_string_value(tokenJ);
 
+#ifndef ARCH_WEB
 	// windowSize
 	json_t *windowSizeJ = json_object_get(rootJ, "windowSize");
 	if (windowSizeJ) {
@@ -106,6 +107,7 @@ static void settingsFromJson(json_t *rootJ) {
 		json_unpack(windowPosJ, "[F, F]", &x, &y);
 		windowSetWindowPos(Vec(x, y));
 	}
+#endif
 
 	// opacity
 	json_t *opacityJ = json_object_get(rootJ, "wireOpacity");

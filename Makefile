@@ -70,12 +70,44 @@ ifeq ($(ARCH), win)
 	OBJECTS += Rack.res
 endif
 
+ifeq ($(ARCH), web)
+	WEB_PLUGINS := Fundamental zFundamental AS AudibleInstruments Befaco cf ImpromptuModular Southpole LindenbergResearch PvC SynthKit SonusModular
+ 	FLAGS += -DWEB_PLUGINS="$(foreach k,$(WEB_PLUGINS),WEB_PLUGIN($k))"
+ 	FLAGS += -s USE_PTHREADS=1
 
-all: $(TARGET)
+	SOURCES += dep/osdialog/osdialog_web.c
+	LDFLAGS += -rdynamic \
+		-lpthread -ldl -lz -lasound -lX11 \
+		$(shell pkg-config --libs gtk+-2.0) \
+		-Ldep/lib -Wl,-Bstatic -lglfw3 -lopenal -ljansson -lspeexdsp -lzip -lz -lrtmidi -lrtaudio -lcurl -lssl -lcrypto -Wl,-Bdynamic
+	LDFLAGS += -lGLESv2
+	TARGET := Rack.bc
+	TARGET_POST := Rack.js Rack2.js
+endif
+
+
+all: $(TARGET) $(TARGET_POST)
 	@echo ---
 	@echo Rack built. Now type \"make run\".
 	@echo ---
 
+ifeq ($(ARCH), web)
+Rack.js: $(TARGET)
+	emcc Rack.bc \
+	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc --preload-file plugins/$(k)/res) \
+	dep/lib/libjansson.a dep/lib/libspeexdsp.a \
+	-s EXPORTED_FUNCTIONS="['_main','_main2','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
+	--preload-file res --preload-file template.vcv --emrun -O3 -o Rack.js -s USE_PTHREADS=1
+
+Rack2.js: $(TARGET) Rack2.post.js Rack2.pre.js
+	emcc Rack.bc --memory-init-file 0 \
+	$(foreach k,$(WEB_PLUGINS),plugins/$(k)/plugin-fix.bc) \
+	-s EXPORTED_FUNCTIONS="['_main','_main2','_midiInputCallbackJS','_processAudioJS']" -s TOTAL_MEMORY=256MB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=0 -s WASM=0 \
+	-s "MODULARIZE=1" -s EXPORT_NAME="'librack'" -s SINGLE_FILE=1 --emrun -O3 -o Rack2.js -s USE_PTHREADS=1 --pre-js Rack2.pre.js
+	
+	cat Rack2.post.js >>Rack2.js
+endif
+	
 PREREQS = cmake autoconf automake pkg-config libtool shtool jq
 ifeq ($(ARCH), lin)
 	PREREQS += libgtk2.0-dev libgles2-mesa-dev libasound2-dev zlib1g-dev
@@ -126,15 +158,18 @@ dep:
 	@echo Dependencies built. Now type \"make\".
 	@echo ---
 
-run: $(TARGET)
+run: all
 ifeq ($(ARCH), lin)
-	LD_LIBRARY_PATH=dep/lib ./$<
+	LD_LIBRARY_PATH=dep/lib ./$(TARGET)
 endif
 ifeq ($(ARCH), mac)
-	DYLD_FALLBACK_LIBRARY_PATH=dep/lib ./$<
+	DYLD_FALLBACK_LIBRARY_PATH=dep/lib ./$(TARGET)
 endif
 ifeq ($(ARCH), win)
-	env PATH="$(PATH)":dep/bin ./$<
+	env PATH="$(PATH)":dep/bin ./$(TARGET)
+endif
+ifeq ($(ARCH), web)
+	emrun Rack.html
 endif
 
 debug: $(TARGET)

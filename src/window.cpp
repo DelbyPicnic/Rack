@@ -8,7 +8,7 @@
 
 #include "osdialog.h"
 
-#if (defined(__arm__) || defined(__aarch64__))
+#if (defined(__arm__) || defined(__aarch64__) || defined(ARCH_WEB))
 #define NANOVG_GLES2_IMPLEMENTATION 1
 #else
 #define NANOVG_GL2_IMPLEMENTATION 1
@@ -32,6 +32,18 @@
 	#include <ApplicationServices/ApplicationServices.h>
 #endif
 
+#ifdef ARCH_WEB
+GLFWAPI void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float* yscale) {
+	double scale = EM_ASM_INT({
+        return window.devicePixelRatio;
+    });
+
+    if (xscale)
+    	*xscale = scale;
+    if (yscale)
+    	*yscale = scale;
+}
+#endif
 
 namespace rack {
 
@@ -373,10 +385,15 @@ void windowInit() {
 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	int w = mode->width, h = mode->height;
-#else
+#elif !defined(ARCH_WEB)
 	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+
 	GLFWmonitor *monitor = NULL;
 	int w = 800, h = 600;
+#else
+	int w, h, fs;
+	emscripten_get_canvas_size(&w, &h, &fs);
+	GLFWmonitor *monitor = NULL;
 #endif	
 
 	lastWindowTitle = gApplicationName + " " + gApplicationVersion;
@@ -458,6 +475,27 @@ void windowDestroy() {
 	glfwTerminate();
 }
 
+#ifdef ARCH_WEB
+static void webLoop() {
+	gGuiFrame++;
+
+	// Poll events
+	glfwPollEvents();
+	double startTime = glfwGetTime();
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(gWindow, &xpos, &ypos);
+		cursorPosCallback(gWindow, xpos, ypos);
+	}
+	mouseButtonStickyPop();
+
+	// Step scene
+	gScene->step();
+
+	renderGui();	
+}
+#endif
+
 void windowRun() {
 	assert(gWindow);
 	gGuiFrame = 0;
@@ -466,6 +504,7 @@ void windowRun() {
 	glfwGetWindowSize(gWindow, &windowWidth, &windowHeight);
 	windowSizeCallback(gWindow, windowWidth, windowHeight);
 
+#ifndef ARCH_WEB
 #if (defined(__arm__) || defined(__aarch64__))
 	const double fps = 30.;
 #else
@@ -521,6 +560,9 @@ void windowRun() {
 
 		wait = std::max(0., 1./fps - (glfwGetTime()-startTime));
 	}
+#else
+	emscripten_set_main_loop(webLoop, 0, 0);
+#endif
 }
 
 void windowClose() {
@@ -688,7 +730,7 @@ std::shared_ptr<Image> Image::load(const std::string &filename) {
 
 SVG::SVG(const std::string &filename) {
 	image = 0;
-	
+
 	NSVGimage *handle = nsvgParseFromFile(filename.c_str(), "px", SVG_DPI);
 	if (handle) {
 		info("Loaded SVG %s", filename.c_str());

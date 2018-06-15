@@ -9,10 +9,12 @@
 #include "dsp/samplerate.hpp"
 #include "dsp/ringbuffer.hpp"
 
+#ifndef ARCH_WEB
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-override"
 #include <RtAudio.h>
 #pragma GCC diagnostic pop
+#endif
 
 
 #define AUDIO_OUTPUTS 0
@@ -46,10 +48,16 @@ struct AudioInterfaceIO2 : AudioIO {
 	}
 
 	void processStream(const float *input, float *output, int frames) override {
+#ifndef ARCH_WEB
 		engineWaitMT();
 		memcpy(output, buf, frames*2*sizeof(float));
 		bufPtr = buf;
 		engineStepMT(frames);
+#else		
+		bufPtr = output;
+		for (int i = 0; i < frames; i++)
+			engineStep();
+#endif
 	}
 
 	void onDeviceChange() override {
@@ -153,6 +161,10 @@ struct AudioInterfaceWidget2 : ModuleWidget {
 		EventChange e;
 		audioWidget->onChange(e);
 		addChild(audioWidget);
+
+#ifdef ARCH_WEB
+		module->audioIO.setDevice(0, 0);
+#endif
 	}
 
 	~AudioInterfaceWidget2() {
