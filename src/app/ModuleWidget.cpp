@@ -264,7 +264,7 @@ void ModuleWidget::onMouseDown(EventMouseDown &e) {
 	if (e.consumed)
 		return;
 
-	if (e.button == 1) {
+	if (e.button == 1 || gForceRMB) {
 		createContextMenu();
 	}
 	e.consumed = true;

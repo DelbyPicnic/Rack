@@ -35,6 +35,9 @@ extern bool gAllowCursorLock;
 extern int gGuiFrame;
 extern Vec gMousePos;
 
+#ifdef TOUCH
+extern bool gForceRMB;
+#endif
 
 void windowInit();
 void windowDestroy();

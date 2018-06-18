@@ -60,6 +60,10 @@ bool gAllowCursorLock = true;
 int gGuiFrame;
 Vec gMousePos;
 
+#ifdef TOUCH
+bool gForceRMB;
+#endif
+
 std::string lastWindowTitle;
 
 

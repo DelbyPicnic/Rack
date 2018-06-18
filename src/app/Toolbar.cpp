@@ -238,6 +238,20 @@ Toolbar::Toolbar() {
 	addModuleButton->box.size.x = 100;
 	layout->addChild(addModuleButton);
 
+#ifdef TOUCH
+	struct RMBButton : Button {
+		void onAction(EventAction &e) override {
+			gForceRMB = !gForceRMB;
+			text = gForceRMB ? "RMB" : "LMB";
+		}
+	};
+
+	auto rmbButton = new RMBButton();
+	rmbButton->text = "LMB";
+	rmbButton->box.size.x = BND_WIDGET_HEIGHT*2.5;
+	layout->addChild(rmbButton);
+#endif
+
 /*
 	cpuUsageButton = new RadioButton();
 	cpuUsageButton->box.size.x = 100;
