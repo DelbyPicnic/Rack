@@ -133,6 +133,10 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 			}
 		}
 		gTempWidget = NULL;
+
+#ifdef TOUCH
+		gForceRMB = false;
+#endif		
 	}
 	else if (action == GLFW_RELEASE) {
 		// onMouseUp
@@ -145,8 +149,9 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 			gTempWidget = e.target;
 		}
 
-		if (button == GLFW_MOUSE_BUTTON_LEFT) {
-			if (gDraggedWidget) {
+		bool isMenuItem = dynamic_cast<MenuItem*>(gTempWidget);
+		if (button == GLFW_MOUSE_BUTTON_LEFT || isMenuItem) {
+			if (gDraggedWidget || isMenuItem) {
 				// onDragDrop
 				EventDragDrop e;
 				e.origin = gDraggedWidget;
