@@ -59,10 +59,7 @@ float gWindowRatio = 1.0;
 bool gAllowCursorLock = true;
 int gGuiFrame;
 Vec gMousePos;
-
-#ifdef TOUCH
 bool gForceRMB;
-#endif
 
 std::string lastWindowTitle;
 
