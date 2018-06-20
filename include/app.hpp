@@ -504,9 +504,12 @@ struct Toolbar : OpaqueWidget {
 	Slider *wireTensionSlider;
 	Slider *zoomSlider;
 	RadioButton *cpuUsageButton;
+	SequentialLayout *layoutLeft;
+	SequentialLayout *layoutRight;
 
 	Toolbar();
 	void draw(NVGcontext *vg) override;
+	void onResize() override;
 };
 
 struct PluginManagerWidget : VirtualWidget {
