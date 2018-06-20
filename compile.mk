@@ -54,6 +54,7 @@ CXXFLAGS += $(FLAGS)
 
 # Derive object files from sources and place them before user-defined objects
 SOURCE_OBJECTS += $(patsubst %, build/%.o, $(SOURCES))
+SOURCE_OBJECTS += $(patsubst %, build/%.bin.o, $(BINARIES))
 DEPENDENCIES := $(patsubst %, build/%.d, $(SOURCES))
 
 
@@ -80,3 +81,7 @@ build/%.cc.o: %.cc
 build/%.m.o: %.m
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+build/%.bin.o: %
+	@mkdir -p $(@D)
+	xxd -i $< | $(CC) $(MAC_SDK_FLAGS) -c -o $@ -xc -

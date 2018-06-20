@@ -59,6 +59,24 @@ Example:
 #define DEPRECATED __attribute__ ((deprecated))
 
 
+/** References binary files compiled into the program.
+For example, to include a file "Test.dat" directly into your program binary, add
+	BINARIES += Test.dat
+to your Makefile and declare
+	BINARY(Test_dat);
+at the root of a .c or .cpp source file. Note that special characters are replaced with "_". Then use
+	BINARY_START(Test_dat)
+	BINARY_END(Test_dat)
+to reference the data beginning and end as a void* array and
+	BINARY_SIZE(Test_dat)
+to get its size in bytes.
+*/
+#define BINARY(sym) extern unsigned char sym[]; extern unsigned int sym##_len
+#define BINARY_START(sym) ((void*) sym)
+#define BINARY_END(sym) ((void*) sym + sym##_len)
+#define BINARY_SIZE(sym) (sym##_len)
+
+
 #include "util/math.hpp"
 
 
