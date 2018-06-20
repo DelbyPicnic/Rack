@@ -283,7 +283,9 @@ void Toolbar::draw(NVGcontext *vg) {
 }
 
 void Toolbar::onResize() {
+#ifdef TOUCH
 	layoutRight->box.size.x = box.size.x;
+#endif
 }
 
 } // namespace rack
