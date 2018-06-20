@@ -6,6 +6,10 @@
 #include "settings.hpp"
 #include "asset.hpp"
 #include "bridge.hpp"
+#include "midi.hpp"
+#include "rtmidi.hpp"
+#include "keyboard.hpp"
+#include "gamepad.hpp"
 #include "osdialog.h"
 
 #include <unistd.h>
@@ -16,9 +20,12 @@ using namespace rack;
 extern "C" void main2() {
 	pluginInit();
 	engineInit();
+	rtmidiInit();
 #ifndef ARCH_WEB
 	// bridgeInit();
+	// gamepadInit();
 #endif
+	keyboardInit();
 	windowInit();
 	appInit();
 	settingsLoad(assetHidden("settings.json"));

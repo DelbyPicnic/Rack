@@ -1,5 +1,7 @@
 #include "window.hpp"
 #include "app.hpp"
+#include "gamepad.hpp"
+#include "keyboard.hpp"
 #include "asset.hpp"
 #include "util/color.hpp"
 #include <map>
@@ -304,6 +306,18 @@ void charCallback(GLFWwindow *window, unsigned int codepoint) {
 }
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	// Keyboard MIDI driver
+	if (mods & GLFW_MOD_CAPS_LOCK) {
+		if (action == GLFW_PRESS) {
+			keyboardPress(key);
+		}
+		else if (action == GLFW_RELEASE) {
+			keyboardRelease(key);
+		}
+		
+		return;
+	}
+
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 		if (gFocusedWidget) {
 			// onKey
@@ -419,6 +433,8 @@ void windowInit() {
 	glfwSwapInterval(1);
 #endif
 
+	glfwSetInputMode(gWindow, GLFW_LOCK_KEY_MODS, 1);
+
 	glfwSetWindowSizeCallback(gWindow, windowSizeCallback);
 	glfwSetMouseButtonCallback(gWindow, mouseButtonStickyCallback);
 	// Call this ourselves, but on every frame instead of only when the mouse moves
@@ -529,6 +545,7 @@ void windowRun() {
 			cursorPosCallback(gWindow, xpos, ypos);
 		}
 		mouseButtonStickyPop();
+		// gamepadStep();
 
 		// Set window title
 		/*std::string windowTitle;

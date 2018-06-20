@@ -23,9 +23,9 @@ namespace rack {
 struct BridgeClientConnection;
 static BridgeClientConnection *connections[BRIDGE_NUM_PORTS] = {};
 static AudioIO *audioListeners[BRIDGE_NUM_PORTS] = {};
-static MidiInput *midiListeners[BRIDGE_NUM_PORTS] = {};
 static std::thread serverThread;
 static bool serverRunning = false;
+static BridgeMidiDriver *driver = NULL;
 
 
 struct BridgeClientConnection {
@@ -206,9 +206,9 @@ struct BridgeClientConnection {
 	void processMidi(MidiMessage message) {
 		if (!(0 <= port && port < BRIDGE_NUM_PORTS))
 			return;
-		if (!midiListeners[port])
+		if (!driver)
 			return;
-		midiListeners[port]->onMessage(message);
+		driver->devices[port].onMessage(message);
 	}
 
 	void setSampleRate(int sampleRate) {
@@ -372,31 +372,48 @@ static void serverRun() {
 	}
 }
 
+
+std::vector<int> BridgeMidiDriver::getInputDeviceIds() {
+	std::vector<int> deviceIds;
+	for (int i = 0; i < 16; i++) {
+		deviceIds.push_back(i);
+	}
+	return deviceIds;
+}
+
+std::string BridgeMidiDriver::getInputDeviceName(int deviceId) {
+	if (deviceId < 0)
+		return "";
+	return stringf("Port %d", deviceId + 1);
+}
+
+MidiInputDevice *BridgeMidiDriver::subscribeInputDevice(int deviceId, MidiInput *midiInput) {
+	if (!(0 <= deviceId && deviceId < 16))
+		return NULL;
+
+	devices[deviceId].subscribe(midiInput);
+	return &devices[deviceId];
+}
+
+void BridgeMidiDriver::unsubscribeInputDevice(int deviceId, MidiInput *midiInput) {
+	if (!(0 <= deviceId && deviceId < 16))
+		return;
+
+	devices[deviceId].unsubscribe(midiInput);
+}
+
+
 void bridgeInit() {
 	serverRunning = true;
 	serverThread = std::thread(serverRun);
+
+	driver = new BridgeMidiDriver();
+	midiDriverAdd(BRIDGE_DRIVER, driver);
 }
 
 void bridgeDestroy() {
 	serverRunning = false;
 	serverThread.join();
-}
-
-void bridgeMidiSubscribe(int port, MidiInput *midi) {
-	if (!(0 <= port && port < BRIDGE_NUM_PORTS))
-		return;
-	// Check if a Midi is already subscribed on the port
-	if (midiListeners[port])
-		return;
-	midiListeners[port] = midi;
-}
-
-void bridgeMidiUnsubscribe(int port, MidiInput *midi) {
-	if (!(0 <= port && port < BRIDGE_NUM_PORTS))
-		return;
-	if (midiListeners[port] != midi)
-		return;
-	midiListeners[port] = NULL;
 }
 
 void bridgeAudioSubscribe(int port, AudioIO *audio) {
