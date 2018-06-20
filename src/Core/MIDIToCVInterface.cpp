@@ -124,7 +124,6 @@ struct MIDIToCVInterface : Module {
 		if (!heldNotes.empty()) {
 			lastNote = heldNotes[heldNotes.size() - 1];
 			gate = true;
-			retriggerPulse.trigger(1e-3);
 		}
 		else {
 			gate = false;
@@ -233,6 +232,7 @@ struct MIDIToCVInterface : Module {
 					clockPulses[1].trigger(1e-3);
 				}
 				if (++clock >= (24*16*16)) {
+					// Avoid overflowing the integer
 					clock = 0;
 				}
 			} break;
@@ -248,6 +248,8 @@ struct MIDIToCVInterface : Module {
 			// Stop
 			case 0xc: {
 				stopPulse.trigger(1e-3);
+				// Reset timing
+				clock = 0;
 			} break;
 			default: break;
 		}
@@ -275,7 +277,7 @@ struct MIDIToCVInterfaceWidget : ModuleWidget {
 		addOutput(Port::create<PJ301MPort>(mm2px(Vec(16.214, 108.144)), Port::OUTPUT, module, MIDIToCVInterface::CONTINUE_OUTPUT));
 
 		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.8143, 60.1445)), Port::OUTPUT, module, MIDIToCVInterface::PITCH_OUTPUT));
-		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.8143, 76.1449)), Port::OUTPUT, module, MIDIToCVInterface::MOD_OUTPUT));		
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.8143, 76.1449)), Port::OUTPUT, module, MIDIToCVInterface::MOD_OUTPUT));
 		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.8143, 92.1439)), Port::OUTPUT, module, MIDIToCVInterface::CLOCK_1_OUTPUT));
 		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.8143, 108.144)), Port::OUTPUT, module, MIDIToCVInterface::CLOCK_2_OUTPUT));
 

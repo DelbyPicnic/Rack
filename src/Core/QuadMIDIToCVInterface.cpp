@@ -27,15 +27,13 @@ struct QuadMIDIToCVInterface : Module {
 
 	enum PolyMode {
 		ROTATE_MODE,
-		// Added REUSE option that reuses a channel when receiving the same note.
-		// Good when using sustain pedal so it doesn't "stack" unisons ... not sure this is the best name but it is descriptive...
 		REUSE_MODE,
 		RESET_MODE,
 		REASSIGN_MODE,
 		UNISON_MODE,
 		NUM_MODES
 	};
-	PolyMode polyMode = ROTATE_MODE;
+	PolyMode polyMode = RESET_MODE;
 
 	struct NoteData {
 		uint8_t velocity = 0;
@@ -314,15 +312,22 @@ struct QuadMIDIToCVInterfaceWidget : ModuleWidget {
 		addChild(Widget::create<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		float x[] = { 3.894335, 15.494659, 27.094986, 38.693935 };
-		float y[] = { 60.144478, 76.144882, 92.143906, 108.1443 };
-		for (int i = 0; i < 4; i++)
-		{
-			addOutput(Port::create<PJ301MPort>(mm2px(Vec(x[i], y[0])), Port::OUTPUT, module, QuadMIDIToCVInterface::CV_OUTPUT + i));
-			addOutput(Port::create<PJ301MPort>(mm2px(Vec(x[i], y[1])), Port::OUTPUT, module, QuadMIDIToCVInterface::GATE_OUTPUT + i));
-			addOutput(Port::create<PJ301MPort>(mm2px(Vec(x[i], y[2])), Port::OUTPUT, module, QuadMIDIToCVInterface::VELOCITY_OUTPUT + i));
-			addOutput(Port::create<PJ301MPort>(mm2px(Vec(x[i], y[3])), Port::OUTPUT, module, QuadMIDIToCVInterface::AFTERTOUCH_OUTPUT + i));
-		}
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(3.894335, 60.144478)), Port::OUTPUT, module, QuadMIDIToCVInterface::CV_OUTPUT + 0));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(15.494659, 60.144478)), Port::OUTPUT, module, QuadMIDIToCVInterface::GATE_OUTPUT + 0));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.094986, 60.144478)), Port::OUTPUT, module, QuadMIDIToCVInterface::VELOCITY_OUTPUT + 0));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(38.693935, 60.144478)), Port::OUTPUT, module, QuadMIDIToCVInterface::AFTERTOUCH_OUTPUT + 0));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(3.894335, 76.144882)), Port::OUTPUT, module, QuadMIDIToCVInterface::CV_OUTPUT + 1));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(15.494659, 76.144882)), Port::OUTPUT, module, QuadMIDIToCVInterface::GATE_OUTPUT + 1));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.094986, 76.144882)), Port::OUTPUT, module, QuadMIDIToCVInterface::VELOCITY_OUTPUT + 1));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(38.693935, 76.144882)), Port::OUTPUT, module, QuadMIDIToCVInterface::AFTERTOUCH_OUTPUT + 1));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(3.894335, 92.143906)), Port::OUTPUT, module, QuadMIDIToCVInterface::CV_OUTPUT + 2));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(15.494659, 92.143906)), Port::OUTPUT, module, QuadMIDIToCVInterface::GATE_OUTPUT + 2));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.094986, 92.143906)), Port::OUTPUT, module, QuadMIDIToCVInterface::VELOCITY_OUTPUT + 2));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(38.693935, 92.143906)), Port::OUTPUT, module, QuadMIDIToCVInterface::AFTERTOUCH_OUTPUT + 2));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(3.894335, 108.1443)), Port::OUTPUT, module, QuadMIDIToCVInterface::CV_OUTPUT + 3));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(15.494659, 108.1443)), Port::OUTPUT, module, QuadMIDIToCVInterface::GATE_OUTPUT + 3));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(27.094986, 108.1443)), Port::OUTPUT, module, QuadMIDIToCVInterface::VELOCITY_OUTPUT + 3));
+		addOutput(Port::create<PJ301MPort>(mm2px(Vec(38.693935, 108.1443)), Port::OUTPUT, module, QuadMIDIToCVInterface::AFTERTOUCH_OUTPUT + 3));
 
 		MidiWidget *midiWidget = Widget::create<MidiWidget>(mm2px(Vec(3.4009969, 14.837336)));
 		midiWidget->box.size = mm2px(Vec(44, 28));
@@ -344,19 +349,19 @@ struct QuadMIDIToCVInterfaceWidget : ModuleWidget {
 
 		menu->addChild(MenuEntry::create());
 		menu->addChild(MenuLabel::create("Polyphony mode"));
-		std::vector<std::string> polyModeNames = {
-			"Rotate",
-			"Reuse",
-			"Reset",
-			"Reassign",
-			"Unison"
-		};
-		for (int i = 0; i < QuadMIDIToCVInterface::NUM_MODES; i++) {
-			PolyphonyItem *item = MenuItem::create<PolyphonyItem>(polyModeNames[i], CHECKMARK(module->polyMode == i));
+
+		auto addPolyphonyItem = [&](QuadMIDIToCVInterface::PolyMode polyMode, std::string name) {
+			PolyphonyItem *item = MenuItem::create<PolyphonyItem>(name, CHECKMARK(module->polyMode == polyMode));
 			item->module = module;
-			item->polyMode = (QuadMIDIToCVInterface::PolyMode) i;
+			item->polyMode = polyMode;
 			menu->addChild(item);
-		}
+		};
+
+		addPolyphonyItem(QuadMIDIToCVInterface::RESET_MODE, "Reset");
+		addPolyphonyItem(QuadMIDIToCVInterface::ROTATE_MODE, "Rotate");
+		addPolyphonyItem(QuadMIDIToCVInterface::REUSE_MODE, "Reuse");
+		addPolyphonyItem(QuadMIDIToCVInterface::REASSIGN_MODE, "Reassign");
+		addPolyphonyItem(QuadMIDIToCVInterface::UNISON_MODE, "Unison");
 	}
 };
 
