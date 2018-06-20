@@ -12,7 +12,7 @@ FLAGS += -DSLUG=$(SLUG)
 FLAGS += -fPIC
 FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include \
          -I$(RACK_DIR)/dep/nanovg/src -I$(RACK_DIR)/dep/nanosvg/src -I$(RACK_DIR)/dep/oui-blendish \
-         -I$(RACK_DIR)/dep/osdialog
+         -I$(RACK_DIR)/dep/osdialog -I$(RACK_DIR)/dep/pfft
 FLAGS += -Wno-missing-braces
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res
