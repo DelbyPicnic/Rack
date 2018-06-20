@@ -62,7 +62,7 @@ void Plugin::addModel(Model *model) {
 
 static void replaceExisting(Plugin *plugin) {
 	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
-	info("%s",plugin->slug.c_str());
+
 	if (oldPlugin) {
 		for (Model *model : plugin->models) {
 			for (auto it = oldPlugin->models.begin(); it != oldPlugin->models.end();) {
