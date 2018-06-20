@@ -6,6 +6,9 @@
 	#define GL_GLEXT_PROTOTYPES 1
 	#define GLFW_INCLUDE_GLEXT
 #endif
+#if (defined(__arm__) || defined(__aarch64__))
+    #define GLFW_INCLUDE_ES2
+#endif
 #include <GLFW/glfw3.h>
 
 #ifdef ARCH_MAC
