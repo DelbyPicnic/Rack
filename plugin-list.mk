@@ -43,6 +43,9 @@ post-%: ;
 catalog:
 	git clone https://github.com/mi-rack/catalog
 
+list-update: catalog
+	cd catalog && git pull -f
+
 list-plugins: catalog
 	for slug in catalog/manifests/*.json ; do echo -e "\033[1m$$(basename $$slug .json)\033[0m" ; jq -r '"\t\(.name)\n\t\(.pluginUrl//.manualUrl//.sourceUrl)\n"' $$slug ; done
 	@echo ---
