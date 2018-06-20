@@ -67,5 +67,5 @@ PLUGIN_STATUS = $(strip $(shell jq -r '.status//""' $(PLUGIN_MF)))
 
 +%: catalog
 	@if [ ! -n "$(PLUGIN_DIR)" ] ; then echo --- ; echo "No such plugin: $*" ; echo "Type \"make list-plugins\" for a list of plugins known to this build script." ; echo --- ; false ; else true ; fi
-	@if [[ "$(SKIP)" && "$(PLUGIN_STATUS)" =~ "skip" ]] ; then echo --- ; echo "Skipping $* with status: $(PLUGIN_STATUS)" ; echo "Type make $@ to force installing it." ; echo --- ; false ; else true ; fi
+	@if [[ "$(SKIP)" && "$(PLUGIN_STATUS)" =~ skip|broken ]] ; then echo --- ; echo "Skipping $* with status: $(PLUGIN_STATUS)" ; echo "Type make $@ to force installing it." ; echo --- ; false ; else true ; fi
 	URL=$(PLUGIN_URL) DIR=$(PLUGIN_DIR) TAG=$(PLUGIN_TAG) $(MAKE) plugin
