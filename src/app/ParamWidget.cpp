@@ -1,6 +1,6 @@
 #include "app.hpp"
 #include "engine.hpp"
-
+#include "window.hpp"
 
 namespace rack {
 
@@ -28,7 +28,7 @@ void ParamWidget::randomize() {
 }
 
 void ParamWidget::onMouseDown(EventMouseDown &e) {
-	if (e.button == 1) {
+	if (e.button == 1 || gForceRMB) {
 		setValue(defaultValue);
 	}
 	e.consumed = true;

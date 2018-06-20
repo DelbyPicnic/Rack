@@ -2,6 +2,8 @@ include $(RACK_DIR)/arch.mk
 
 # The install location for `make install`
 DEP_LOCAL ?= .
+DEP_PATH := $(shell pwd)/$(DEP_LOCAL)
+
 DEP_FLAGS += -g -O3
 
 ifneq (,$(findstring arm,$(CPU)))
@@ -12,8 +14,9 @@ else
 endif
 
 ifeq ($(ARCH), mac)
-	DEP_FLAGS += -mmacosx-version-min=10.7 -stdlib=libc++
-	DEP_LDFLAGS += -mmacosx-version-min=10.7 -stdlib=libc++
+	DEP_MAC_SDK_FLAGS := -mmacosx-version-min=10.7
+	DEP_FLAGS += $(DEP_MAC_SDK_FLAGS) -stdlib=libc++
+	DEP_LDFLAGS += $(DEP_MAC_SDK_FLAGS) -stdlib=libc++
 endif
 
 DEP_CFLAGS += $(DEP_FLAGS)
@@ -24,14 +27,14 @@ WGET := curl -OL
 UNTAR := tar xf
 UNZIP := unzip
 ifeq ($(ARCH), web)
-	CONFIGURE := emconfigure ./configure --prefix="$(realpath $(DEP_LOCAL))"
+	CONFIGURE := emconfigure ./configure --prefix="$(DEP_PATH)"
 else
-	CONFIGURE := ./configure --prefix="$(realpath $(DEP_LOCAL))"
+	CONFIGURE := ./configure --prefix="$(DEP_PATH)"
 endif
 ifeq ($(ARCH), win)
-	CMAKE := cmake -G 'MSYS Makefiles' -DCMAKE_INSTALL_PREFIX="$(realpath $(DEP_LOCAL))"
+	CMAKE := cmake -G 'MSYS Makefiles' -DCMAKE_INSTALL_PREFIX="$(DEP_PATH)"
 else
-	CMAKE := cmake -DCMAKE_INSTALL_PREFIX="$(realpath $(DEP_LOCAL))"
+	CMAKE := cmake -DCMAKE_INSTALL_PREFIX="$(DEP_PATH)"
 endif
 
 # Export environment for all dependency targets

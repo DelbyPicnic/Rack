@@ -20,7 +20,7 @@ MenuItem::MenuItem() {
 
 void MenuItem::draw(NVGcontext *vg) {
 	// Get state
-	BNDwidgetState state = (gHoveredWidget == this) ? BND_HOVER : BND_DEFAULT;
+	BNDwidgetState state = (gHoveredWidget == this || gDragHoveredWidget == this) ? BND_HOVER : BND_DEFAULT;
 	Menu *parentMenu = dynamic_cast<Menu*>(parent);
 	if (parentMenu && parentMenu->activeEntry == this) {
 		state = BND_ACTIVE;
@@ -67,9 +67,6 @@ void MenuItem::onMouseEnter(EventMouseEnter &e) {
 }
 
 void MenuItem::onDragDrop(EventDragDrop &e) {
-	if (e.origin != this)
-		return;
-
 	EventAction eAction;
 	// Consume event by default, but allow action to un-consume it to prevent the menu from being removed.
 	eAction.consumed = true;
@@ -77,14 +74,12 @@ void MenuItem::onDragDrop(EventDragDrop &e) {
 	if (eAction.consumed) {
 		// deletes `this`
 		gScene->setOverlay(NULL);
+		// e.target = NULL;
 	}
 }
 
 
 void ChoiceMenuItem::onDragDrop(EventDragDrop &e) {
-	if (e.origin != this)
-		return;
-
 	EventAction eAction;
 	// Consume event by default, but allow action to un-consume it to prevent the menu from being removed.
 	eAction.consumed = true;
@@ -92,6 +87,7 @@ void ChoiceMenuItem::onDragDrop(EventDragDrop &e) {
 	if (eAction.consumed) {
 		// deletes `this`
 		gScene->setOverlay(NULL);
+		// e.target = NULL;
 
 		if (choice) {
 			EventChange e2;

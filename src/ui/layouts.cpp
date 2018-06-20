@@ -26,12 +26,15 @@ void SequentialLayout::onResize() {
 		return;
 
 	// Adjust positions based on width of the layout itself
-	//TODO: take padding into account
-	offset -= spacing;
-	if (alignment == RIGHT_ALIGNMENT)
-		offset -= (orientation == HORIZONTAL_ORIENTATION ? box.size.x : box.size.y);
-	else if (alignment == CENTER_ALIGNMENT)
-		offset -= (orientation == HORIZONTAL_ORIENTATION ? box.size.x : box.size.y) / 2.0;
+	if (alignment == RIGHT_ALIGNMENT) {
+		if (orientation == HORIZONTAL_ORIENTATION)
+			offset = box.size.x - offset - padding.x;
+		else
+			offset = box.size.y - offset - padding.y;
+
+	} else if (alignment == CENTER_ALIGNMENT)
+		offset = (orientation == HORIZONTAL_ORIENTATION ? box.size.x : box.size.y) - offset / 2.0;
+
 	for (Widget *child : children) {
 		if (!child->visible)
 			continue;

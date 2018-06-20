@@ -34,7 +34,7 @@ extern float gWindowRatio;
 extern bool gAllowCursorLock;
 extern int gGuiFrame;
 extern Vec gMousePos;
-
+extern bool gForceRMB;
 
 void windowInit();
 void windowDestroy();

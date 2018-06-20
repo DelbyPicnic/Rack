@@ -175,24 +175,24 @@ struct EngineSampleRateChoice : ChoiceButton {
 Toolbar::Toolbar() {
 	box.size.y = BND_WIDGET_HEIGHT + 2*5;
 
-	SequentialLayout *layout = new SequentialLayout();
-	layout->padding = Vec(5, 5);
-	layout->spacing = 5;
-	addChild(layout);
+	layoutLeft = new SequentialLayout();
+	layoutLeft->padding = Vec(5, 5);
+	layoutLeft->spacing = 5;
+	addChild(layoutLeft);
 
 	ChoiceButton *fileChoice = new FileChoice();
 	fileChoice->box.size.x = 100;
 	fileChoice->text = "File";
-	layout->addChild(fileChoice);
+	layoutLeft->addChild(fileChoice);
 
 	ChoiceButton *optionsChoice = new OptionsChoice();
 	optionsChoice->box.size.x = 100;
 	optionsChoice->text = "Options";
-	layout->addChild(optionsChoice);
+	layoutLeft->addChild(optionsChoice);
 
 	// EngineSampleRateChoice *srChoice = new EngineSampleRateChoice();
 	// srChoice->box.size.x = 100;
-	// layout->addChild(srChoice);
+	// layoutLeft->addChild(srChoice);
 
 	wireOpacitySlider = new Slider();
 	wireOpacitySlider->box.size.x = 150;
@@ -201,7 +201,7 @@ Toolbar::Toolbar() {
 	wireOpacitySlider->unit = "%";
 	wireOpacitySlider->setLimits(0.0, 100.0);
 	wireOpacitySlider->setDefaultValue(50.0);
-	layout->addChild(wireOpacitySlider);
+	layoutLeft->addChild(wireOpacitySlider);
 
 	wireTensionSlider = new Slider();
 	wireTensionSlider->box.size.x = 150;
@@ -209,7 +209,7 @@ Toolbar::Toolbar() {
 	wireTensionSlider->unit = "";
 	wireTensionSlider->setLimits(0.0, 1.0);
 	wireTensionSlider->setDefaultValue(0.5);
-	layout->addChild(wireTensionSlider);
+	layoutLeft->addChild(wireTensionSlider);
 
 	struct ZoomSlider : Slider {
 		void onAction(EventAction &e) override {
@@ -225,7 +225,7 @@ Toolbar::Toolbar() {
 	zoomSlider->unit = "%";
 	zoomSlider->setLimits(25.0, 200.0);
 	zoomSlider->setDefaultValue(100.0);
-	layout->addChild(zoomSlider);
+	layoutLeft->addChild(zoomSlider);
 
 	struct AddModuleButton : Button {
 		void onAction(EventAction &e) override {
@@ -236,18 +236,42 @@ Toolbar::Toolbar() {
 	auto addModuleButton = new AddModuleButton();
 	addModuleButton->text = "Add Module";
 	addModuleButton->box.size.x = 100;
-	layout->addChild(addModuleButton);
+	layoutLeft->addChild(addModuleButton);
+
+#ifdef TOUCH
+	layoutRight = new SequentialLayout();
+	layoutRight->padding = Vec(5, 5);
+	layoutRight->spacing = 5;
+	layoutRight->alignment = SequentialLayout::RIGHT_ALIGNMENT;
+	addChild(layoutRight);
+
+	struct RMBButton : Button {
+		void draw(NVGcontext *vg) override {
+			bndToolButton(vg, 0.0, 0.0, box.size.x, box.size.y, BND_CORNER_ALL, (gForceRMB ? BND_ACTIVE : state), -1, text.c_str());
+		}
+
+		void onAction(EventAction &e) override {
+			//TODO: in reality at the moment it can only activate the mode
+			gForceRMB = !gForceRMB;
+		}
+	};
+
+	auto rmbButton = new RMBButton();
+	rmbButton->text = "RMB";
+	rmbButton->box.size.x = BND_WIDGET_HEIGHT*2.5;
+	layoutRight->addChild(rmbButton);
+#endif
 
 /*
 	cpuUsageButton = new RadioButton();
 	cpuUsageButton->box.size.x = 100;
 	cpuUsageButton->label = "CPU usage";
-	layout->addChild(cpuUsageButton);
+	layoutLeft->addChild(cpuUsageButton);
 */
 
 /*#if defined(RELEASE)
 	Widget *pluginManager = new PluginManagerWidget();
-	layout->addChild(pluginManager);
+	layoutLeft->addChild(pluginManager);
 #endif*/
 }
 
@@ -258,5 +282,8 @@ void Toolbar::draw(NVGcontext *vg) {
 	Widget::draw(vg);
 }
 
+void Toolbar::onResize() {
+	layoutRight->box.size.x = box.size.x;
+}
 
 } // namespace rack
