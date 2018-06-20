@@ -36,6 +36,9 @@ post-Fundamental:
 post-SynthKit:
 	cp -r deps/rack-components/res/* res/
 
+pre-trowaSoft:
+	perl -pi -e 's/bool\* isDirty/DirtyWrapper* isDirty/' src/TSParamTextField.hpp
+
 
 pre-%: ;
 post-%: ;
