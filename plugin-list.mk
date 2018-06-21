@@ -1,14 +1,20 @@
 SHELL = /bin/bash
 
-plugin:
-	@mkdir -p plugins
-	@[ ! -e plugins/$(DIR) ] && true || ( echo -e "---\nPlugin folder plugins/$(DIR) already exists and will be overwritten. Press \033[1my\033[0m to proceed or any other key to skip this plugin.\n---" ; read -n 1 R; [ "$$R" = "y" ] )
+plugin-clone:
+	@[ ! -e plugins/$(DIR) ] && true || ( echo -e "---\nPlugin folder plugins/$(DIR) already exists and will be overwritten. Press \033[1my\033[0m to proceed or any other key to skip this plugin.\nOr update the plugin with UPDATE=1 make +$(PLUGIN_DIR)\n---" ; read -n 1 R; [ "$$R" = "y" ] )
 	rm -rf plugins/$(DIR)
 ifeq (,$(findstring http,$(URL)))
 	git clone http://github.com/$(URL) plugins/$(DIR)
 else
 	git clone $(URL) plugins/$(DIR)
 endif
+
+plugin-pull:
+	cd plugins/$(DIR) && git pull -f
+
+plugin:
+	@mkdir -p plugins
+	if [ ! "$(UPDATE)" -o ! -e plugins/$(DIR) ] ; then make plugin-clone ; else make plugin-pull ; fi
 ifneq (,$(TAG))
 	cd plugins/$(DIR) && git reset --hard $(TAG)
 endif
@@ -46,7 +52,7 @@ post-%: ;
 catalog:
 	git clone https://github.com/mi-rack/catalog
 
-list-update: catalog
+update-catalog: catalog
 	cd catalog && git pull -f
 
 list-plugins: catalog
@@ -62,8 +68,14 @@ rebuild-plugins:
 deb-plugins:
 	for f in plugins/*; do $(MAKE) deb -C "$$f"; done
 
+update-plugins: catalog
+	for slug in catalog/manifests/*.json ; do UPDATE=1 EXISTING=1 $(MAKE) +$$(basename $$slug .json) ; done
+
 +all: catalog
 	for slug in catalog/manifests/*.json ; do SKIP=1 $(MAKE) +$$(basename $$slug .json) ; done
+
++upgrade: catalog
+	for slug in catalog/manifests/*.json ; do SKIP=1 UPDATE=1 $(MAKE) +$$(basename $$slug .json) ; done
 
 PLUGIN_MF = $(shell find catalog/manifests -iname $*.json)
 PLUGIN_DIR = $(shell basename $(PLUGIN_MF) .json)
@@ -74,4 +86,4 @@ PLUGIN_STATUS = $(strip $(shell jq -r '.status//""' $(PLUGIN_MF)))
 +%: catalog
 	@if [ ! -n "$(PLUGIN_DIR)" ] ; then echo --- ; echo "No such plugin: $*" ; echo "Type \"make list-plugins\" for a list of plugins known to this build script." ; echo --- ; false ; else true ; fi
 	@if [[ "$(SKIP)" && "$(PLUGIN_STATUS)" =~ skip|broken ]] ; then echo --- ; echo "Skipping $* with status: $(PLUGIN_STATUS)" ; echo "Type make $@ to force installing it." ; echo --- ; false ; else true ; fi
-	URL=$(PLUGIN_URL) DIR=$(PLUGIN_DIR) TAG=$(PLUGIN_TAG) $(MAKE) plugin
+	if [ ! "$(EXISTING)" -o -e plugins/$(PLUGIN_DIR) ] ; then URL=$(PLUGIN_URL) DIR=$(PLUGIN_DIR) TAG=$(PLUGIN_TAG) $(MAKE) plugin ; fi
