@@ -20,6 +20,8 @@ DISTRIBUTABLES += $(wildcard LICENSE*) res
 
 include $(RACK_DIR)/arch.mk
 
+LDFLAGS += -L$(RACK_DIR)/dep/lib
+
 ifeq ($(ARCH), lin)
 	LDFLAGS += -shared
 	TARGET := plugin.so

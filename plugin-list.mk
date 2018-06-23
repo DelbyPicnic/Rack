@@ -45,6 +45,10 @@ post-SynthKit:
 pre-trowaSoft:
 	perl -pi -e 's/bool\* isDirty/DirtyWrapper* isDirty/' src/TSParamTextField.hpp
 
+pre-Valley:
+	perl -pi -e 's/<pmmintrin.h>/"util\/SSE2NEON.h"/' src/Dexter/QuadOsc.hpp
+	perl -pi -e 's/<pmmintrin.h>/"util\/SSE2NEON.h"/' src/Plateau/InterpDelay.hpp
+
 
 pre-%: ;
 post-%: ;
