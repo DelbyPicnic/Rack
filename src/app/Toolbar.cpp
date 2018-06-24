@@ -3,6 +3,11 @@
 #include "engine.hpp"
 #include "settings.hpp"
 #include "asset.hpp"
+#include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+#include <sys/stat.h> // for mkdir
 
 namespace rack {
 
@@ -171,7 +176,7 @@ struct EngineSampleRateChoice : ChoiceButton {
 	}
 };
 
-
+void renderGui();
 Toolbar::Toolbar() {
 	box.size.y = BND_WIDGET_HEIGHT + 2*5;
 
@@ -237,6 +242,57 @@ Toolbar::Toolbar() {
 	addModuleButton->text = "Add Module";
 	addModuleButton->box.size.x = 100;
 	layoutLeft->addChild(addModuleButton);
+
+	struct ScreenshotBtn : Button {
+		void onAction(EventAction &e) override {
+
+			int width, height;
+			glfwGetFramebufferSize(gWindow, &width, &height);
+
+			mkdir("scr", 0755);				
+			for (Plugin *plugin : gPlugins) {
+				for (Model *model : plugin->models) {
+					info("processing %s - %s", plugin->slug.c_str(), model->slug.c_str());
+
+					ModuleWidget *mw = model->createModuleWidget();
+					// Move module nearest to the mouse position
+					mw->box.pos = Vec(0,0);
+					gRackWidget->addModule(mw);
+
+					mw->module->step();
+					mw->step();
+
+					renderGui();			
+					renderGui();			
+
+					int w = mw->box.size.x*gPixelRatio, h = mw->box.size.y*gPixelRatio;
+					unsigned char img[w*h*3];
+					unsigned char tmp[w*3];
+					glPixelStorei(GL_PACK_ALIGNMENT, 1);
+					glReadPixels(mw->box.pos.x*gPixelRatio,height-h-gToolbar->box.size.y*gPixelRatio-mw->box.pos.y*gPixelRatio,w,h,GL_RGB, GL_UNSIGNED_BYTE, img);
+					for (int j = 0; j < h/2; j++) {
+						memcpy(tmp, img+w*3*(h-j-1), w*3);
+						memcpy(img+w*3*(h-j-1), img+w*3*j, w*3);
+						memcpy(img+w*3*j, tmp, w*3);
+					}
+
+					std::string dir = std::string("scr/")+model->author;
+					mkdir(dir.c_str(), 0755);
+				 	stbi_write_png((dir+"/"+model->name+".png").c_str(), w, h, 3, img, w*3);	
+
+		 			gRackWidget->deleteModule(mw);
+		 			delete mw;
+
+				}
+			}
+		}
+	};
+
+	auto scrButton = new ScreenshotBtn();
+	scrButton->text = "Scr";
+	scrButton->box.size.x = 100;
+	layoutLeft->addChild(scrButton);
+
 
 #ifdef TOUCH
 	layoutRight = new SequentialLayout();
