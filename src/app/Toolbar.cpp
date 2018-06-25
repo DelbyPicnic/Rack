@@ -8,6 +8,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 #include <sys/stat.h> // for mkdir
+#include <jansson.h>
 
 namespace rack {
 
@@ -249,15 +250,41 @@ Toolbar::Toolbar() {
 			int width, height;
 			glfwGetFramebufferSize(gWindow, &width, &height);
 
-			mkdir("scr", 0755);				
-			for (Plugin *plugin : gPlugins) {
-				for (Model *model : plugin->models) {
-					info("processing %s - %s", plugin->slug.c_str(), model->slug.c_str());
+			mkdir("gallery", 0755);				
 
+			json_t *rootJ = json_object();
+			json_t *pluginsJ = json_array();
+			json_object_set_new(rootJ, "plugins", pluginsJ);
+
+			for (Plugin *plugin : gPlugins) {
+				json_t *pluginJ = json_object();
+				json_array_append_new(pluginsJ, pluginJ);
+				json_object_set_new(pluginJ, "slug", json_string(plugin->slug.c_str()));
+				json_object_set_new(pluginJ, "website", json_string(plugin->website.c_str()));
+				json_object_set_new(pluginJ, "manual", json_string(plugin->manual.c_str()));
+				json_t *modelsJ = json_array();
+				json_object_set_new(pluginJ, "models", modelsJ);
+
+				for (Model *model : plugin->models) {
 					ModuleWidget *mw = model->createModuleWidget();
-					// Move module nearest to the mouse position
+					if (mw->box.size.x == 0)
+						continue;
+
+					info("processing %s - %s", plugin->slug.c_str(), model->slug.c_str());
+					json_t *modelJ = json_object();
+					json_array_append_new(modelsJ, modelJ);
+					json_object_set_new(modelJ, "slug", json_string(model->slug.c_str()));
+					json_object_set_new(modelJ, "author", json_string(model->author.c_str()));
+					json_object_set_new(modelJ, "name", json_string(model->name.c_str()));
+					json_t *tagsJ = json_array();
+					json_object_set_new(modelJ, "tags", tagsJ);
+					for (auto tag : model->tags)
+						json_array_append_new(tagsJ, json_string(gTagNames[tag].c_str()));
+
 					mw->box.pos = Vec(0,0);
 					gRackWidget->addModule(mw);
+
+					json_object_set_new(modelJ, "size", json_real(mw->box.size.x/15));
 
 					mw->module->step();
 					mw->step();
@@ -276,20 +303,28 @@ Toolbar::Toolbar() {
 						memcpy(img+w*3*j, tmp, w*3);
 					}
 
-					std::string dir = std::string("scr/")+model->author;
+					std::string dir = std::string("gallery/")+plugin->slug;
 					mkdir(dir.c_str(), 0755);
-				 	stbi_write_png((dir+"/"+model->name+".png").c_str(), w, h, 3, img, w*3);	
+				 	stbi_write_png((dir+"/"+model->slug+".png").c_str(), w, h, 3, img, w*3);	
 
 		 			gRackWidget->deleteModule(mw);
 		 			delete mw;
-
 				}
 			}
+
+			FILE *file = fopen("gallery/modules.js", "w");
+			if (!file)
+				return;
+
+			fwrite("var db = ", 9, 1, file);
+			json_dumpf(rootJ, file, JSON_INDENT(2) | JSON_REAL_PRECISION(9));
+			json_decref(rootJ);
+			fclose(file);			
 		}
 	};
 
 	auto scrButton = new ScreenshotBtn();
-	scrButton->text = "Scr";
+	scrButton->text = "Shot";
 	scrButton->box.size.x = 100;
 	layoutLeft->addChild(scrButton);
 
