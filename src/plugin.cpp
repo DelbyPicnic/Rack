@@ -60,7 +60,7 @@ void Plugin::addModel(Model *model) {
 // private API
 ////////////////////
 
-static void replaceExisting(Plugin *plugin) {
+static bool replaceExisting(Plugin *plugin) {
 	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
 
 	if (oldPlugin) {
@@ -70,11 +70,14 @@ static void replaceExisting(Plugin *plugin) {
 					it = oldPlugin->models.erase(it);
 					oldPlugin->models.insert(it, model);
 					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", plugin->path.c_str(), model->slug.c_str(), plugin->slug.c_str());
+					return true;
 				} else
 					it++;
 			}
 		}
 	}	
+
+	return false;
 }
 
 static bool loadPlugin(std::string path) {
@@ -130,11 +133,9 @@ static bool loadPlugin(std::string path) {
 	plugin->handle = handle;
 	initCallback(plugin);
 
-	// Replace already registered modules
-	replaceExisting(plugin);
-
 	// Add plugin to list
-	gPlugins.push_back(plugin);
+	if (!replaceExisting(plugin))
+		gPlugins.push_back(plugin);
 	info("Loaded plugin %s", libraryFilename.c_str());
 
 	return true;
