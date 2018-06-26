@@ -70,6 +70,7 @@ extern "C" void main2() {
 
 int main(int argc, char* argv[]) {
 	randomInit();
+	assetInit();
 	loggerInit();
 
 	info("Rack %s", gApplicationVersion.c_str());

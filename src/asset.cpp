@@ -22,10 +22,13 @@
 
 namespace rack {
 
-// Resources folder if packaged as an app on Mac, current (executable) folder otherwise
-std::string assetGlobal(std::string filename) {
-	std::string dir;
+static std::string localDir;
+static std::string globalDir;
+static std::string hiddenDir;
 
+
+void assetInit() {
+	// Global
 #if ARCH_MAC && RELEASE
 	CFBundleRef bundle = CFBundleGetMainBundle();
 	assert(bundle);
@@ -34,26 +37,21 @@ std::string assetGlobal(std::string filename) {
 	Boolean success = CFURLGetFileSystemRepresentation(resourcesUrl, TRUE, (UInt8 *)buf, sizeof(buf));
 	assert(success);
 	CFRelease(resourcesUrl);
-	dir = buf;
+	globalDir = buf;
 
 #else
-	dir = ".";
+	globalDir = ".";
 #endif
 
-	return dir + "/" + filename;
-}
 
-// User Documents folder always
-std::string assetLocal(std::string filename) {
-	std::string dir;
-
+	// Local
 #if ARCH_MAC
 	// Use home directory
 	struct passwd *pw = getpwuid(getuid());
 	assert(pw);
-	dir = pw->pw_dir;
-	dir += "/Documents";
-	mkdir(dir.c_str(), 0755);
+	localDir = pw->pw_dir;
+	localDir += "/Documents";
+	mkdir(localDir.c_str(), 0755);
 #endif
 
 #if ARCH_WIN
@@ -61,9 +59,9 @@ std::string assetLocal(std::string filename) {
 	char buf[MAX_PATH];
 	HRESULT result = SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, buf);
 	assert(result == S_OK);
-	dir = buf;
-	dir += "/Rack";
-	CreateDirectory(dir.c_str(), NULL);
+	localDir = buf;
+	localDir += "/Rack";
+	CreateDirectory(localDir.c_str(), NULL);
 #endif
 
 #if ARCH_LIN
@@ -73,33 +71,28 @@ std::string assetLocal(std::string filename) {
 		assert(pw);
 		home = pw->pw_dir;
 	}
-	dir = home;
+	localDir = home;
 
 	// If the distro already has Documents folder, use it, otherwise just use home folder
-	if (systemIsDirectory(dir+"/Documents"))
-		dir += "/Documents";
+	if (systemIsDirectory(localDir+"/Documents"))
+		localDir += "/Documents";
 #endif
 
 #if ARCH_WEB
-	dir = "/work";
-#endif
+	localDir = "/work";
+#endif	
 
-	return dir + "/" + filename;
-}
 
-// Platform-specific folder if RELEASE, current folder otherwise
-std::string assetHidden(std::string filename) {
-	std::string dir;
-
+	// Hidden
 #ifndef ARCH_WEB
 #if RELEASE
 #if ARCH_MAC
 	// Use Application Support folder
 	struct passwd *pw = getpwuid(getuid());
 	assert(pw);
-	dir = pw->pw_dir;
-	dir += "/Library/Application Support/miRack";
-	mkdir(dir.c_str(), 0755);
+	hiddenDir = pw->pw_dir;
+	hiddenDir += "/Library/Application Support/miRack";
+	mkdir(hiddenDir.c_str(), 0755);
 #endif
 	
 #if ARCH_WIN
@@ -107,9 +100,9 @@ std::string assetHidden(std::string filename) {
 	char buf[MAX_PATH];
 	HRESULT result = SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, buf);
 	assert(result == S_OK);
-	dir = buf;
-	dir += "/miRack";
-	CreateDirectory(dir.c_str(), NULL);
+	hiddenDir = buf;
+	hiddenDir += "/miRack";
+	CreateDirectory(hiddenDir.c_str(), NULL);
 #endif
 
 #if ARCH_LIN
@@ -120,21 +113,33 @@ std::string assetHidden(std::string filename) {
 		assert(pw);
 		home = pw->pw_dir;
 	}
-	dir = home;
-	dir += "/.miRack";
-	mkdir(dir.c_str(), 0755);
+	hiddenDir = home;
+	hiddenDir += "/.miRack";
+	mkdir(hiddenDir.c_str(), 0755);
 #endif
 
 #else
-	dir = ".";
+	hiddenDir = ".";
 #endif
 
 #else
-	dir = "/work";
+	hiddenDir = "/work";
 #endif
+}
 
+// Resources folder if packaged as an app on Mac, current (executable) folder otherwise
+std::string assetGlobal(std::string filename) {
+	return globalDir + "/" + filename;
+}
 
-	return dir + "/" + filename;
+// User Documents folder always
+std::string assetLocal(std::string filename) {
+	return localDir + "/" + filename;
+}
+
+// Platform-specific folder if RELEASE, current folder otherwise
+std::string assetHidden(std::string filename) {
+	return hiddenDir + "/" + filename;
 }
 
 
