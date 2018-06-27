@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 //TODO: get rid of this
@@ -96,4 +96,4 @@ void ChoiceMenuItem::onDragDrop(EventDragDrop &e) {
 	}
 }
 
-} // namespace rack
+} // namespace mirack

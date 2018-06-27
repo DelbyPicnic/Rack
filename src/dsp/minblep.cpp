@@ -1,7 +1,7 @@
 #include "dsp/minblep.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 // TODO I should probably compute this on launch
@@ -10,4 +10,4 @@ const float minblep_16_32[] = {
 };
 
 
-} // namespace rack
+} // namespace mirack

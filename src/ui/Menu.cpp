@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 Menu::~Menu() {
 	setChildMenu(NULL);
@@ -59,4 +59,4 @@ void Menu::onScroll(EventScroll &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

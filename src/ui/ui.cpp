@@ -1,9 +1,9 @@
 #include "ui.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 Scene *gScene = NULL;
 
 
-} // namespace rack
+} // namespace mirack

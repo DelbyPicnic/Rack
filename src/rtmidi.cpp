@@ -2,7 +2,7 @@
 #include <map>
 
 
-namespace rack {
+namespace mirack {
 
 
 static void midiInputCallback(double timeStamp, std::vector<unsigned char> *message, void *userData) {
@@ -115,4 +115,4 @@ void rtmidiInit() {
 }
 
 
-} // namespace rack
+} // namespace mirack

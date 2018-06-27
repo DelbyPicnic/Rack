@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 void Tooltip::step() {
 	// Follow the mouse
@@ -21,4 +21,4 @@ void Tooltip::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

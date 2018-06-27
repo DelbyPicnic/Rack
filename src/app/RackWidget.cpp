@@ -11,7 +11,9 @@
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 
-namespace rack {
+#include "compat/include/app.hpp"
+
+namespace mirack {
 
 
 struct ModuleContainer : Widget {
@@ -292,6 +294,15 @@ void RackWidget::fromJson(json_t *rootJ) {
 		// Create ModuleWidget
 		ModuleWidget *moduleWidget = model->createModuleWidget();
 		assert(moduleWidget);
+
+		// Is a VCV plugin/module
+		if (moduleWidget->parent) {
+			printf("######## VCV Module\n");
+			rack::ModuleWidget *mw = reinterpret_cast<rack::ModuleWidget*>(moduleWidget);
+			moduleWidget = new VCVModuleWidget(mw);
+			// return;
+		}
+
 		moduleWidget->fromJson(moduleJ);
 		gRackWidget->addModule(moduleWidget);
 		moduleWidgets[moduleId] = moduleWidget;
@@ -578,4 +589,4 @@ void RackWidget::onMouseDown(EventMouseDown &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

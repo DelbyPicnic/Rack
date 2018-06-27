@@ -1,7 +1,7 @@
 #include "tags.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 std::string gTagNames[NUM_TAGS];
@@ -64,4 +64,4 @@ void tagsInit() {
 }
 
 
-} // namespace rack
+} // namespace mirack

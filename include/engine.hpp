@@ -3,8 +3,11 @@
 #include "util/common.hpp"
 #include <jansson.h>
 
-
 namespace rack {
+	struct Module;
+}
+
+namespace mirack {
 
 
 struct Param {
@@ -102,6 +105,18 @@ struct Module {
 	virtual void randomize() {}
 };
 
+struct VCVModuleProxy : Module {
+	rack::Module *target;
+
+	VCVModuleProxy(rack::Module *target);
+	~VCVModuleProxy();
+
+	json_t *toJson() override;
+	void fromJson(json_t *root) override;
+
+	void step() override;
+};
+
 struct Wire {
 	Module *outputModule = NULL;
 	int outputId;
@@ -141,4 +156,4 @@ extern std::vector<Module*> gModules;
 extern std::vector<Wire*> gWires;
 
 
-} // namespace rack
+} // namespace mirack

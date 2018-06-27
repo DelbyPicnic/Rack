@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 /** Driver ID in AudioIO and MidiIO */
@@ -53,4 +53,4 @@ enum BridgeCommand {
 };
 
 
-} // namespace rack
+} // namespace mirack

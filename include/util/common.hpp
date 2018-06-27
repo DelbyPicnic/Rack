@@ -80,7 +80,7 @@ to get its size in bytes.
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 ////////////////////
 // Template hacks
@@ -224,4 +224,4 @@ struct VIPLock {
 };
 
 
-} // namespace rack
+} // namespace mirack

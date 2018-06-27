@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void MomentarySwitch::onDragStart(EventDragStart &e) {
@@ -15,4 +15,4 @@ void MomentarySwitch::onDragEnd(EventDragEnd &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -5,7 +5,7 @@
 #include "keyboard.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 static std::vector<int> driverIds;
@@ -213,4 +213,4 @@ void midiDriverAdd(int driverId, MidiDriver *driver) {
 }
 
 
-} // namespace rack
+} // namespace mirack

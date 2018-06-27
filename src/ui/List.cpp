@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 //TODO: no need to do all of this on resize
 void List::onResize() {
@@ -21,4 +21,4 @@ void List::onResize() {
 }
 
 
-} // namespace rack
+} // namespace mirack

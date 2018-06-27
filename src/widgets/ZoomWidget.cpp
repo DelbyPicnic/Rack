@@ -1,7 +1,7 @@
 #include "widgets.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 Vec ZoomWidget::getRelativeOffset(Vec v, Widget *relative) {
@@ -74,4 +74,4 @@ void ZoomWidget::onPathDrop(EventPathDrop &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -2,7 +2,7 @@
 #include "engine.hpp"
 #include "window.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 json_t *ParamWidget::toJson() {
@@ -46,4 +46,4 @@ void ParamWidget::onChange(EventChange &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

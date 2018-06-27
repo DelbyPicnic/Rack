@@ -3,7 +3,7 @@
 #include <cmath>
 
 
-namespace rack {
+namespace mirack {
 
 
 inline float sinc(float x) {
@@ -43,4 +43,4 @@ inline float exponentialBipolar(float b, float x) {
 }
 
 
-} // namespace rack
+} // namespace mirack

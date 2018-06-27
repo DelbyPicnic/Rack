@@ -21,7 +21,7 @@
 #define AUDIO_INPUTS 2
 
 // #define printf(a...) {}
-using namespace rack;
+using namespace mirack;
 
 struct AudioInterfaceIO2 : AudioIO {
 	std::mutex engineMutex;

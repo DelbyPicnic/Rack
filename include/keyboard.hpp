@@ -5,7 +5,7 @@
 #include <map>
 
 
-namespace rack {
+namespace mirack {
 
 
 struct KeyboardInputDevice : MidiInputDevice {
@@ -32,4 +32,4 @@ void keyboardPress(int key);
 void keyboardRelease(int key);
 
 
-} // namespace rack
+} // namespace mirack

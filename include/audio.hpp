@@ -12,7 +12,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-namespace rack {
+namespace mirack {
 
 
 struct AudioIO {
@@ -73,4 +73,4 @@ struct AudioIO {
 };
 
 
-} // namespace rack
+} // namespace mirack

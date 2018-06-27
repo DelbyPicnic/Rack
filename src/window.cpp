@@ -48,6 +48,11 @@ GLFWAPI void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float*
 #endif
 
 namespace rack {
+	extern NVGcontext *gVg;
+	extern NVGcontext *gFramebufferVg;
+}
+
+namespace mirack {
 
 
 //TODO: where should this go?
@@ -470,6 +475,18 @@ void windowInit() {
 #endif
 	assert(gVg);
 
+	rack::gVg = gVg;
+
+	// Set up NanoVG
+#if defined NANOVG_GL2
+	rack::gFramebufferVg = nvgCreateGL2(NVG_ANTIALIAS);
+#elif defined NANOVG_GL3
+	rack::gFramebufferVg = nvgCreateGL3(NVG_ANTIALIAS);
+#elif defined NANOVG_GLES2
+	rack::gFramebufferVg = nvgCreateGLES2(NVG_ANTIALIAS);
+#endif
+	assert(rack::gFramebufferVg);
+
 	// Set up Blendish
 	gGuiFont = Font::load(assetGlobal("res/fonts/DejaVuSans.ttf"));
 	bndSetFont(gGuiFont->handle);
@@ -783,4 +800,4 @@ std::shared_ptr<SVG> SVG::load(const std::string &filename) {
 }
 
 
-} // namespace rack
+} // namespace mirack

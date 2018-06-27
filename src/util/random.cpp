@@ -3,7 +3,7 @@
 #include <sys/time.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 // xoroshiro128+
@@ -69,4 +69,4 @@ float randomNormal() {
 }
 
 
-} // namespace rack
+} // namespace mirack

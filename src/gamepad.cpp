@@ -1,8 +1,8 @@
 #include "gamepad.hpp"
-#include "window.hpp"
+#include <GLFW/glfw3.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 static const int GAMEPAD_DRIVER = -10;
@@ -112,4 +112,4 @@ void gamepadStep() {
 }
 
 
-} // namespace rack
+} // namespace mirack

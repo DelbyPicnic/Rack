@@ -7,7 +7,7 @@ else
 endif
 
 FLAGS += \
-	-Iinclude \
+	-Iinclude -I. \
 	-Idep/include -I$(RACK_DIR)/dep/nanovg/src -Idep/nanosvg/src -Idep/osdialog \
 	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source
 
@@ -24,7 +24,7 @@ include arch.mk
 STRIP ?= strip
 
 # Sources and build flags
-SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
+SOURCES += $(wildcard src/*.cpp src/*/*.cpp compat/src/*.cpp compat/src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp
 SOURCES += $(wildcard dep/pfft/pffft.c) $(wildcard dep/pfft/fftpack.c)
 

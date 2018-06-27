@@ -3,7 +3,7 @@
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 // Pre-made minBLEP samples in minBLEP.cpp
 extern const float minblep_16_32[];
@@ -34,4 +34,4 @@ struct MinBLEP {
 	}
 };
 
-} // namespace rack
+} // namespace mirack

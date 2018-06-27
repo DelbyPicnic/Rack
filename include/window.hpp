@@ -18,7 +18,7 @@
 #endif
 
 
-namespace rack {
+namespace mirack {
 
 
 extern GLFWwindow *gWindow;
@@ -54,4 +54,4 @@ void windowSetTheme(NVGcolor bg, NVGcolor fg);
 NVGcontext* windowCreateNVGContext();
 void windowReleaseNVGContext(NVGcontext *ctx);
 
-} // namespace rack
+} // namespace mirack

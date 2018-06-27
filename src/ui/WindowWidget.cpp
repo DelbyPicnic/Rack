@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void WindowWidget::draw(NVGcontext *vg) {
@@ -14,4 +14,4 @@ void WindowWidget::onDragMove(EventDragMove &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

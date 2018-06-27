@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 Knob::Knob() {
@@ -47,4 +47,4 @@ void Knob::onDragEnd(EventDragEnd &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

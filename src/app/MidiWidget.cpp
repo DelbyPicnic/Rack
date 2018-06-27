@@ -2,7 +2,7 @@
 #include "midi.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct MidiDriverItem : MenuItem {
@@ -149,4 +149,4 @@ void MidiWidget::onResize() {
 }
 
 
-} // namespace rack
+} // namespace mirack

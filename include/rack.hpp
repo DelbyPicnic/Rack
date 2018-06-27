@@ -11,7 +11,7 @@
 #include "componentlibrary.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 ////////////////////
@@ -89,4 +89,4 @@ DEPRECATED TModuleLightWidget *createLight(Vec pos, Module *module, int firstLig
 }
 
 
-} // namespace rack
+} // namespace mirack

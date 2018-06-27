@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void Panel::draw(NVGcontext *vg) {
@@ -34,4 +34,4 @@ void Panel::draw(NVGcontext *vg) {
 	Widget::draw(vg);
 }
 
-} // namespace rack
+} // namespace mirack

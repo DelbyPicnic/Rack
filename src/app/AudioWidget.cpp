@@ -2,7 +2,7 @@
 #include "audio.hpp"
 #include "engine.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 struct AudioDriverItem : ChoiceMenuItem {
@@ -217,4 +217,4 @@ void AudioWidget::onResize() {
 }
 
 
-} // namespace rack
+} // namespace mirack

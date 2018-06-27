@@ -4,7 +4,7 @@
 #include "midi.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct GamepadInputDevice : MidiInputDevice {
@@ -31,4 +31,4 @@ void gamepadInit();
 void gamepadStep();
 
 
-} // namespace rack
+} // namespace mirack

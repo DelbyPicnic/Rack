@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 static const int KEYBOARD_DRIVER = -11;
@@ -136,4 +136,4 @@ void keyboardRelease(int key) {
 }
 
 
-} // namespace rack
+} // namespace mirack

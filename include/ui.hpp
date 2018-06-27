@@ -7,7 +7,7 @@
 #define CHECKMARK(_cond) ((_cond) ? CHECKMARK_STRING : "")
 
 
-namespace rack {
+namespace mirack {
 
 ////////////////////
 // Layouts (layouts.cpp)
@@ -269,4 +269,4 @@ struct Scene : OpaqueWidget {
 extern Scene *gScene;
 
 
-} // namespace rack
+} // namespace mirack

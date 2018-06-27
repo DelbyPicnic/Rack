@@ -31,7 +31,7 @@
 #include <dirent.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 std::list<Plugin*> gPlugins;
@@ -60,7 +60,7 @@ void Plugin::addModel(Model *model) {
 // private API
 ////////////////////
 
-static void replaceExisting(Plugin *plugin) {
+static bool replaceExisting(Plugin *plugin) {
 	Plugin *oldPlugin = pluginGetPlugin(plugin->slug);
 
 	if (oldPlugin) {
@@ -70,11 +70,14 @@ static void replaceExisting(Plugin *plugin) {
 					it = oldPlugin->models.erase(it);
 					oldPlugin->models.insert(it, model);
 					warn("Plugin %s replaced module \"%s\" of plugin \"%s\"", plugin->path.c_str(), model->slug.c_str(), plugin->slug.c_str());
+					return true;
 				} else
 					it++;
 			}
 		}
 	}	
+
+	return false;
 }
 
 static bool loadPlugin(std::string path) {
@@ -130,11 +133,9 @@ static bool loadPlugin(std::string path) {
 	plugin->handle = handle;
 	initCallback(plugin);
 
-	// Replace already registered modules
-	replaceExisting(plugin);
-
 	// Add plugin to list
-	gPlugins.push_back(plugin);
+	if (!replaceExisting(plugin))
+		gPlugins.push_back(plugin);
 	info("Loaded plugin %s", libraryFilename.c_str());
 
 	return true;
@@ -235,7 +236,7 @@ static bool loadPlugin(std::string path) {
 }*/
 
 #ifdef ARCH_WEB
-#define WEB_DECL_PLUGIN(n) extern "C" void init_##n(rack::Plugin *plugin);
+#define WEB_DECL_PLUGIN(n) extern "C" void init_##n(mirack::Plugin *plugin);
 #define WEB_LOAD_PLUGIN(n) { Plugin *plugin = new Plugin(); plugin->path = "plugins/" # n; init_##n(plugin); replaceExisting(plugin); gPlugins.push_back(plugin); }
 #define WEB_PLUGIN WEB_DECL_PLUGIN
 WEB_PLUGINS
@@ -584,4 +585,4 @@ Model *pluginGetModel(std::string pluginSlug, std::string modelSlug) {
 }
 
 
-} // namespace rack
+} // namespace mirack

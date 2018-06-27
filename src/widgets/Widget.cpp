@@ -7,7 +7,7 @@
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 
-namespace rack {
+namespace mirack {
 
 /*PosWrapper& PosWrapper::operator=(Vec v) {
 	x = v.x;
@@ -381,4 +381,4 @@ Rect Widget::getHitBox() {
 	return box.grow(grow);
 }
 
-} // namespace rack
+} // namespace mirack

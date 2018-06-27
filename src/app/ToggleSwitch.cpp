@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void ToggleSwitch::onDragStart(EventDragStart &e) {
@@ -14,4 +14,4 @@ void ToggleSwitch::onDragStart(EventDragStart &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

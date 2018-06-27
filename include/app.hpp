@@ -8,8 +8,13 @@
 static const float SVG_DPI = 75.0;
 static const float MM_PER_IN = 25.4;
 
-
 namespace rack {
+	struct ModuleWidget;
+	struct Widget;
+	struct Port;
+}
+
+namespace mirack {
 
 
 inline float in2px(float inches) {
@@ -107,6 +112,74 @@ struct ModuleWidget : OpaqueWidget {
 	void onDragStart(EventDragStart &e) override;
 	void onDragEnd(EventDragEnd &e) override;
 	void onDragMove(EventDragMove &e) override;
+};
+
+struct VCVWidgetProxy : Widget {
+	rack::Widget *target;
+
+	VCVWidgetProxy(rack::Widget *target);
+	~VCVWidgetProxy();
+
+	operator rack::Widget*() {
+		return target;
+	}
+
+	void step() override;
+	void draw(NVGcontext *vg) override;
+
+	void onMouseDown(EventMouseDown &e) override;
+	void onMouseMove(EventMouseMove &e) override;
+	void onHoverKey(EventHoverKey &e) override;
+	void onDragStart(EventDragStart &e) override;
+	void onDragEnd(EventDragEnd &e) override;
+	void onDragMove(EventDragMove &e) override;	
+	void onDragEnter(EventDragEnter &e) override;
+	void onDragLeave(EventDragEnter &e) override;
+};
+
+struct VCVModuleWidget : ModuleWidget {
+	rack::ModuleWidget *mw;
+
+	VCVModuleWidget(rack::ModuleWidget *mw);
+	~VCVModuleWidget();
+
+	virtual json_t *toJson();
+	virtual void fromJson(json_t *rootJ);
+
+	virtual void create();
+	virtual void _delete();
+	/** Disconnects cables from all ports
+	Called when the user clicks Disconnect Cables in the context menu.
+	*/
+	virtual void disconnect();
+	/** Resets the parameters of the module and calls the Module's randomize().
+	Called when the user clicks Initialize in the context menu.
+	*/
+	virtual void reset();
+	/** Randomizes the parameters of the module and calls the Module's randomize().
+	Called when the user clicks Randomize in the context menu.
+	*/
+	virtual void randomize();
+	/** Do not subclass this to add context menu entries. Use appendContextMenu() instead */
+	virtual Menu *createContextMenu();
+	/** Override to add context menu entries to your subclass.
+	It is recommended to add a blank MenuEntry first for spacing.
+	*/
+	virtual void appendContextMenu(Menu *menu) {}
+
+	void step() override;
+	void draw(NVGcontext *vg) override;
+	void drawShadow(NVGcontext *vg);
+
+	Vec dragPos;
+	void onMouseDown(EventMouseDown &e) override;
+	void onMouseMove(EventMouseMove &e) override;
+	void onHoverKey(EventHoverKey &e) override;
+	void onDragStart(EventDragStart &e) override;
+	void onDragEnd(EventDragEnd &e) override;
+	void onDragMove(EventDragMove &e) override;
+	void onDragEnter(EventDragEnter &e) override;
+	void onDragLeave(EventDragEnter &e) override;
 };
 
 struct WireWidget : OpaqueWidget {
@@ -477,6 +550,21 @@ struct Port : Component {
 	}
 };
 
+struct VCVPortProxy : Port {
+	rack::Port *target;
+
+	VCVPortProxy(rack::Port *target);
+	~VCVPortProxy();
+	void step() override;
+	void draw(NVGcontext *vg) override;
+	void onMouseDown(EventMouseDown &e) override;
+	void onDragStart(EventDragStart &e) override;
+	void onDragEnd(EventDragEnd &e) override;
+	void onDragDrop(EventDragDrop &e) override;
+	void onDragEnter(EventDragEnter &e) override;
+	void onDragLeave(EventDragEnter &e) override;
+};
+
 struct SVGPort : Port {
 	SVGWidget *background;
 	CircularShadow *shadow;
@@ -560,4 +648,4 @@ json_t *colorToJson(NVGcolor color);
 NVGcolor jsonToColor(json_t *colorJ);
 
 
-} // namespace rack
+} // namespace mirack

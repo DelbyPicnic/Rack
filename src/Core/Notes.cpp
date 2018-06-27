@@ -1,6 +1,6 @@
 #include "Core.hpp"
 
-using namespace rack;
+using namespace mirack;
 
 
 

@@ -4,7 +4,7 @@
 #include "util/common.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 /** A simple cyclic buffer.
 S must be a power of 2.
@@ -197,4 +197,4 @@ struct AppleRingBuffer {
 	}
 };
 
-} // namespace rack
+} // namespace mirack

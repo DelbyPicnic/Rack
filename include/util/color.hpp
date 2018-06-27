@@ -5,7 +5,7 @@
 #include "nanovg.h"
 
 
-namespace rack {
+namespace mirack {
 
 
 inline NVGcolor colorClip(NVGcolor a) {
@@ -55,4 +55,4 @@ inline NVGcolor colorScreen(NVGcolor a, NVGcolor b) {
 }
 
 
-} // namespace rack
+} // namespace mirack

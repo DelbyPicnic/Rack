@@ -4,7 +4,7 @@
 #include "tags.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct ModuleWidget;
@@ -116,7 +116,7 @@ extern std::list<Plugin*> gPlugins;
 extern std::string gToken;
 
 
-} // namespace rack
+} // namespace mirack
 
 
 ////////////////////
@@ -127,4 +127,4 @@ extern std::string gToken;
 You must implement this in your plugin
 */
 extern "C"
-void init(rack::Plugin *plugin);
+void init(mirack::Plugin *plugin);

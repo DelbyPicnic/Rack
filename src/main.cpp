@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 
-using namespace rack;
+using namespace mirack;
 
 extern "C" void main2() {
 	pluginInit();

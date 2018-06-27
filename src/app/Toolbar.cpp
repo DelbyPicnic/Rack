@@ -4,7 +4,7 @@
 #include "settings.hpp"
 #include "asset.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 struct NewItem : MenuItem {
@@ -288,4 +288,4 @@ void Toolbar::onResize() {
 #endif
 }
 
-} // namespace rack
+} // namespace mirack

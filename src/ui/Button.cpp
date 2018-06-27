@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 Button::Button() {
 	box.size.y = BND_WIDGET_HEIGHT;
@@ -36,4 +36,4 @@ void Button::onDragDrop(EventDragDrop &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -6,7 +6,7 @@
 #include <jansson.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 bool skipAutosaveOnLaunch = false;
@@ -206,4 +206,4 @@ void settingsLoad(std::string filename) {
 }
 
 
-} // namespace rack
+} // namespace mirack

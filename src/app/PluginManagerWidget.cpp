@@ -5,7 +5,7 @@
 #include "osdialog.h"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct SyncButton : Button {
@@ -218,4 +218,4 @@ void PluginManagerWidget::step() {
 }
 
 
-} // namespace rack
+} // namespace mirack

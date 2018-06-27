@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void SequentialLayout::onResize() {
@@ -45,4 +45,4 @@ void SequentialLayout::onResize() {
 }
 
 
-} // namespace rack
+} // namespace mirack

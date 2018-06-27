@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 /** Parent must be a ScrollWidget */
@@ -157,4 +157,4 @@ void ScrollWidget::onHoverKey(EventHoverKey &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

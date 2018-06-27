@@ -3,7 +3,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void LedDisplay::draw(NVGcontext *vg) {
@@ -106,4 +106,4 @@ int LedDisplayTextField::getTextPosition(Vec mousePos) {
 }
 
 
-} // namespace rack
+} // namespace mirack

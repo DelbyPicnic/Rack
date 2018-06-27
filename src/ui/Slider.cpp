@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 #define SLIDER_SENSITIVITY 0.001
 
@@ -43,4 +43,4 @@ void Slider::onMouseDown(EventMouseDown &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

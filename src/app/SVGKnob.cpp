@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGKnob::SVGKnob() {
@@ -50,4 +50,4 @@ void SVGKnob::onChange(EventChange &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGSwitch::SVGSwitch() {
@@ -34,4 +34,4 @@ void SVGSwitch::onChange(EventChange &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -4,7 +4,7 @@
 #include <libgen.h> // for dirname and basename
 
 
-namespace rack {
+namespace mirack {
 
 
 std::string stringf(const char *format, ...) {
@@ -71,4 +71,4 @@ std::string stringExtension(std::string path) {
 }
 
 
-} // namespace rack
+} // namespace mirack

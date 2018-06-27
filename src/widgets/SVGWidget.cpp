@@ -1,6 +1,6 @@
 #include "widgets.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 // Some modules set svg directly without calling setSVG() so we need to mark widget dirty
@@ -44,4 +44,4 @@ void SVGWidget::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

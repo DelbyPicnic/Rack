@@ -15,7 +15,7 @@
 
 #include "engine.hpp"
 
-namespace rack {
+namespace mirack {
 
 bool gPaused = false;
 std::vector<Module*> gModules;
@@ -143,7 +143,7 @@ void engineInit() {
     engineSetSampleRate(48000.0);
 
 #ifndef ARCH_WEB
-    numWorkers = 3;
+    numWorkers = 6;
     for (int i = 0; i < numWorkers; i++)
     {
         ptoks[i] = new moodycamel::ProducerToken(q);
@@ -470,4 +470,4 @@ float engineGetSampleTime() {
     return sampleTime;
 }
 
-} // namespace rack
+} // namespace mirack

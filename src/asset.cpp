@@ -20,7 +20,7 @@
 #endif
 
 
-namespace rack {
+namespace mirack {
 
 // Resources folder if packaged as an app on Mac, current (executable) folder otherwise
 std::string assetGlobal(std::string filename) {
@@ -144,4 +144,4 @@ std::string assetPlugin(Plugin *plugin, std::string filename) {
 }
 
 
-} // namespace rack
+} // namespace mirack

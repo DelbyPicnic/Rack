@@ -1,7 +1,7 @@
 #include "widgets.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 QuantityWidget::QuantityWidget() {
 	EventChange e;
@@ -33,4 +33,4 @@ std::string QuantityWidget::getText() {
 }
 
 
-} // namespace rack
+} // namespace mirack

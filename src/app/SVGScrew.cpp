@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGScrew::SVGScrew() {
@@ -22,4 +22,4 @@ void SVGScrew::draw(NVGcontext *vg) {
 	sw->drawCachedOrFresh(vg);
 }
 
-} // namespace rack
+} // namespace mirack

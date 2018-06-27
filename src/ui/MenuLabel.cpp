@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void MenuLabel::draw(NVGcontext *vg) {
@@ -18,4 +18,4 @@ void MenuLabel::step() {
 }
 
 
-} // namespace rack
+} // namespace mirack

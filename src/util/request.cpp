@@ -4,7 +4,7 @@
 #include <openssl/sha.h>
 
 
-namespace rack {
+namespace mirack {
 
 static size_t writeStringCallback(char *ptr, size_t size, size_t nmemb, void *userdata) {
 	std::string *str = (std::string*) userdata;
@@ -186,5 +186,5 @@ std::string requestSHA256File(std::string filename) {
 }
 
 
-} // namespace rack
+} // namespace mirack
 */

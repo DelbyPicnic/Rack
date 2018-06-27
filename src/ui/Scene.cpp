@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 void Scene::setOverlay(Widget *w) {
 	if (overlay) {
@@ -36,4 +36,4 @@ void Scene::onResize() {
 	Widget::onResize();
 }
 
-} // namespace rack
+} // namespace mirack

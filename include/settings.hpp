@@ -5,7 +5,7 @@
 
 #define KNOB_SENSITIVITY 0.0015
 
-namespace rack {
+namespace mirack {
 
 
 void settingsSave(std::string filename);
@@ -19,4 +19,4 @@ extern bool lockModules;
 extern float knobSensitivity;
 
 
-} // namespace rack
+} // namespace mirack

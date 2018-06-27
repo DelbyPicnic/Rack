@@ -2,7 +2,7 @@
 #include "engine.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void ModuleLightWidget::step() {
@@ -19,4 +19,4 @@ void ModuleLightWidget::step() {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGSlider::SVGSlider() {
@@ -33,4 +33,4 @@ void SVGSlider::onChange(EventChange &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -4,7 +4,7 @@
 #include "midi.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct BridgeMidiInputDevice : MidiInputDevice {
@@ -28,4 +28,4 @@ void bridgeAudioSubscribe(int channel, AudioIO *audio);
 void bridgeAudioUnsubscribe(int channel, AudioIO *audio);
 
 
-} // namespace rack
+} // namespace mirack

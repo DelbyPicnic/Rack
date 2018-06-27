@@ -2,7 +2,7 @@
 #include <string>
 
 
-namespace rack {
+namespace mirack {
 
 
 /** Describes the type(s) of each module
@@ -72,4 +72,4 @@ void tagsInit();
 extern std::string gTagNames[NUM_TAGS];
 
 
-} // namespace rack
+} // namespace mirack

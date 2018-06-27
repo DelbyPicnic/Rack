@@ -1,7 +1,7 @@
 #include "widgets.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 void SpriteWidget::draw(NVGcontext *vg) {
 	int width, height;
@@ -20,4 +20,4 @@ void SpriteWidget::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

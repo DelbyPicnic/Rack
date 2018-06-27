@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGPort::SVGPort() {
@@ -29,4 +29,4 @@ void SVGPort::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

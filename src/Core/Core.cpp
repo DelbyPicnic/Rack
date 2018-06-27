@@ -1,7 +1,7 @@
 #include "Core.hpp"
 
 
-void init(rack::Plugin *p) {
+void init(mirack::Plugin *p) {
 	p->slug = "Core";
 	p->version = TOSTRING(VERSION);
 

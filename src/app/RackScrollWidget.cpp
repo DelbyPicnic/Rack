@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void RackScrollWidget::step() {
@@ -43,4 +43,4 @@ void RackScrollWidget::updateForOffsetChange() {
 	ScrollWidget::updateForOffsetChange();
 }
 
-} // namespace rack
+} // namespace mirack

@@ -7,7 +7,7 @@
 #include <jansson.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 struct MidiMessage {
@@ -133,4 +133,4 @@ void midiDestroy();
 void midiDriverAdd(int driverId, MidiDriver *driver);
 
 
-} // namespace rack
+} // namespace mirack

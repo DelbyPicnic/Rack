@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void MenuOverlay::onResize() {
@@ -40,4 +40,4 @@ void MenuOverlay::onHoverKey(EventHoverKey &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

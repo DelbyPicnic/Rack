@@ -3,7 +3,7 @@
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 struct RCFilter {
 	float c = 0.f, c1, c2;
@@ -84,4 +84,4 @@ struct ExponentialFilter {
 };
 
 
-} // namespace rack
+} // namespace mirack

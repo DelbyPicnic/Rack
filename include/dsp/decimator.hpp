@@ -5,7 +5,7 @@
 #include "dsp/fir.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 template<int OVERSAMPLE, int QUALITY>
 struct Decimator {
@@ -36,4 +36,4 @@ struct Decimator {
 	}
 };
 
-} // namespace rack
+} // namespace mirack

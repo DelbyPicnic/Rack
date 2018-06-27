@@ -12,7 +12,7 @@ using std::isnan;
 using std::isnormal;
 
 
-namespace rack {
+namespace mirack {
 
 ////////////////////
 // basic integer functions
@@ -178,10 +178,10 @@ struct Vec {
 		return hypotf(x, y);
 	}
 	Vec min(Vec b) {
-		return Vec(rack::min(x, b.x), rack::min(y, b.y));
+		return Vec(mirack::min(x, b.x), mirack::min(y, b.y));
 	}
 	Vec max(Vec b) {
-		return Vec(rack::max(x, b.x), rack::max(y, b.y));
+		return Vec(mirack::max(x, b.x), mirack::max(y, b.y));
 	}
 	Vec round() {
 		return Vec(roundf(x), roundf(y));
@@ -252,8 +252,8 @@ struct Rect {
 		Rect r;
 		r.pos.x = clamp2(pos.x, bound.pos.x, bound.pos.x + bound.size.x);
 		r.pos.y = clamp2(pos.y, bound.pos.y, bound.pos.y + bound.size.y);
-		r.size.x = rack::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
-		r.size.y = rack::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
+		r.size.x = mirack::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
+		r.size.y = mirack::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
 		return r;
 	}
 	/** Nudges the position to fix inside a bounding box */
@@ -290,14 +290,14 @@ struct Rect {
 
 inline Vec Vec::clamp(Rect bound) {
 	return Vec(
-		rack::clamp(x, bound.pos.x, bound.pos.x + bound.size.x),
-		rack::clamp(y, bound.pos.y, bound.pos.y + bound.size.y));
+		mirack::clamp(x, bound.pos.x, bound.pos.x + bound.size.x),
+		mirack::clamp(y, bound.pos.y, bound.pos.y + bound.size.y));
 }
 
 inline Vec Vec::clamp2(Rect bound) {
 	return Vec(
-		rack::clamp2(x, bound.pos.x, bound.pos.x + bound.size.x),
-		rack::clamp2(y, bound.pos.y, bound.pos.y + bound.size.y));
+		mirack::clamp2(x, bound.pos.x, bound.pos.x + bound.size.x),
+		mirack::clamp2(y, bound.pos.y, bound.pos.y + bound.size.y));
 }
 
 
@@ -325,7 +325,7 @@ DEPRECATED inline float interpf(const float *p, float x) {return interpolateLine
 DEPRECATED inline void cmultf(float *cr, float *ci, float ar, float ai, float br, float bi) {return cmult(cr, ci, ar, ai, br, bi);}
 
 
-} // namespace rack
+} // namespace mirack
 
 #if defined(__arm__) || defined(__aarch64__)
 	extern "C" {

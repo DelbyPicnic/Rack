@@ -1,6 +1,6 @@
 #include "widgets.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 Widget *gHoveredWidget = NULL;
@@ -10,4 +10,4 @@ Widget *gFocusedWidget = NULL;
 Widget *gTempWidget = NULL;
 
 
-} // namespace rack
+} // namespace mirack

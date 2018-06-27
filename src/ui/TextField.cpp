@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 void TextField::draw(NVGcontext *vg) {
@@ -205,4 +205,4 @@ int TextField::getTextPosition(Vec mousePos) {
 }
 
 
-} // namespace rack
+} // namespace mirack

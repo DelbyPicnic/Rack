@@ -3,7 +3,7 @@
 #include <complex>
 
 
-namespace rack {
+namespace mirack {
 
 /** Simple FFT implementation
 If you need something fast, use pffft, KissFFT, etc instead.
@@ -60,4 +60,4 @@ struct SimpleFFT {
 	}
 };
 
-} // namespace rack
+} // namespace mirack

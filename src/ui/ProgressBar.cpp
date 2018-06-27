@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 void ProgressBar::draw(NVGcontext *vg) {
 	float progress = rescale(value, minValue, maxValue, 0.0, 1.0);
@@ -9,4 +9,4 @@ void ProgressBar::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

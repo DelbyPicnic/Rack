@@ -4,7 +4,7 @@
 #include "engine.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 AudioIO::AudioIO() {
@@ -449,4 +449,4 @@ void AudioIO::fromJson(json_t *rootJ) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -4,7 +4,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 static void drawPlug(NVGcontext *vg, Vec pos, NVGcolor color) {
 	NVGcolor colorOutline = nvgLerpRGBA(color, nvgRGBf(0.0, 0.0, 0.0), 0.5);
@@ -204,4 +204,4 @@ void WireWidget::drawPlugs(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

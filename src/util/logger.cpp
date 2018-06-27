@@ -3,7 +3,7 @@
 #include <stdarg.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 static FILE *logFile = stderr;
@@ -65,4 +65,4 @@ void fatal(const char *format, ...) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -4,7 +4,7 @@
 #include "plugin.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 /** Returns the path of a global resource. Should only read files from this location. */
@@ -17,4 +17,4 @@ std::string assetHidden(std::string filename);
 std::string assetPlugin(Plugin *plugin, std::string filename);
 
 
-} // namespace rack
+} // namespace mirack

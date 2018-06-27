@@ -2,7 +2,7 @@
 #include "window.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct PanelBorder : TransparentWidget {
@@ -30,4 +30,4 @@ void SVGPanel::setBackground(std::shared_ptr<SVG> svg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

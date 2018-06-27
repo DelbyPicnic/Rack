@@ -3,7 +3,7 @@
 #include "asset.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 ////////////////////
@@ -626,4 +626,4 @@ struct DarkPanel : Panel {
 };
 
 
-} // namespace rack
+} // namespace mirack

@@ -11,7 +11,7 @@
 #pragma GCC diagnostic pop
 
 
-namespace rack {
+namespace mirack {
 
 
 struct RtMidiInputDevice : MidiInputDevice {
@@ -42,4 +42,4 @@ struct RtMidiDriver : MidiDriver {
 void rtmidiInit();
 
 
-} // namespace rack
+} // namespace mirack

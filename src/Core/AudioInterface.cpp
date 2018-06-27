@@ -14,7 +14,7 @@
 #define AUDIO_INPUTS 8
 
 
-using namespace rack;
+using namespace mirack;
 
 
 struct AudioInterfaceIO : AudioIO {

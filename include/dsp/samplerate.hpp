@@ -6,7 +6,7 @@
 #include "frame.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 template<int CHANNELS>
 struct SampleRateConverter {
@@ -95,4 +95,4 @@ struct SampleRateConverter {
 	}
 };
 
-} // namespace rack
+} // namespace mirack

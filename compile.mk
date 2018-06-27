@@ -70,6 +70,10 @@ build/%.c.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+build/compat/%.cpp.o: compat/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) -Icompat/include $(CXXFLAGS) -c -o $@ $<
+
 build/%.cpp.o: %.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

@@ -5,7 +5,7 @@
 #include <thread>
 
 
-namespace rack {
+namespace mirack {
 
 struct CalibrationWidget : OpaqueWidget {
 	std::vector<Vec> pts;
@@ -152,4 +152,4 @@ void RackScene::onPathDrop(EventPathDrop &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 SVGButton::SVGButton() {
@@ -35,4 +35,4 @@ void SVGButton::onDragEnd(EventDragEnd &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

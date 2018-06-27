@@ -3,7 +3,7 @@
 #include "window.hpp"
 #include <set>
 #include <algorithm>
-
+#include "compat/include/app.hpp"
 
 #ifdef TOUCH
 static const float itemMargin = 2.0 + 8.0;
@@ -12,7 +12,7 @@ static const float itemMargin = 2.0;
 #endif
 
 
-namespace rack {
+namespace mirack {
 
 
 static std::set<Model*> sFavoriteModels;
@@ -152,6 +152,15 @@ struct ModelItem : BrowserListItem {
 		ModuleWidget *moduleWidget = model->createModuleWidget();
 		if (!moduleWidget)
 			return;
+
+		// Is a VCV plugin/module
+		if (moduleWidget->parent) {
+			printf("######## VCV Module\n");
+			rack::ModuleWidget *mw = reinterpret_cast<rack::ModuleWidget*>(moduleWidget);
+			moduleWidget = new VCVModuleWidget(mw);
+			// return;
+		}
+
 		// Move module nearest to the mouse position
 		moduleWidget->box.pos = gRackWidget->lastMousePos.minus(moduleWidget->box.size.div(2));
 		gRackWidget->requestModuleBoxNearest(moduleWidget, moduleWidget->box);
@@ -702,4 +711,4 @@ void appModuleBrowserFromJson(json_t *rootJ) {
 }
 
 
-} // namespace rack
+} // namespace mirack

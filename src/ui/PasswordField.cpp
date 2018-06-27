@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void PasswordField::draw(NVGcontext *vg) {
@@ -12,4 +12,4 @@ void PasswordField::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

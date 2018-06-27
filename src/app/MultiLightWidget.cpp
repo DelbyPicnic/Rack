@@ -2,7 +2,7 @@
 #include "util/color.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void MultiLightWidget::addBaseColor(NVGcolor baseColor) {
@@ -24,4 +24,4 @@ void MultiLightWidget::setValues(const std::vector<float> &values) {
 }
 
 
-} // namespace rack
+} // namespace mirack

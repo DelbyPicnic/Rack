@@ -4,7 +4,7 @@
 #include "componentlibrary.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct PlugLight : MultiLightWidget {
@@ -126,4 +126,4 @@ void Port::onDragLeave(EventDragEnter &e) {
 }
 
 
-} // namespace rack
+} // namespace mirack

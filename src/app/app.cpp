@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 std::string gApplicationName = "miRack";
 std::string gApplicationVersion = TOSTRING(VERSION);
@@ -41,4 +41,4 @@ NVGcolor jsonToColor(json_t *colorJ) {
 }
 
 
-} // namespace rack
+} // namespace mirack

@@ -9,7 +9,7 @@
 #endif
 
 
-namespace rack {
+namespace mirack {
 
 
 std::vector<std::string> systemListEntries(std::string path) {
@@ -87,4 +87,4 @@ void systemOpenBrowser(std::string url) {
 }
 
 
-} // namespace rack
+} // namespace mirack

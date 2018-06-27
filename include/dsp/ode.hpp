@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace rack {
+namespace mirack {
 
 typedef void (*stepCallback)(float x, const float y[], float dydt[]);
 
@@ -45,4 +45,4 @@ inline void stepRK4(stepCallback f, float x, float dx, float y[], int len) {
 	}
 }
 
-} // namespace rack
+} // namespace mirack

@@ -1,7 +1,7 @@
 #include "app.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 CircularShadow::CircularShadow() {
@@ -32,4 +32,4 @@ void CircularShadow::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

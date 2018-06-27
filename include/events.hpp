@@ -4,7 +4,7 @@
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct Widget;
@@ -104,4 +104,4 @@ struct EventZoom : Event {
 };
 
 
-} // namespace rack
+} // namespace mirack

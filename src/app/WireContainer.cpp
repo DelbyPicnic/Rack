@@ -5,7 +5,7 @@
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 
-namespace rack {
+namespace mirack {
 
 WireContainer::WireContainer() {
 	plug = new SVG(assetGlobal("res/Plug.svg"));
@@ -158,4 +158,4 @@ void WireContainer::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

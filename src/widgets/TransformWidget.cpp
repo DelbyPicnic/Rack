@@ -1,7 +1,7 @@
 #include "widgets.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 TransformWidget::TransformWidget() {
@@ -46,4 +46,4 @@ void TransformWidget::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

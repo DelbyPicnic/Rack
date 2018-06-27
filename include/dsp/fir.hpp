@@ -6,7 +6,7 @@
 	#include <arm_neon.h>
 #endif
 
-namespace rack {
+namespace mirack {
 
 /** Perform a direct convolution
 x[-len + 1] to x[0] must be defined
@@ -160,4 +160,4 @@ struct RealTimeConvolver {
 };
 
 
-} // namespace rack
+} // namespace mirack

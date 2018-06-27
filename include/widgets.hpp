@@ -10,7 +10,7 @@
 
 struct NVGLUframebuffer;
 
-namespace rack {
+namespace mirack {
 
 ////////////////////
 // resources
@@ -127,8 +127,8 @@ struct BoxWrapper {
 		Rect r;
 		r.pos.x = clamp2(pos.x, bound.pos.x, bound.pos.x + bound.size.x);
 		r.pos.y = clamp2(pos.y, bound.pos.y, bound.pos.y + bound.size.y);
-		r.size.x = rack::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
-		r.size.y = rack::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
+		r.size.x = mirack::clamp(pos.x + size.x, bound.pos.x, bound.pos.x + bound.size.x) - r.pos.x;
+		r.size.y = mirack::clamp(pos.y + size.y, bound.pos.y, bound.pos.y + bound.size.y) - r.pos.y;
 		return r;
 	}
 	/** Nudges the position to fix inside a bounding box */
@@ -476,4 +476,4 @@ extern Widget *gFocusedWidget;
 extern Widget *gTempWidget;
 
 
-} // namespace rack
+} // namespace mirack

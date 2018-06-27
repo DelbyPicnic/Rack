@@ -2,7 +2,7 @@
 #include "util/color.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 void LightWidget::draw(NVGcontext *vg) {
@@ -56,4 +56,4 @@ void LightWidget::drawHalo(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack

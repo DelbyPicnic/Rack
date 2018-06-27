@@ -4,7 +4,7 @@
 #include "window.hpp"
 #include "settings.hpp"
 
-namespace rack {
+namespace mirack {
 
 
 static double dragStartTime;
@@ -433,4 +433,4 @@ Menu *ModuleWidget::createContextMenu() {
 }
 
 
-} // namespace rack
+} // namespace mirack

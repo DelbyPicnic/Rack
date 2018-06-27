@@ -3,7 +3,7 @@
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 /** Turns high when value reaches 1, turns low when value reaches 0 */
@@ -72,4 +72,4 @@ struct PulseGenerator {
 };
 
 
-} // namespace rack
+} // namespace mirack

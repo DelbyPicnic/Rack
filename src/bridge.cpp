@@ -17,7 +17,7 @@
 #include <thread>
 
 
-namespace rack {
+namespace mirack {
 
 
 struct BridgeClientConnection;
@@ -436,4 +436,4 @@ void bridgeAudioUnsubscribe(int port, AudioIO *audio) {
 }
 
 
-} // namespace rack
+} // namespace mirack

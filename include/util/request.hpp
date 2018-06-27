@@ -3,7 +3,7 @@
 #include <jansson.h>
 
 
-namespace rack {
+namespace mirack {
 
 
 enum RequestMethod {
@@ -23,4 +23,4 @@ std::string requestEscape(std::string s);
 std::string requestSHA256File(std::string filename);
 
 
-} // namespace rack
+} // namespace mirack

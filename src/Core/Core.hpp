@@ -1,7 +1,7 @@
 #include "rack.hpp"
 
 
-using namespace rack;
+using namespace mirack;
 
 
 extern Model *modelAudioInterface;

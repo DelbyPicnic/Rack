@@ -3,7 +3,7 @@
 #include "util/math.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 struct VUMeter {
@@ -29,4 +29,4 @@ struct VUMeter {
 };
 
 
-} // namespace rack
+} // namespace mirack

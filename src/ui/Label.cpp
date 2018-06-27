@@ -1,7 +1,7 @@
 #include "ui.hpp"
 
 
-namespace rack {
+namespace mirack {
 
 
 Label::Label() {
@@ -35,4 +35,4 @@ void Label::draw(NVGcontext *vg) {
 }
 
 
-} // namespace rack
+} // namespace mirack
