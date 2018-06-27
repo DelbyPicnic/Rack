@@ -108,7 +108,7 @@ void VCVWidgetProxy::onHoverKey(EventHoverKey &e) {
 void VCVWidgetProxy::onDragStart(EventDragStart &e) {
 	rack::EventDragStart e2;
 	target->onDragStart(e2);
-printf("DRAGSTART %p\n",target);
+
 	// dragPos = gRackWidget->lastMousePos.minus(box.pos);
 }
 

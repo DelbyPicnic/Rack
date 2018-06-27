@@ -224,14 +224,6 @@ void ModuleWidget::drawShadow(NVGcontext *vg) {
 
 void ModuleWidget::onMouseDown(EventMouseDown &e) {
 	Widget::onMouseDown(e);
-	if (e.consumed)
-		return;
-
-	if (e.button == 1) {
-		createContextMenu();
-	}
-	e.consumed = true;
-	e.target = this;
 }
 
 void ModuleWidget::onMouseMove(EventMouseMove &e) {

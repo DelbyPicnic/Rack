@@ -143,8 +143,8 @@ struct VCVModuleWidget : ModuleWidget {
 	VCVModuleWidget(rack::ModuleWidget *mw);
 	~VCVModuleWidget();
 
-	virtual json_t *toJson();
-	virtual void fromJson(json_t *rootJ);
+	json_t *toJson() override;
+	void fromJson(json_t *rootJ) override;
 
 	virtual void create();
 	virtual void _delete();
@@ -155,31 +155,23 @@ struct VCVModuleWidget : ModuleWidget {
 	/** Resets the parameters of the module and calls the Module's randomize().
 	Called when the user clicks Initialize in the context menu.
 	*/
-	virtual void reset();
-	/** Randomizes the parameters of the module and calls the Module's randomize().
-	Called when the user clicks Randomize in the context menu.
-	*/
-	virtual void randomize();
-	/** Do not subclass this to add context menu entries. Use appendContextMenu() instead */
-	virtual Menu *createContextMenu();
-	/** Override to add context menu entries to your subclass.
-	It is recommended to add a blank MenuEntry first for spacing.
-	*/
-	virtual void appendContextMenu(Menu *menu) {}
+	void reset() override;
+	void randomize() override;
+	void appendContextMenu(Menu *menu) override;
 
 	void step() override;
 	void draw(NVGcontext *vg) override;
 	void drawShadow(NVGcontext *vg);
 
-	Vec dragPos;
+	// Vec dragPos;
 	void onMouseDown(EventMouseDown &e) override;
 	void onMouseMove(EventMouseMove &e) override;
-	void onHoverKey(EventHoverKey &e) override;
-	void onDragStart(EventDragStart &e) override;
-	void onDragEnd(EventDragEnd &e) override;
-	void onDragMove(EventDragMove &e) override;
-	void onDragEnter(EventDragEnter &e) override;
-	void onDragLeave(EventDragEnter &e) override;
+	// void onHoverKey(EventHoverKey &e) override;
+	// void onDragStart(EventDragStart &e) override;
+	// void onDragEnd(EventDragEnd &e) override;
+	// void onDragMove(EventDragMove &e) override;
+	// void onDragEnter(EventDragEnter &e) override;
+	// void onDragLeave(EventDragEnter &e) override;
 };
 
 struct WireWidget : OpaqueWidget {

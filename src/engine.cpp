@@ -143,7 +143,7 @@ void engineInit() {
     engineSetSampleRate(48000.0);
 
 #ifndef ARCH_WEB
-    numWorkers = 6;
+    numWorkers = 3;
     for (int i = 0; i < numWorkers; i++)
     {
         ptoks[i] = new moodycamel::ProducerToken(q);

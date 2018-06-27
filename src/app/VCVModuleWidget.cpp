@@ -4,12 +4,14 @@
 #include "window.hpp"
 #include "compat/include/app.hpp"
 #include "compat/include/engine.hpp"
+#include "compat/include/plugin.hpp"
 
 namespace mirack {
 
 
 VCVModuleWidget::VCVModuleWidget(rack::ModuleWidget *mw) : ModuleWidget(NULL) {
 	this->mw = mw;
+	this->model = reinterpret_cast<Model*>(mw->model);
 	box.size = Vec(mw->box.size.x, mw->box.size.y);
 
 	auto *mp = new VCVModuleProxy(mw->module);
@@ -42,6 +44,7 @@ VCVModuleWidget::~VCVModuleWidget() {
 
 
 json_t *VCVModuleWidget::toJson() {
+	mw->box.pos = rack::Vec(box.pos.x, box.pos.y);
 	return mw->toJson();
 }
 
@@ -66,21 +69,12 @@ void VCVModuleWidget::_delete() {
 }
 
 void VCVModuleWidget::reset() {
-	for (ParamWidget *param : params) {
-		param->reset();
-	}
-	if (module) {
-		module->onReset();
-	}
+	mw->reset();
 }
 
 void VCVModuleWidget::randomize() {
-	for (ParamWidget *param : params) {
-		param->randomize();
-	}
-	if (module) {
-		module->onRandomize();
-	}
+	//TODO: broken
+	mw->randomize();
 }
 
 void VCVModuleWidget::step() {
@@ -142,20 +136,21 @@ void VCVModuleWidget::onMouseDown(EventMouseDown &e) {
 	e2.button = e.button;
 	mw->onMouseDown(e2);
 	e.consumed = e2.consumed;
-	if (e2.target)
+	
+	if (e2.target) {
 		if (e2.target == mw)
 			e.target = this;
 		else
 			e.target = new VCVWidgetProxy(e2.target);
-	printf("#1 %p\n",e.target);
-	// if (e.consumed)
-	// 	return;
+	}
 
-	// if (e.button == 1) {
-	// 	createContextMenu();
-	// }
-	// e.consumed = true;
-	// e.target = this;
+	if (e.consumed)
+		return;
+
+	if (e.button == 1)
+		createContextMenu();
+	e.consumed = true;
+	e.target = this;
 }
 
 void VCVModuleWidget::onMouseMove(EventMouseMove &e) {
@@ -176,150 +171,38 @@ void VCVModuleWidget::onMouseMove(EventMouseMove &e) {
 	// }
 }
 
-void VCVModuleWidget::onHoverKey(EventHoverKey &e) {
-	// switch (e.key) {
-	// 	case GLFW_KEY_I: {
-	// 		if (windowIsModPressed() && !windowIsShiftPressed()) {
-	// 			reset();
-	// 			e.consumed = true;
-	// 			return;
-	// 		}
-	// 	} break;
-	// 	case GLFW_KEY_R: {
-	// 		if (windowIsModPressed() && !windowIsShiftPressed()) {
-	// 			randomize();
-	// 			e.consumed = true;
-	// 			return;
-	// 		}
-	// 	} break;
-	// 	case GLFW_KEY_D: {
-	// 		if (windowIsModPressed() && !windowIsShiftPressed()) {
-	// 			gRackWidget->cloneModule(this);
-	// 			e.consumed = true;
-	// 			return;
-	// 		}
-	// 	} break;
-	// 	case GLFW_KEY_U: {
-	// 		if (windowIsModPressed() && !windowIsShiftPressed()) {
-	// 			disconnect();
-	// 			e.consumed = true;
-	// 			return;
-	// 		}
-	// 	} break;
-	// }
+// void VCVModuleWidget::onDragStart(EventDragStart &e) {
+// 	// rack::EventDragStart e2;
+// 	// mw->onDragStart(e2);
 
-	// Widget::onHoverKey(e);
-}
+// 	dragPos = gRackWidget->lastMousePos.minus(box.pos);
+// }
 
-void VCVModuleWidget::onDragStart(EventDragStart &e) {
-	// rack::EventDragStart e2;
-	// mw->onDragStart(e2);
+// void VCVModuleWidget::onDragEnd(EventDragEnd &e) {
+// }
 
-	dragPos = gRackWidget->lastMousePos.minus(box.pos);
-}
-
-void VCVModuleWidget::onDragEnd(EventDragEnd &e) {
-}
-
-void VCVModuleWidget::onDragMove(EventDragMove &e) {
-	// if (!gRackWidget->lockModules)
-	{
-		Rect newBox = box;
-		newBox.pos = gRackWidget->lastMousePos.minus(dragPos);
-		gRackWidget->requestModuleBoxNearest(this, newBox);
-	}
-}
-
-void VCVModuleWidget::onDragEnter(EventDragEnter &e) {
-	rack::EventDragEnter e2;
-	mw->onDragEnter(e2);
-}
-
-void VCVModuleWidget::onDragLeave(EventDragEnter &e) {
-	rack::EventDragEnter e2;
-	mw->onDragLeave(e2);
-}
-
-
-
-// struct DisconnectMenuItem : MenuItem {
-// 	VCVModuleWidget *VCVModuleWidget;
-// 	void onAction(EventAction &e) override {
-// 		VCVModuleWidget->disconnect();
+// void VCVModuleWidget::onDragMove(EventDragMove &e) {
+// 	// if (!gRackWidget->lockModules)
+// 	{
+// 		Rect newBox = box;
+// 		newBox.pos = gRackWidget->lastMousePos.minus(dragPos);
+// 		gRackWidget->requestModuleBoxNearest(this, newBox);
 // 	}
-// };
+// }
 
-// struct ResetMenuItem : MenuItem {
-// 	VCVModuleWidget *VCVModuleWidget;
-// 	void onAction(EventAction &e) override {
-// 		VCVModuleWidget->reset();
-// 	}
-// };
+// void VCVModuleWidget::onDragEnter(EventDragEnter &e) {
+// 	rack::EventDragEnter e2;
+// 	mw->onDragEnter(e2);
+// }
 
-// struct RandomizeMenuItem : MenuItem {
-// 	VCVModuleWidget *VCVModuleWidget;
-// 	void onAction(EventAction &e) override {
-// 		VCVModuleWidget->randomize();
-// 	}
-// };
+// void VCVModuleWidget::onDragLeave(EventDragEnter &e) {
+// 	rack::EventDragEnter e2;
+// 	mw->onDragLeave(e2);
+// }
 
-// struct CloneMenuItem : MenuItem {
-// 	VCVModuleWidget *VCVModuleWidget;
-// 	void onAction(EventAction &e) override {
-// 		gRackWidget->cloneModule(VCVModuleWidget);
-// 	}
-// };
-
-// struct DeleteMenuItem : MenuItem {
-// 	VCVModuleWidget *VCVModuleWidget;
-// 	void onAction(EventAction &e) override {
-// 		gRackWidget->deleteModule(VCVModuleWidget);
-// 		VCVModuleWidget->finalizeEvents();
-// 		delete VCVModuleWidget;
-// 	}
-// };
-
-Menu *VCVModuleWidget::createContextMenu() {
-	Menu *menu = gScene->createMenu();
-
-	// MenuLabel *menuLabel = new MenuLabel();
-	// menuLabel->text = model->author + " " + model->name + " " + model->plugin->version;
-	// menu->addChild(menuLabel);
-
-	// ResetMenuItem *resetItem = new ResetMenuItem();
-	// resetItem->text = "Initialize";
-	// resetItem->rightText = WINDOW_MOD_KEY_NAME "+I";
-	// resetItem->VCVModuleWidget = this;
-	// menu->addChild(resetItem);
-
-	// RandomizeMenuItem *randomizeItem = new RandomizeMenuItem();
-	// randomizeItem->text = "Randomize";
-	// randomizeItem->rightText = WINDOW_MOD_KEY_NAME "+R";
-	// randomizeItem->VCVModuleWidget = this;
-	// menu->addChild(randomizeItem);
-
-	// DisconnectMenuItem *disconnectItem = new DisconnectMenuItem();
-	// disconnectItem->text = "Disconnect cables";
-	// disconnectItem->rightText = WINDOW_MOD_KEY_NAME "+U";
-	// disconnectItem->VCVModuleWidget = this;
-	// menu->addChild(disconnectItem);
-
-	// CloneMenuItem *cloneItem = new CloneMenuItem();
-	// cloneItem->text = "Duplicate";
-	// cloneItem->rightText = WINDOW_MOD_KEY_NAME "+D";
-	// cloneItem->VCVModuleWidget = this;
-	// menu->addChild(cloneItem);
-
-	// DeleteMenuItem *deleteItem = new DeleteMenuItem();
-	// deleteItem->text = "Delete";
-	// deleteItem->rightText = "Backspace/Delete";
-	// deleteItem->VCVModuleWidget = this;
-	// menu->addChild(deleteItem);
-
-	// appendContextMenu(menu);
-
-	return menu;
+void VCVModuleWidget::appendContextMenu(Menu *menu) {
+	rack::Menu *_menu = new rack::Menu();
+	mw->appendContextMenu(_menu);	
 }
-
 
 } // namespace rack
