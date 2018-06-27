@@ -170,7 +170,7 @@ struct RackWidget : OpaqueWidget {
 	/** Disconnects all wires */
 	void disconnect();
 	void savePatch(std::string filename);
-	void loadPatch(std::string filename);
+	bool loadPatch(std::string filename);
 	json_t *toJson();
 	void fromJson(json_t *rootJ);
 

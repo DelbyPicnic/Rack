@@ -85,11 +85,7 @@ void RackWidget::reset() {
 	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Clear your patch and start over?")) {
 		clear();
 		// Fails silently if file does not exist
-#ifndef ARCH_WEB
-		loadPatch(assetHidden("template.vcv"));
-#else
 		loadPatch(assetGlobal("template.vcv"));
-#endif
 		lastPath = "";
 	}
 }
@@ -145,27 +141,30 @@ void RackWidget::savePatch(std::string path) {
 	json_decref(rootJ);
 }
 
-void RackWidget::loadPatch(std::string path) {
+bool RackWidget::loadPatch(std::string path) {
 	info("Loading patch %s", path.c_str());
 	FILE *file = fopen(path.c_str(), "r");
 	if (!file) {
 		// Exit silently
-		return;
+		return false;
 	}
 
 	json_error_t error;
 	json_t *rootJ = json_loadf(file, 0, &error);
+	fclose(file);
 	if (rootJ) {
 		clear();
 		fromJson(rootJ);
 		json_decref(rootJ);
+		
+		return true;
 	}
 	else {
 		std::string message = stringf("JSON parsing error at %s %d:%d %s\n", error.source, error.line, error.column, error.text);
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
-	}
 
-	fclose(file);
+		return false;
+	}
 }
 
 void RackWidget::revert() {
