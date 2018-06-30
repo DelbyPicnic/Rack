@@ -1,6 +1,5 @@
 #include "asset.hpp"
 #include "util/common.hpp"
-#include <sys/stat.h> // for mkdir
 #include "osdialog.h"
 
 #if ARCH_MAC
@@ -51,7 +50,7 @@ void assetInit() {
 	assert(pw);
 	localDir = pw->pw_dir;
 	localDir += "/Documents";
-	mkdir(localDir.c_str(), 0755);
+	systemCreateDirectory(localDir);
 #endif
 
 #if ARCH_WIN
@@ -92,7 +91,7 @@ void assetInit() {
 	assert(pw);
 	hiddenDir = pw->pw_dir;
 	hiddenDir += "/Library/Application Support/miRack";
-	mkdir(hiddenDir.c_str(), 0755);
+	systemCreateDirectory(hiddenDir);
 #endif
 	
 #if ARCH_WIN
@@ -115,7 +114,7 @@ void assetInit() {
 	}
 	hiddenDir = home;
 	hiddenDir += "/.miRack";
-	mkdir(hiddenDir.c_str(), 0755);
+	systemCreateDirectory(hiddenDir);
 #endif
 
 #else

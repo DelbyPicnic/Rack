@@ -14,9 +14,6 @@
 namespace rack {
 
 
-static const char *FILTERS = "VCV Rack patch (.vcv):vcv";
-
-
 struct ModuleContainer : Widget {
 	/*void draw(NVGcontext *vg) override {
 		// Draw shadows behind each ModuleWidget first, so the shadow doesn't overlap the front.
@@ -95,7 +92,7 @@ void RackWidget::reset() {
 
 void RackWidget::openDialog() {
 	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
-	osdialog_filters *filters = osdialog_filters_parse(FILTERS);
+	osdialog_filters *filters = osdialog_filters_parse(PATCH_FILTERS);
 	char *path = osdialog_file(OSDIALOG_OPEN, dir.c_str(), NULL, filters);
 
 	if (path) {
@@ -117,7 +114,7 @@ void RackWidget::saveDialog() {
 
 void RackWidget::saveAsDialog() {
 	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
-	osdialog_filters *filters = osdialog_filters_parse(FILTERS);
+	osdialog_filters *filters = osdialog_filters_parse(PATCH_FILTERS);
 	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), "Untitled.vcv", filters);
 
 	if (path) {
@@ -168,7 +165,7 @@ bool RackWidget::loadPatch(std::string path) {
 		return true;
 	}
 	else {
-		std::string message = stringf("JSON parsing error at %s %d:%d %s\n", error.source, error.line, error.column, error.text);
+		std::string message = stringf("JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
 		osdialog_message(OSDIALOG_WARNING, OSDIALOG_OK, message.c_str());
 
 		return false;
@@ -178,7 +175,7 @@ bool RackWidget::loadPatch(std::string path) {
 void RackWidget::revert() {
 	if (lastPath.empty())
 		return;
-	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Revert your patch to the last saved state?")) {
+	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Revert patch to the last saved state?")) {
 		loadPatch(lastPath);
 	}
 }
@@ -210,6 +207,12 @@ json_t *RackWidget::toJson() {
 		moduleId++;
 		// module
 		json_t *moduleJ = moduleWidget->toJson();
+		{
+			// pos
+			Vec pos = moduleWidget->box.pos.div(RACK_GRID_SIZE).round();
+			json_t *posJ = json_pack("[i, i]", (int) pos.x, (int) pos.y);
+			json_object_set_new(moduleJ, "pos", posJ);
+		}
 		json_array_append_new(modulesJ, moduleJ);
 	}
 	json_object_set_new(rootJ, "modules", modulesJ);
@@ -283,25 +286,29 @@ void RackWidget::fromJson(json_t *rootJ) {
 			json_object_set(moduleJ, "legacy", json_integer(legacy));
 		}
 
-		json_t *pluginSlugJ = json_object_get(moduleJ, "plugin");
-		if (!pluginSlugJ) continue;
-		json_t *modelSlugJ = json_object_get(moduleJ, "model");
-		if (!modelSlugJ) continue;
-		std::string pluginSlug = json_string_value(pluginSlugJ);
-		std::string modelSlug = json_string_value(modelSlugJ);
+		ModuleWidget *moduleWidget = moduleFromJson(moduleJ);
+		if (moduleWidget) {
+			// pos
+			json_t *posJ = json_object_get(moduleJ, "pos");
+			double x, y;
+			json_unpack(posJ, "[F, F]", &x, &y);
+			Vec pos = Vec(x, y);
+			if (legacy && legacy <= 1) {
+				moduleWidget->box.pos = pos;
+			}
+			else {
+				moduleWidget->box.pos = pos.mult(RACK_GRID_SIZE);
+			}
 
-		Model *model = pluginGetModel(pluginSlug, modelSlug);
-		if (!model) {
-			message += stringf("Could not find module \"%s\" of plugin \"%s\"\n", modelSlug.c_str(), pluginSlug.c_str());
-			continue;
+			moduleWidgets[moduleId] = moduleWidget;
 		}
-
-		// Create ModuleWidget
-		ModuleWidget *moduleWidget = model->createModuleWidget();
-		assert(moduleWidget);
-		moduleWidget->fromJson(moduleJ);
-		gRackWidget->addModule(moduleWidget);
-		moduleWidgets[moduleId] = moduleWidget;
+		else {
+			json_t *pluginSlugJ = json_object_get(moduleJ, "plugin");
+			json_t *modelSlugJ = json_object_get(moduleJ, "model");
+			std::string pluginSlug = json_string_value(pluginSlugJ);
+			std::string modelSlug = json_string_value(modelSlugJ);
+			message += stringf("Could not find module \"%s\" of plugin \"%s\"\n", modelSlug.c_str(), pluginSlug.c_str());
+		}
 	}
 
 	// wires
@@ -363,6 +370,55 @@ void RackWidget::fromJson(json_t *rootJ) {
 	}
 }
 
+ModuleWidget *RackWidget::moduleFromJson(json_t *moduleJ) {
+	// Get slugs
+	json_t *pluginSlugJ = json_object_get(moduleJ, "plugin");
+	if (!pluginSlugJ)
+		return NULL;
+	json_t *modelSlugJ = json_object_get(moduleJ, "model");
+	if (!modelSlugJ)
+		return NULL;
+	std::string pluginSlug = json_string_value(pluginSlugJ);
+	std::string modelSlug = json_string_value(modelSlugJ);
+
+	// Get Model
+	Model *model = pluginGetModel(pluginSlug, modelSlug);
+	if (!model)
+		return NULL;
+
+	// Create ModuleWidget
+	ModuleWidget *moduleWidget = model->createModuleWidget();
+	assert(moduleWidget);
+	moduleWidget->fromJson(moduleJ);
+
+	addModule(moduleWidget);
+
+	return moduleWidget;
+}
+
+void RackWidget::pastePresetClipboard() {
+	const char *moduleJson = glfwGetClipboardString(gWindow);
+	if (!moduleJson) {
+		warn("Could not get text from clipboard.");
+		return;
+	}
+
+	json_error_t error;
+	json_t *moduleJ = json_loads(moduleJson, 0, &error);
+	if (moduleJ) {
+		ModuleWidget *moduleWidget = moduleFromJson(moduleJ);
+		// Set moduleWidget position
+		Rect newBox = moduleWidget->box;
+		newBox.pos = lastMousePos.minus(newBox.size.div(2));
+		requestModuleBoxNearest(moduleWidget, newBox);
+
+		json_decref(moduleJ);
+	}
+	else {
+		warn("JSON parsing error at %s %d:%d %s", error.source, error.line, error.column, error.text);
+	}
+}
+
 void RackWidget::addModule(ModuleWidget *m) {
 	moduleContainer->addChild(m);
 
@@ -384,16 +440,13 @@ void RackWidget::deleteModule(ModuleWidget *m) {
 }
 
 void RackWidget::cloneModule(ModuleWidget *m) {
-	// Create new module from model
-	ModuleWidget *clonedModuleWidget = m->model->createModuleWidget();
 	// JSON serialization is the most straightforward way to do this
 	json_t *moduleJ = m->toJson();
-	clonedModuleWidget->fromJson(moduleJ);
+	ModuleWidget *clonedModuleWidget = moduleFromJson(moduleJ);
 	json_decref(moduleJ);
 	Rect clonedBox = clonedModuleWidget->box;
 	clonedBox.pos = m->box.pos;
 	requestModuleBoxNearest(clonedModuleWidget, clonedBox);
-	addModule(clonedModuleWidget);
 }
 
 bool RackWidget::requestModuleBox(ModuleWidget *m, Rect box) {
