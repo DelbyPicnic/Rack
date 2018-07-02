@@ -8,16 +8,21 @@ ifeq (,$(findstring http,$(URL)))
 else
 	git clone $(URL) plugins/$(DIR)
 endif
+ifneq (,$(TAG))
+	cd plugins/$(DIR) && git reset --hard $(TAG)
+endif
 
 plugin-pull:
+ifneq (,$(TAG))
+	cd plugins/$(DIR) && git fetch
+	cd plugins/$(DIR) && git reset --hard $(TAG)
+else
 	cd plugins/$(DIR) && git pull -f
+endif
 
 plugin:
 	@mkdir -p plugins
 	if [ ! "$(UPDATE)" -o ! -e plugins/$(DIR) ] ; then make plugin-clone ; else make plugin-pull ; fi
-ifneq (,$(TAG))
-	cd plugins/$(DIR) && git reset --hard $(TAG)
-endif
 	cd plugins/$(DIR) && git submodule update --recursive --init
 	cd plugins/$(DIR) && $(MAKE) -i -f ../../plugin-list.mk pre-$(DIR)
 	$(MAKE) -C plugins/$(DIR)
@@ -27,7 +32,6 @@ endif
 	@echo ---
 
 pre-Bidoo:
-	make dep/lib/libmpg123.a
 	echo -e "#include <cstddef>\n$$(cat src/dep/gist/src/mfcc/MFCC.h)" > src/dep/gist/src/mfcc/MFCC.h
 
 post-CharredDesert:
@@ -45,9 +49,11 @@ post-SynthKit:
 pre-trowaSoft:
 	perl -pi -e 's/bool\* isDirty/DirtyWrapper* isDirty/' src/TSParamTextField.hpp
 
+ifneq (,$(findstring arm,$(CPU)))
 pre-Valley:
 	perl -pi -e 's/<pmmintrin.h>/"util\/SSE2NEON.h"/' src/Dexter/QuadOsc.hpp
 	perl -pi -e 's/<pmmintrin.h>/"util\/SSE2NEON.h"/' src/Plateau/InterpDelay.hpp
+endif
 
 
 pre-%: ;
