@@ -38,13 +38,13 @@ extern "C" void main2() {
 	skipAutosaveOnLaunch = false;
 	if (oldSkipAutosaveOnLaunch && osdialog_message(OSDIALOG_INFO, OSDIALOG_YES_NO, "Rack has recovered from a crash, possibly caused by a faulty module in your patch. Would you like to clear your patch and start over?")) {
 		gRackWidget->loadPatch(assetGlobal("template.vcv"));
-		gRackWidget->lastPath = "";
+		gRackWidget->currentPatchPath = "";
 	}
 	else
 #endif
 	if (!gRackWidget->loadPatch(assetHidden("autosave.vcv"))) {
 		gRackWidget->loadPatch(assetGlobal("template.vcv"));
-		gRackWidget->lastPath = "";
+		gRackWidget->currentPatchPath = "";
 	}
 
 	engineStart();

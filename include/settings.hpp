@@ -18,5 +18,7 @@ extern bool largerHitBoxes;
 extern bool lockModules;
 extern float knobSensitivity;
 
+extern std::string lastDialogPath;
+
 
 } // namespace rack

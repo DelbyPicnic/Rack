@@ -552,9 +552,9 @@ void windowRun() {
 		windowTitle = gApplicationName;
 		windowTitle += " ";
 		windowTitle += gApplicationVersion;
-		if (!gRackWidget->lastPath.empty()) {
+		if (!gRackWidget->currentPatchPath.empty()) {
 			windowTitle += " - ";
-			windowTitle += stringFilename(gRackWidget->lastPath);
+			windowTitle += stringFilename(gRackWidget->currentPatchPath);
 		}
 		if (windowTitle != lastWindowTitle) {
 			glfwSetWindowTitle(gWindow, windowTitle.c_str());

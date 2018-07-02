@@ -3,6 +3,7 @@
 #include "window.hpp"
 #include "engine.hpp"
 #include "plugin.hpp"
+#include "asset.hpp"
 #include <jansson.h>
 
 
@@ -15,6 +16,7 @@ bool largerHitBoxes = false;
 bool lockModules = false;
 float knobSensitivity = KNOB_SENSITIVITY;
 
+std::string lastDialogPath = assetLocal("");
 
 static json_t *settingsToJson() {
 	// root
@@ -59,9 +61,13 @@ static json_t *settingsToJson() {
 	json_t *sampleRateJ = json_real(engineGetSampleRate());
 	json_object_set_new(rootJ, "sampleRate", sampleRateJ);
 
-	// lastPath
-	json_t *lastPathJ = json_string(gRackWidget->lastPath.c_str());
-	json_object_set_new(rootJ, "lastPath", lastPathJ);
+	// currentPatchPath
+	json_t *currentPatchPathJ = json_string(gRackWidget->currentPatchPath.c_str());
+	json_object_set_new(rootJ, "currentPatchPath", currentPatchPathJ);
+
+	// lastDialogPath
+	json_t *lastDialogPathJ = json_string(lastDialogPath.c_str());
+	json_object_set_new(rootJ, "lastDialogPath", lastDialogPathJ);
 
 	// skipAutosaveOnLaunch
 	if (skipAutosaveOnLaunch) {
@@ -138,10 +144,17 @@ static void settingsFromJson(json_t *rootJ) {
 		engineSetSampleRate(sampleRate);
 	}
 
-	// lastPath
-	json_t *lastPathJ = json_object_get(rootJ, "lastPath");
-	if (lastPathJ)
-		gRackWidget->lastPath = json_string_value(lastPathJ);
+	// currentPatchPath
+	json_t *currentPatchPathJ = json_object_get(rootJ, "currentPatchPath");
+	if (currentPatchPathJ)
+		gRackWidget->currentPatchPath = json_string_value(currentPatchPathJ);
+
+	// lastDialogPath
+	json_t *lastDialogPathJ = json_object_get(rootJ, "lastDialogPath");
+	if (lastDialogPathJ)
+		lastDialogPath = json_string_value(lastDialogPathJ);
+	else
+		lastDialogPath = assetLocal("");
 
 	// skipAutosaveOnLaunch
 	json_t *skipAutosaveOnLaunchJ = json_object_get(rootJ, "skipAutosaveOnLaunch");

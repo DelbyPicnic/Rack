@@ -159,7 +159,7 @@ struct RackWidget : OpaqueWidget {
 	Widget *moduleContainer;
 	// Only put WireWidgets in here
 	WireContainer *wireContainer;
-	std::string lastPath;
+	std::string currentPatchPath;
 	Vec lastMousePos;
 	std::vector<LightWidget*> lights;
 

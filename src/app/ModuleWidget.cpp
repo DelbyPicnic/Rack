@@ -271,11 +271,12 @@ void ModuleWidget::savePreset(std::string filename) {
 }
 
 void ModuleWidget::openDialog() {
-	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
+	std::string dir = lastDialogPath;
 
 	osdialog_filters *filters = osdialog_filters_parse(PRESET_FILTERS);
 	char *path = osdialog_file(OSDIALOG_OPEN, dir.c_str(), NULL, filters);
 	if (path) {
+		lastDialogPath = stringDirectory(path);
 		loadPreset(path);
 		free(path);
 	}
@@ -283,20 +284,21 @@ void ModuleWidget::openDialog() {
 }
 
 void ModuleWidget::saveDialog() {
-	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
+	std::string dir = lastDialogPath;
 
 	osdialog_filters *filters = osdialog_filters_parse(PRESET_FILTERS);
 	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), "Untitled.vcvm", filters);
 
 	if (path) {
+		lastDialogPath = stringDirectory(path);
 		std::string pathStr = path;
-		free(path);
 		std::string extension = stringExtension(pathStr);
 		if (extension.empty()) {
 			pathStr += ".vcvm";
 		}
 
 		savePreset(pathStr);
+		free(path);
 	}
 	osdialog_filters_free(filters);
 }

@@ -86,26 +86,27 @@ void RackWidget::reset() {
 		clear();
 		// Fails silently if file does not exist
 		loadPatch(assetGlobal("template.vcv"));
-		lastPath = "";
+		currentPatchPath = "";
 	}
 }
 
 void RackWidget::openDialog() {
-	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
+	std::string dir = currentPatchPath.empty() ? lastDialogPath : stringDirectory(currentPatchPath);
 	osdialog_filters *filters = osdialog_filters_parse(PATCH_FILTERS);
 	char *path = osdialog_file(OSDIALOG_OPEN, dir.c_str(), NULL, filters);
 
 	if (path) {
+		lastDialogPath = stringDirectory(path);
 		loadPatch(path);
-		lastPath = path;
+		currentPatchPath = path;
 		free(path);
 	}
 	osdialog_filters_free(filters);
 }
 
 void RackWidget::saveDialog() {
-	if (!lastPath.empty()) {
-		savePatch(lastPath);
+	if (!currentPatchPath.empty()) {
+		savePatch(currentPatchPath);
 	}
 	else {
 		saveAsDialog();
@@ -113,20 +114,22 @@ void RackWidget::saveDialog() {
 }
 
 void RackWidget::saveAsDialog() {
-	std::string dir = lastPath.empty() ? assetLocal("") : stringDirectory(lastPath);
+	std::string dir = currentPatchPath.empty() ? lastDialogPath : stringDirectory(currentPatchPath);
+	std::string filename = currentPatchPath.empty() ? "Untitled.vcv" : stringFilename(currentPatchPath);
 	osdialog_filters *filters = osdialog_filters_parse(PATCH_FILTERS);
-	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), "Untitled.vcv", filters);
+	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), filters);
 
 	if (path) {
+		lastDialogPath = stringDirectory(path);
 		std::string pathStr = path;
-		free(path);
 		std::string extension = stringExtension(pathStr);
 		if (extension.empty()) {
 			pathStr += ".vcv";
 		}
 
 		savePatch(pathStr);
-		lastPath = pathStr;
+		currentPatchPath = pathStr;
+		free(path);
 	}
 	osdialog_filters_free(filters);
 }
@@ -173,10 +176,10 @@ bool RackWidget::loadPatch(std::string path) {
 }
 
 void RackWidget::revert() {
-	if (lastPath.empty())
+	if (currentPatchPath.empty())
 		return;
 	if (osdialog_message(OSDIALOG_INFO, OSDIALOG_OK_CANCEL, "Revert patch to the last saved state?")) {
-		loadPatch(lastPath);
+		loadPatch(currentPatchPath);
 	}
 }
 
