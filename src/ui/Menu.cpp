@@ -3,8 +3,30 @@
 
 namespace rack {
 
+Menu::Menu() {
+	box.size = Vec(0, 0);
+}
+
 Menu::~Menu() {
 	setChildMenu(NULL);
+}
+
+void Menu::addChild(Widget *widget) {
+	widget->autosize();
+	
+	widget->box.pos = Vec(0, box.size.y);
+	box.size.y += widget->box.size.y;
+	// Increase width based on maximum width of child
+	if (widget->box.size.x > box.size.x) {
+		box.size.x = widget->box.size.x;
+	}
+
+	// Resize widths of children
+	for (Widget *widget : children) {
+		widget->box.size.x = box.size.x;
+	}
+
+	Widget::addChild(widget);
 }
 
 void Menu::setChildMenu(Menu *menu) {
@@ -18,29 +40,6 @@ void Menu::setChildMenu(Menu *menu) {
 		childMenu = menu;
 		assert(parent);
 		parent->addChild(childMenu);
-	}
-}
-
-void Menu::step() {
-	Widget::step();
-
-	// Set positions of children
-	box.size = Vec(0, 0);
-	for (Widget *child : children) {
-		if (!child->visible)
-			continue;
-		// Increment height, set position of child
-		child->box.pos = Vec(0, box.size.y);
-		box.size.y += child->box.size.y;
-		// Increase width based on maximum width of child
-		if (child->box.size.x > box.size.x) {
-			box.size.x = child->box.size.x;
-		}
-	}
-
-	// Resize widths of children
-	for (Widget *child : children) {
-		child->box.size.x = box.size.x;
 	}
 }
 

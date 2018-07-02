@@ -252,6 +252,7 @@ struct Widget {
 	void ensureCached(NVGcontext *vg);
 
 	Rect getHitBox();
+	virtual void autosize() {};
 
 	// Events
 

@@ -604,6 +604,7 @@ Menu *ModuleWidget::createContextMenu() {
 	menu->addChild(deleteItem);
 
 	appendContextMenu(menu);
+	gScene->adjustMenuPosition(menu);
 
 	return menu;
 }

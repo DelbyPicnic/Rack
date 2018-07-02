@@ -29,6 +29,11 @@ Menu *Scene::createMenu() {
 	return menu;
 }
 
+void Scene::adjustMenuPosition(Menu *menu) {
+	if (menu->box.pos.x + menu->box.size.x >= box.size.x)
+		menu->box.pos.x -= menu->box.size.x - 1;
+}
+
 void Scene::onResize() {
 	if (overlay)
 		overlay->box.size = box.size;

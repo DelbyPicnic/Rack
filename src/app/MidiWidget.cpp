@@ -26,6 +26,7 @@ struct MidiDriverChoice : LedDisplayChoice {
 			item->rightText = CHECKMARK(item->driverId == midiWidget->midiIO->driverId);
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void step() override {
 		text = midiWidget->midiIO->getDriverName(midiWidget->midiIO->driverId);
@@ -68,6 +69,7 @@ struct MidiDeviceChoice : LedDisplayChoice {
 			item->rightText = CHECKMARK(item->deviceId == midiWidget->midiIO->deviceId);
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void step() override {
 		text = midiWidget->midiIO->getDeviceName(midiWidget->midiIO->deviceId);
@@ -102,6 +104,7 @@ struct MidiChannelChoice : LedDisplayChoice {
 			item->rightText = CHECKMARK(item->channel == midiWidget->midiIO->channel);
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);
 	}
 	void step() override {
 		text = midiWidget->midiIO->getChannelName(midiWidget->midiIO->channel);

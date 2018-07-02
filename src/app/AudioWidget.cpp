@@ -27,6 +27,7 @@ struct AudioDriverChoice : LedDisplayChoice {
 			item->driver = driver;
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void onChange(EventChange &e) override {
 		text = audioWidget->audioIO->getDriverName(audioWidget->audioIO->driver);
@@ -74,6 +75,7 @@ struct AudioDeviceChoice : LedDisplayChoice {
 				menu->addChild(item);
 			}
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void onChange(EventChange &e) override {
 		text = audioWidget->audioIO->getDeviceDetail(audioWidget->audioIO->device, audioWidget->audioIO->offset);
@@ -115,6 +117,7 @@ struct AudioSampleRateChoice : LedDisplayChoice {
 			item->sampleRate = sampleRate;
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void onChange(EventChange &e) override {
 		text = stringf("%g kHz", audioWidget->audioIO->sampleRate / 1000.f);
@@ -149,6 +152,7 @@ struct AudioBlockSizeChoice : LedDisplayChoice {
 			item->blockSize = blockSize;
 			menu->addChild(item);
 		}
+		gScene->adjustMenuPosition(menu);		
 	}
 	void onChange(EventChange &e) override {
 		text = stringf("%d", audioWidget->audioIO->blockSize);

@@ -70,16 +70,15 @@ struct Menu : OpaqueWidget {
 	/** The entry which created the child menu */
 	MenuEntry *activeEntry = NULL;
 
-	Menu() {
-		box.size = Vec(0, 0);
-	}
+	Menu();
 	~Menu();
 	/** Deprecated. Just use addChild(child) instead */
 	void pushChild(Widget *child) DEPRECATED {
 		addChild(child);
 	}
+	void addChild(Widget *widget);
 	void setChildMenu(Menu *menu);
-	void step() override;
+	// void step() override;
 	void draw(NVGcontext *vg) override;
 	void onScroll(EventScroll &e) override;
 };
@@ -98,7 +97,8 @@ struct MenuEntry : OpaqueWidget {
 struct MenuLabel : MenuEntry {
 	std::string text;
 	void draw(NVGcontext *vg) override;
-	void step() override;
+	// void step() override;
+	void autosize() override;
 
 	template <typename T = MenuLabel>
 	static T *create(std::string text) {
@@ -113,10 +113,11 @@ struct MenuItem : MenuEntry {
 	std::string rightText;
 	MenuItem();
 	void draw(NVGcontext *vg) override;
-	void step() override;
+	// void step() override;
 	virtual Menu *createChildMenu() {return NULL;}
 	void onMouseEnter(EventMouseEnter &e) override;
 	void onDragDrop(EventDragDrop &e) override;
+	void autosize() override;
 
 	template <typename T = MenuItem>
 	static T *create(std::string text, std::string rightText = "") {
@@ -258,6 +259,7 @@ struct Scene : OpaqueWidget {
 	Widget *overlay = NULL;
 	void setOverlay(Widget *w);
 	Menu *createMenu();
+	void adjustMenuPosition(Menu *menu);
 	void onResize() override;
 };
 
