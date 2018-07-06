@@ -143,13 +143,16 @@ void engineInit() {
     engineSetSampleRate(48000.0);
 
 #ifndef ARCH_WEB
+#ifndef ARCH_WIN
     numWorkers = 3;
-    for (int i = 0; i < numWorkers; i++)
-    {
+#else
+    numWorkers = 1;
+#endif
+    for (int i = 0; i < numWorkers; i++) {
         ptoks[i] = new moodycamel::ProducerToken(q);
         (new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
     }
-    info("Started %d DSP threads", numWorkers);
+    info("Started %d DSP thread(s)", numWorkers);
 #endif
 }
 
