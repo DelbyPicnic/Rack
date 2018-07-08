@@ -87,7 +87,23 @@ struct TriggerGenerator {
 };
 
 /** Deprecated name for TriggerGenerator */
-typedef TriggerGenerator PulseGenerator;
+// typedef TriggerGenerator PulseGenerator;
+
+struct PulseGenerator {
+	float time = 0.f;
+	float pulseTime = 0.f;
+	bool process(float deltaTime) {
+		time += deltaTime;
+		return time < pulseTime;
+	}
+	void trigger(float pulseTime) {
+		// Keep the previous pulseTime if the existing pulse would be held longer than the currently requested one.
+		if (time + pulseTime >= this->pulseTime) {
+			time = 0.f;
+			this->pulseTime = pulseTime;
+		}
+	}
+};
 
 
 } // namespace rack
