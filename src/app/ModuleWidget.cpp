@@ -9,6 +9,8 @@
 namespace rack {
 
 
+static const char *PRESET_FILTERS = "VCV Rack module preset (.vcvm):vcvm";
+
 static double dragStartTime;
 static bool cancelDrag;
 

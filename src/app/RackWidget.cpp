@@ -14,6 +14,8 @@
 namespace rack {
 
 
+static const char *PATCH_FILTERS = "VCV Rack patch (.vcv):vcv";
+
 struct ModuleContainer : Widget {
 	/*void draw(NVGcontext *vg) override {
 		// Draw shadows behind each ModuleWidget first, so the shadow doesn't overlap the front.

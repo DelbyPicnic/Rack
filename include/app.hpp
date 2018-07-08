@@ -47,8 +47,6 @@ struct LightWidget;
 static const float RACK_GRID_WIDTH = 15;
 static const float RACK_GRID_HEIGHT = 380;
 static const Vec RACK_GRID_SIZE = Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT);
-static const char *PRESET_FILTERS = "VCV Rack module preset (.vcvm):vcvm";
-static const char *PATCH_FILTERS = "VCV Rack patch (.vcv):vcv";
 
 
 struct ModuleWidget : OpaqueWidget {
