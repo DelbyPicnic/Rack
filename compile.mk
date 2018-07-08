@@ -14,7 +14,7 @@ FLAGS += -MMD -MP
 FLAGS += -g
 # Optimization
 FLAGS += -O3
-FLAGS += -Wall -Wextra -Wno-unused-parameter
+FLAGS += -Wall -Wextra -Wno-unused-parameter -Wno-missing-braces
 
 ifneq (,$(findstring arm,$(CPU)))
 	FLAGS += $(ARM_CPU_FLAGS) -ffast-math -fno-finite-math-only
