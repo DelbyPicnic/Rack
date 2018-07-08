@@ -21,12 +21,12 @@ void Menu::addChild(Widget *widget) {
 		box.size.x = widget->box.size.x;
 	}
 
+	Widget::addChild(widget);
+
 	// Resize widths of children
 	for (Widget *widget : children) {
 		widget->box.size.x = box.size.x;
-	}
-
-	Widget::addChild(widget);
+	}	
 }
 
 void Menu::setChildMenu(Menu *menu) {
