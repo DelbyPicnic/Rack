@@ -9,7 +9,7 @@ endif
 FLAGS += \
 	-Iinclude \
 	-Idep/include -I$(RACK_DIR)/dep/nanovg/src -Idep/nanosvg/src -Idep/osdialog \
-	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source
+	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source -Idep/pfft
 
 ifdef RELEASE
 	FLAGS += -DRELEASE
