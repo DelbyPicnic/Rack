@@ -23,54 +23,44 @@ void loggerDestroy() {
 #endif
 }
 
-static void loggerLogVa(const char *type, const char *file, int line, const char *format, va_list args) {
+static void printTimestamp() {
+}
+
+static void printLog(const char *type, const char *format, va_list args) {
 	auto nowTime = std::chrono::high_resolution_clock::now();
 	int duration = std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime).count();
+	printTimestamp();
 	fprintf(logFile, "[%.03f %s] ", duration / 1000.0, type);
 	vfprintf(logFile, format, args);
 	fprintf(logFile, "\n");
 	fflush(logFile);
 }
 
-void loggerLog(const char *type, const char *file, int line, const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	loggerLogVa(type, file, line, format, args);
-	va_end(args);
-}
-
-/** Deprecated. Included for ABI compatibility */
-
-#undef debug
-#undef info
-#undef warn
-#undef fatal
-
 void debug(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	loggerLogVa("debug", "", 0, format, args);
+	printLog("debug", format, args);
 	va_end(args);
 }
 
 void info(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	loggerLogVa("info", "", 0, format, args);
+	printLog("info", format, args);
 	va_end(args);
 }
 
 void warn(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	loggerLogVa("warn", "", 0, format, args);
+	printLog("warn", format, args);
 	va_end(args);
 }
 
 void fatal(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	loggerLogVa("fatal", "", 0, format, args);
+	printLog("fatal", format, args);
 	va_end(args);
 }
 
