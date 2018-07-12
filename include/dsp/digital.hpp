@@ -59,11 +59,11 @@ struct SchmittTrigger {
 
 
 /** When triggered, holds a high value for a specified time before going low again */
-struct TriggerGenerator {
+struct PulseGenerator {
 	float time;
 	float triggerDuration;
 
-	TriggerGenerator() {
+	PulseGenerator() {
 		reset();
 	}
 	/** Immediately resets the state to LOW */
@@ -82,25 +82,6 @@ struct TriggerGenerator {
 		if (time + triggerDuration >= this->triggerDuration) {
 			time = 0.f;
 			this->triggerDuration = triggerDuration;
-		}
-	}
-};
-
-/** Deprecated name for TriggerGenerator */
-// typedef TriggerGenerator PulseGenerator;
-
-struct PulseGenerator {
-	float time = 0.f;
-	float pulseTime = 0.f;
-	bool process(float deltaTime) {
-		time += deltaTime;
-		return time < pulseTime;
-	}
-	void trigger(float pulseTime) {
-		// Keep the previous pulseTime if the existing pulse would be held longer than the currently requested one.
-		if (time + pulseTime >= this->pulseTime) {
-			time = 0.f;
-			this->pulseTime = pulseTime;
 		}
 	}
 };
