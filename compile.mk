@@ -11,7 +11,7 @@ include $(RACK_DIR)/arch.mk
 FLAGS += -DVERSION=$(VERSION)
 # Generate dependency files alongside the object files
 FLAGS += -MMD -MP
-FLAGS += -g
+FLAGS += -g -DNDEBUG
 # Optimization
 FLAGS += -O3
 FLAGS += -Wall -Wextra -Wno-unused-parameter -Wno-missing-braces

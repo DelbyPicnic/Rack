@@ -38,6 +38,7 @@ struct UOW {
 };
 moodycamel::ConcurrentQueue<UOW> q;
 moodycamel::ProducerToken *ptoks[10];
+moodycamel::ConsumerToken *ctoks[10];
 volatile int runningt;
 
 tthread::mutex m;
@@ -98,12 +99,12 @@ void do_work(int qq)
         m.unlock();
 
         UOW item;
+        //while(q.try_dequeue(*ctoks[qq], item))
         while(q.try_dequeue(item))
         {
             Module *module = item.module;
             for (int step = item.step; step < item.step2; step++)
             {
-                int id=0;
                 for (auto &in : module->inputs)
                 {
                     if (in.pos < step)
@@ -113,7 +114,6 @@ void do_work(int qq)
                         goto nope;
                     }
                     in.value = *(volatile float*)(in.queue + step);
-                    id++;
                 }
                 
                 module->step();
@@ -150,6 +150,7 @@ void engineInit() {
 #endif
     for (int i = 0; i < numWorkers; i++) {
         ptoks[i] = new moodycamel::ProducerToken(q);
+        ctoks[i] = new moodycamel::ConsumerToken(q);
         (new tthread::thread((void(*)(void*))do_work, (void*)i))->detach();
     }
     info("Started %d DSP thread(s)", numWorkers);

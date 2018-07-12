@@ -170,7 +170,7 @@ namespace moodycamel { namespace details {
 
 #ifndef MOODYCAMEL_NOEXCEPT
 #if !defined(MOODYCAMEL_EXCEPTIONS_ENABLED)
-#define MOODYCAMEL_NOEXCEPT
+// #define MOODYCAMEL_NOEXCEPT
 #define MOODYCAMEL_NOEXCEPT_CTOR(type, valueType, expr) true
 #define MOODYCAMEL_NOEXCEPT_ASSIGN(type, valueType, expr) true
 #elif defined(_MSC_VER) && defined(_NOEXCEPT) && _MSC_VER < 1800
@@ -1910,7 +1910,7 @@ private:
 				// incremented after dequeueOptimisticCount -- this is enforced in the `else` block below), and since we now
 				// have a version of dequeueOptimisticCount that is at least as recent as overcommit (due to the release upon
 				// incrementing dequeueOvercommit and the acquire above that synchronizes with it), overcommit <= myDequeueCount.
-				assert(overcommit <= myDequeueCount);
+				// assert(overcommit <= myDequeueCount);
 				
 				// Note that we reload tail here in case it changed; it will be the same value as before or greater, since
 				// this load is sequenced after (happens after) the earlier load above. This is supported by read-read
