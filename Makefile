@@ -9,7 +9,7 @@ endif
 FLAGS += \
 	-Iinclude \
 	-Idep/include -I$(RACK_DIR)/dep/nanovg/src -Idep/nanosvg/src -Idep/osdialog \
-	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source -Idep/pfft
+	-Idep/oui-blendish -Idep/lib/libzip/include -Idep/tinythread/source -Idep/pffft
 
 ifdef RELEASE
 	FLAGS += -DRELEASE
@@ -26,7 +26,7 @@ STRIP ?= strip
 # Sources and build flags
 SOURCES += $(wildcard src/*.cpp src/*/*.cpp)
 SOURCES += dep/nanovg/src/nanovg.c dep/tinythread/source/tinythread.cpp dep/osdialog/osdialog.c
-SOURCES += $(wildcard dep/pfft/pffft.c) $(wildcard dep/pfft/fftpack.c)
+SOURCES += $(wildcard dep/pffft/pffft.c) $(wildcard dep/pffft/fftpack.c)
 
 ifneq (,$(findstring arm,$(CPU)))
 	SOURCES += $(wildcard dep/math-neon/*.c)

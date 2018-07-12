@@ -48,9 +48,9 @@ ifeq ($(ARCH), web)
 	libspeexdsp = lib/libspeexdsp.so
 endif
 
-pfft = pfft
+pffft = pffft
 
-DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(mathlib) $(pfft)
+DEPS += $(glew) $(glfw) $(jansson) $(libspeexdsp) $(libcurl) $(libzip) $(rtmidi) $(rtaudio) $(mathlib) $(pffft)
 include $(RACK_DIR)/dep.mk
 
 
@@ -156,9 +156,9 @@ $(rtaudio):
 	$(MAKE) -C rtaudio/build install
 	cp rtaudio/build/librtaudio_static.a lib/librtaudio.a
 
-$(pfft):
+$(pffft):
 	$(WGET) "https://bitbucket.org/jpommier/pffft/get/29e4f76ac53b.zip"
-	$(UNZIP) -j -d pfft 29e4f76ac53b.zip
+	$(UNZIP) -j -d pffft 29e4f76ac53b.zip
 
 clean:
 	git clean -ffdx
