@@ -85,6 +85,7 @@
     <body>        
         <div>
             <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" style="display:none;"></canvas>
+            <button id="startaudio" onclick="startAudio2.apply(null, startAudioParams);this.remove();" style="display:none;position:absolute;top:100px;left:50%;padding:20px;background:lightgreen;border:1px solid black;">Start Audio</button>
         </div>
 
         <div style="position: absolute;top:0;left:0">
@@ -188,10 +189,18 @@
             if (window.SharedArrayBuffer === undefined)
                 delete window.Atomics;
 
-            // Not yet.
-            var useAudioWorklet = (window.AudioWorklet !== undefined && window.SharedArrayBuffer !== undefined);
+            var useAudioWorklet; 
+            var startAudioParams;
 
             function startAudio(audio, addr, blockSize) {
+                if (useAudioWorklet === undefined)
+                    useAudioWorklet = (window.AudioWorkletNode !== undefined && window.SharedArrayBuffer !== undefined && window.confirm("Use Audio Worklet?"));
+
+                startAudioParams = arguments;
+                document.getElementById('startaudio').style.display = null;
+            }
+
+            function startAudio2(audio, addr, blockSize) {
                 if (useAudioWorklet) {
                     if (Module.context) {
                         if (Module.node)
@@ -284,14 +293,17 @@
             }
 
             function getAudioSampleRate() {
+                if (!Module.context)
+                    return 44100;
+
                 return Module.context.sampleRate;
             }
 
             function getAudioBlockSize() {
-                if (useAudioWorklet)
-                    return 128;
-                else
-                    return Module.audioNode.blockSize;
+                if (!Module.context)
+                    return useAudioWorklet ? 128 : startAudioParams[2];
+
+                return useAudioWorklet ? 128 : Module.audioNode.blockSize;
             }
 
             //alert('Download size is about 40MB, please be patient. Some modules may not work and/or crash the app, you\'ve been warned.\n\nIMPORTANT\n\n1. MIDI input requires Chrome browser.\n\n2. For best results, use the latest version of Chrome, then navigate to chrome://flags and enable SharedArrayBuffer support.\n\nSee github.com/mi-rack/Rack for information about miRack, plugins, and licenses.');            
