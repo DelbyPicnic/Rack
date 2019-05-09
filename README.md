@@ -1,3 +1,5 @@
+Try a **[web version](http://assets.mifki.com/mirack/Rack.html)** - requires a modern browser (Chrome for MIDI input).
+
 # miRack
 
 **miRack** is a fork of [VCVRack](http://github.com/VCVRack/Rack) (an open-source virtual modular synthesizer) with optimisations and tweaks primarily targeting Raspberry Pi, ASUS Tinker Board and similar hardware. Can be used on desktop systems as well.
