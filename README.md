@@ -2,7 +2,7 @@ Try a **[web version](http://assets.mifki.com/mirack/Rack.html)** - requires a m
 
 # miRack
 
-**miRack** is a fork of [VCVRack](http://github.com/VCVRack/Rack) (an open-source virtual modular synthesizer) with optimisations and tweaks primarily targeting Raspberry Pi, ASUS Tinker Board and similar hardware. Can be used on desktop systems as well.
+**miRack** is a fork of [VCVRack](http://github.com/VCVRack/Rack) (an open-source virtual modular synthesizer) with optimisations and tweaks primarily targeting Raspberry Pi, ASUS Tinker Board and similar hardware, as well as iOS and Web. Can be used on desktop systems as well.
 
 **Rack** itself is the main application/engine/plugin host. See below for information about plugins implementing actual modules.
 
